@@ -42,6 +42,13 @@ describe('validateHelcimPayHash', () => {
     expect(validateHelcimPayHash(data, hash.toUpperCase(), secret)).toBe(true);
   });
 
+  it('trims surrounding whitespace on the hash before comparing', () => {
+    const data = { x: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    expect(validateHelcimPayHash(data, `  ${hash}  `, secret)).toBe(true);
+  });
+
   it('rejects when any required field is empty', () => {
     expect(validateHelcimPayHash({}, 'hash', 'secret')).toBe(false);
     expect(validateHelcimPayHash({ a: 1 }, '', 'secret')).toBe(false);

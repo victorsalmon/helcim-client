@@ -140,6 +140,77 @@ describe('parseHelcimWebhookBody', () => {
     expect(result.type).toBe('someEvent');
     expect(result.transactionId).toBeNull();
   });
+
+  it('extracts a direct subscriptionId from a subscriptionPayment event', () => {
+    const result = parseHelcimWebhookBody('{"type":"subscriptionPayment","subscriptionId":88}');
+    expect(result.type).toBe('subscriptionPayment');
+    expect(result.subscriptionId).toBe('88');
+    expect(result.transactionId).toBeNull();
+  });
+
+  it('extracts a string direct subscriptionId', () => {
+    const result = parseHelcimWebhookBody('{"type":"subscriptionPayment","subscriptionId":"sub-abc"}');
+    expect(result.subscriptionId).toBe('sub-abc');
+  });
+
+  it('extracts a numeric direct subscriptionId as a string', () => {
+    const result = parseHelcimWebhookBody('{"type":"subscriptionPayment","subscriptionId":123}');
+    expect(result.subscriptionId).toBe('123');
+  });
+
+  it('extracts a nested string subscriptionId from record.data', () => {
+    const body = '{"type":"subscriptionPayment","data":{"subscriptionId":"sub-xyz"}}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.subscriptionId).toBe('sub-xyz');
+  });
+
+  it('extracts a nested subscriptionId from record.data', () => {
+    const body = '{"type":"subscriptionPayment","data":{"subscriptionId":77}}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.subscriptionId).toBe('77');
+  });
+
+  it('extracts a nested numeric subscriptionId from record.data as a string', () => {
+    const body = '{"type":"subscriptionPayment","data":{"subscriptionId":456}}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.subscriptionId).toBe('456');
+  });
+
+  it('extracts a nested string transactionId from record.data', () => {
+    const body = '{"type":"terminalCancel","data":{"transactionId":"txn-1"}}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.transactionId).toBe('txn-1');
+  });
+
+  it('prefers a direct subscriptionId over a nested one', () => {
+    const body = '{"type":"subscriptionPayment","subscriptionId":1,"data":{"subscriptionId":2}}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.subscriptionId).toBe('1');
+  });
+
+  it('returns null subscriptionId when neither direct nor nested is present', () => {
+    const result = parseHelcimWebhookBody('{"type":"cardTransaction","id":42}');
+    expect(result.subscriptionId).toBeNull();
+  });
+
+  it('returns null subscriptionId when record.data is not an object', () => {
+    const body = '{"type":"subscriptionPayment","data":"not-an-object"}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.subscriptionId).toBeNull();
+  });
+
+  it('returns null subscriptionId when record.data.subscriptionId is a non-string/number type', () => {
+    const body = '{"type":"subscriptionPayment","data":{"subscriptionId":true}}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.subscriptionId).toBeNull();
+  });
+
+  it('extracts both a nested transactionId and a nested subscriptionId from record.data', () => {
+    const body = '{"type":"subscriptionPayment","data":{"transactionId":10,"subscriptionId":20}}';
+    const result = parseHelcimWebhookBody(body);
+    expect(result.transactionId).toBe('10');
+    expect(result.subscriptionId).toBe('20');
+  });
 });
 
 // ─── Property-based tests ───────────────────────────────────────────────────

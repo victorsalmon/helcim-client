@@ -428,6 +428,51 @@ describe('client — error handling', () => {
       client.createCustomer({ contactName: 'X' })
     ).rejects.toThrow(/HTTP 502/);
   });
+
+  it('falls back to a status-code message when errors[0] is not a string', async () => {
+    const { fetchImpl } = mockFetch({ status: 400, body: { errors: [{ code: 'X' }] } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(
+      client.createCustomer({ contactName: 'X' })
+    ).rejects.toThrow(/HTTP 400/);
+  });
+});
+
+// ─── request() helper branch coverage ───────────────────────────────────────
+
+describe('client — request helper branches', () => {
+  it('omits the idempotency-key header on non-idempotent GET requests', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: {} });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await client.connectionTest();
+    expect(calls[0].headers['idempotency-key']).toBeUndefined();
+  });
+
+  it('filters out null and empty-string query params from the URL', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: { data: [] } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await client.getCustomers({ page: 1, limit: undefined, customerCode: '' });
+    const url = new URL(calls[0].url);
+    expect(url.searchParams.get('page')).toBe('1');
+    expect(url.searchParams.has('limit')).toBe(false);
+    expect(url.searchParams.has('customerCode')).toBe(false);
+  });
+
+  it('treats a bare-array JSON response as wrapped { data: [...] }', async () => {
+    const { fetchImpl } = mockFetch({ body: [{ id: 1, customerCode: 'C1' }] });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const results = await client.getCustomers({});
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe(1);
+  });
+
+  it('treats a non-object JSON response (bare primitive) as an empty body', async () => {
+    const { fetchImpl } = mockFetch({ body: 12345 });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const result = await client.getCustomer(1);
+    expect(result.id).toBe(0);
+    expect(result.customerCode).toBe('');
+  });
 });
 
 // ─── Bank accounts ──────────────────────────────────────────────────────────
