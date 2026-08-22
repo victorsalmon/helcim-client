@@ -1,0 +1,72 @@
+import { describe, it, expect } from 'vitest';
+import {
+  createHelcimConfigFromEnv,
+  HELCIM_PRODUCTION_BASE_URL,
+  HELCIM_TEST_BASE_URL,
+} from '../src/index.js';
+
+describe('Helcim configuration', () => {
+  it('is disabled when HELCIM_API_TOKEN is missing', () => {
+    expect(createHelcimConfigFromEnv({})).toBeNull();
+    expect(createHelcimConfigFromEnv({ HELCIM_API_TOKEN: '' })).toBeNull();
+    expect(createHelcimConfigFromEnv({ HELCIM_API_TOKEN: '   ' })).toBeNull();
+  });
+
+  it('defaults to the test base URL when HELCIM_ENV is unset', () => {
+    const cfg = createHelcimConfigFromEnv({ HELCIM_API_TOKEN: 'tok-1' });
+    expect(cfg).not.toBeNull();
+    expect(cfg!.baseUrl).toBe(HELCIM_TEST_BASE_URL);
+    expect(cfg!.apiToken).toBe('tok-1');
+  });
+
+  it('uses the production base URL when HELCIM_ENV=production', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_ENV: 'production',
+    });
+    expect(cfg!.baseUrl).toBe(HELCIM_PRODUCTION_BASE_URL);
+  });
+
+  it('uses the production base URL when HELCIM_ENV=prod', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_ENV: 'prod',
+    });
+    expect(cfg!.baseUrl).toBe(HELCIM_PRODUCTION_BASE_URL);
+  });
+
+  it('uses HELCIM_BASE_URL when explicitly set, stripping trailing slashes', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_BASE_URL: 'https://custom.helcim.example/v2/',
+    });
+    expect(cfg!.baseUrl).toBe('https://custom.helcim.example/v2');
+  });
+
+  it('HELCIM_BASE_URL wins over HELCIM_ENV', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_ENV: 'production',
+      HELCIM_BASE_URL: 'https://api.helcim.test/v2',
+    });
+    expect(cfg!.baseUrl).toBe('https://api.helcim.test/v2');
+  });
+
+  it('includes the webhook verifier token when set', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_WEBHOOK_VERIFIER_TOKEN: 'verifier-abc',
+    });
+    expect(cfg!.webhookVerifierToken).toBe('verifier-abc');
+  });
+
+  it('omits the webhook verifier token when unset', () => {
+    const cfg = createHelcimConfigFromEnv({ HELCIM_API_TOKEN: 'tok-1' });
+    expect(cfg!.webhookVerifierToken).toBeUndefined();
+  });
+
+  it('trims whitespace from the api token', () => {
+    const cfg = createHelcimConfigFromEnv({ HELCIM_API_TOKEN: '  tok-1  ' });
+    expect(cfg!.apiToken).toBe('tok-1');
+  });
+});

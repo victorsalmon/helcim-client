@@ -1,0 +1,40 @@
+{
+  "name": "@clocklobster/helcim-client",
+  "version": "0.1.0",
+  "description": "Product-neutral Helcim API client — Payment API, Recurring API (payment plans + subscriptions), Customer/Card vault, HelcimPay.js checkout session init, webhook + response-hash verification. Used by currents-bookkeeping and other Clocklobster SaaS products.",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./sandbox": {
+      "import": "./dist/sandbox.js",
+      "types": "./dist/sandbox.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "postinstall": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:mutation": "stryker run"
+  },
+  "devDependencies": {
+    "@fast-check/vitest": "^0.2.0",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
+    "@types/node": "^22.10.2",
+    "fast-check": "^3.23.0",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.7"
+  }
+}
