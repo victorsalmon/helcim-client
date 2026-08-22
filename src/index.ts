@@ -14,13 +14,25 @@ export type {
   HelcimSubscription,
   HelcimSubscriptionPayment,
   HelcimCheckoutSession,
+  HelcimBankAccount,
+  HelcimPADAgreement,
+  HelcimACHTransaction,
+  HelcimInvoice,
   CreateCustomerInput,
   InitializeHelcimPayInput,
   CreatePaymentPlanInput,
   CreateSubscriptionInput,
+  CreateBankAccountInput,
+  ProcessACHWithdrawInput,
+  ProcessPurchaseInput,
+  ProcessPreauthInput,
+  CapturePreauthInput,
+  RefundPurchaseInput,
+  ReversePurchaseInput,
+  CreateInvoiceInput,
   HelcimClient,
 } from './client.js';
-export { createHelcimClient } from './client.js';
+export { createHelcimClient, ACH_STATUS_AUTH, ACH_STATUS_CLEARING } from './client.js';
 export {
   decodeAddress,
   decodeCard,
@@ -29,6 +41,10 @@ export {
   decodePaymentPlan,
   decodeSubscription,
   decodeSubscriptionPayment,
+  decodeBankAccount,
+  decodePADAgreement,
+  decodeACHTransaction,
+  decodeInvoice,
   isProviderErrorStatus,
 } from './client.js';
 

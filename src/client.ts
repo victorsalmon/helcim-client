@@ -127,6 +127,84 @@ export interface HelcimCheckoutSession {
   secretToken: string;
 }
 
+// ─── Bank account + PAD + ACH types ─────────────────────────────────────────
+
+export interface HelcimBankAccount {
+  id: number;
+  customerId: number | null;
+  dateCreated: string | null;
+  dateUpdated: string | null;
+  dateLastUsed: string | null;
+  dateVerified: string | null;
+  bankToken: string | null;
+  accountType: 'CHECKING' | 'SAVINGS' | string | null;
+  accountCorporate: 'PERSONAL' | 'CORPORATE' | string | null;
+  verified: boolean | null;
+  ready: boolean | null;
+  bankIdNumber: string | null;
+  transitNumber: string | null;
+  routingNumber: string | null;
+  bankAccountNumberL4: string | null;
+  address: HelcimAddress | null;
+  raw: Record<string, unknown>;
+}
+
+export interface HelcimPADAgreement {
+  id: number;
+  accepted: boolean;
+  bankAccountId: number | null;
+  customerId: number | null;
+  dateAccepted: string | null;
+  dateCreated: string | null;
+  dateEarliestDebit: string | null;
+  dateRevoked: string | null;
+  dateUpdated: string | null;
+  ipAddress: string | null;
+  merchantAuthorized: boolean;
+  type: number | null;
+  status: number | null;
+  raw: Record<string, unknown>;
+}
+
+/** ACH transaction statusAuth values. */
+export const ACH_STATUS_AUTH = {
+  APPROVED: 1,
+  DECLINED: 2,
+  CANCELLED: 4,
+  PENDING: 5,
+} as const;
+
+/** ACH transaction statusClearing values. */
+export const ACH_STATUS_CLEARING = {
+  IN_SETTLEMENT: 0,
+  SETTLED_APPROVED: 1,
+  SETTLED_DECLINED: 4,
+} as const;
+
+export interface HelcimACHTransaction {
+  id: number;
+  merchantId: number | null;
+  dateCreated: string | null;
+  statusAuth: number | null;
+  statusClearing: number | null;
+  batchId: number | null;
+  bankAccountId: number | null;
+  bankAccountL4: string | null;
+  transactionType: number | null;
+  amount: number | null;
+  currency: number | null;
+  approvalCode: string | null;
+  test: boolean | null;
+  acquirerTransactionId: string | null;
+  responseMessage: string | null;
+  statusBatch: number | null;
+  dateClosed: string | null;
+  customerCode: string | null;
+  invoiceNumber: string | null;
+  orderId: number | null;
+  raw: Record<string, unknown>;
+}
+
 // ─── Input types ────────────────────────────────────────────────────────────
 
 export interface CreateCustomerInput {
@@ -146,6 +224,10 @@ export interface InitializeHelcimPayInput {
   invoiceNumber?: string;
   language?: 'en' | 'fr';
   setAsDefaultPaymentMethod?: boolean;
+  /** Payment method shown in the modal: cc (cards), ach (bank), cc-ach (both). */
+  paymentMethod?: 'cc' | 'ach' | 'cc-ach';
+  /** Digital wallet overrides — google-pay. */
+  digitalWallet?: { 'google-pay'?: 0 | 1 };
   customerRequest?: {
     contactName: string;
     businessName?: string;
@@ -213,6 +295,142 @@ export interface CreateSubscriptionInput {
   paymentMethod?: 'card' | 'bank';
   maxCycles?: number;
   addOns?: Array<{ addOnId: number; quantity?: number }>;
+}
+
+export interface CreateBankAccountInput {
+  /** 1 = Personal, 2 = Corporate */
+  accountCorporate: 1 | 2;
+  /** 1 = Checking, 2 = Savings */
+  accountType: 1 | 2;
+  bankAccountNumber: string;
+  /** 3-digit financial number (Canadian bank accounts). */
+  bankFinancialNumber?: string;
+  /** 5-digit transit number (Canadian bank accounts). */
+  bankTransitNumber?: string;
+  /** 9-digit routing number (US bank accounts). */
+  bankRoutingNumber?: string;
+  city: string;
+  countryAlpha2: string;
+  provinceAlpha2: string;
+  postalCode: string;
+  streetAddress: string;
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+}
+
+export interface ProcessACHWithdrawInput {
+  bankAccountId: number;
+  customerId: number;
+  amount: number;
+  /** 1 = CAD, 2 = USD */
+  currencyId: 1 | 2;
+  orderId?: number;
+}
+
+export interface ProcessPurchaseInput {
+  amount: number;
+  currency: string;
+  ipAddress: string;
+  /** Either cardToken OR full card details. Full card details require PCI approval. */
+  cardData:
+    | { cardToken: string }
+    | { cardNumber: string; cardExpiry: string; cardCVV: string; cardHolderName: string };
+  customerCode?: string;
+  invoiceNumber?: string;
+  orderId?: number;
+  ecommerce?: boolean;
+  terminalId?: number;
+  billingAddress?: HelcimAddress;
+  /** Invoice details — when provided, an invoice is created with the purchase. */
+  invoiceRequest?: {
+    invoiceNumber?: string;
+    notes?: string;
+    lineItems: Array<{
+      description: string;
+      quantity: number;
+      price: number;
+      total: number;
+      sku?: string;
+      taxAmount?: number;
+      discountAmount?: number;
+    }>;
+  };
+}
+
+export interface ProcessPreauthInput {
+  amount: number;
+  currency: string;
+  ipAddress: string;
+  cardData:
+    | { cardToken: string }
+    | { cardNumber: string; cardExpiry: string; cardCVV: string; cardHolderName: string };
+  customerCode?: string;
+  invoiceNumber?: string;
+  ecommerce?: boolean;
+  terminalId?: number;
+  billingAddress?: HelcimAddress;
+}
+
+export interface CapturePreauthInput {
+  cardTransactionId: number;
+  amount: number;
+  currency: string;
+  ipAddress: string;
+  orderId?: number;
+}
+
+export interface RefundPurchaseInput {
+  cardTransactionId: number;
+  amount: number;
+  ipAddress: string;
+  customerCode?: string;
+  invoiceNumber?: string;
+}
+
+export interface ReversePurchaseInput {
+  cardTransactionId: number;
+  ipAddress: string;
+}
+
+export interface CreateInvoiceInput {
+  customerCode: string;
+  invoiceNumber?: string;
+  notes?: string;
+  lineItems: Array<{
+    description: string;
+    quantity: number;
+    price: number;
+    total: number;
+    sku?: string;
+    taxAmount?: number;
+    discountAmount?: number;
+  }>;
+  tipAmount?: number;
+  depositAmount?: number;
+}
+
+export interface HelcimInvoice {
+  id: number;
+  invoiceNumber: string | null;
+  customerId: number | null;
+  customerCode: string | null;
+  dateCreated: string | null;
+  dateUpdated: string | null;
+  status: string | null;
+  amount: number | null;
+  currency: string | null;
+  notes: string | null;
+  lineItems: Array<{
+    sku: string | null;
+    description: string | null;
+    quantity: number | null;
+    price: number | null;
+    total: number | null;
+    taxAmount: number | null;
+    discountAmount: number | null;
+  }>;
+  raw: Record<string, unknown>;
 }
 
 // ─── Response decoders ──────────────────────────────────────────────────────
@@ -370,6 +588,113 @@ function decodeSubscription(raw: unknown): HelcimSubscription {
       typeof v === 'number' ? v : Number(v) || 0
     ),
     payments: paymentsRaw.map(decodeSubscriptionPayment),
+    raw: r,
+  };
+}
+
+function decodeBankAccount(raw: unknown): HelcimBankAccount {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const accountType = firstString(r, ['accountType', 'account_type']);
+  const accountCorporate = firstString(r, ['accountCorporate', 'account_corporate']);
+  const verifiedNum = firstNumber(r, ['verified', 'Verified']);
+  const readyNum = firstNumber(r, ['ready', 'Ready']);
+  return {
+    id: firstNumber(r, ['id', 'Id']) ?? 0,
+    customerId: firstNumber(r, ['customerId', 'customer_id']),
+    dateCreated: firstString(r, ['dateCreated', 'date_created']),
+    dateUpdated: firstString(r, ['dateUpdated', 'date_updated']),
+    dateLastUsed: firstString(r, ['dateLastUsed', 'date_last_used']),
+    dateVerified: firstString(r, ['dateVerified', 'date_verified']),
+    bankToken: firstString(r, ['bankToken', 'bank_token']),
+    accountType: accountType ?? null,
+    accountCorporate: accountCorporate ?? null,
+    verified: verifiedNum !== null ? verifiedNum === 1 : null,
+    ready: readyNum !== null ? readyNum === 1 : null,
+    bankIdNumber: firstString(r, ['bankIdNumber', 'bank_id_number']),
+    transitNumber: firstString(r, ['transitNumber', 'transit_number']),
+    routingNumber: firstString(r, ['routingNumber', 'routing_number']),
+    bankAccountNumberL4: firstString(r, ['bankAccountNumberL4', 'bankAccountNumberL4l4', 'bank_account_number_l4']),
+    address: decodeAddress(r.address ?? r.Address),
+    raw: r,
+  };
+}
+
+function decodePADAgreement(raw: unknown): HelcimPADAgreement {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const acceptedNum = firstNumber(r, ['accepted', 'Accepted']);
+  const merchantAuthorizedNum = firstNumber(r, ['merchantAuthorized', 'merchant_authorized']);
+  return {
+    id: firstNumber(r, ['id', 'Id']) ?? 0,
+    accepted: acceptedNum === 1,
+    bankAccountId: firstNumber(r, ['bankAccountId', 'bank_account_id']),
+    customerId: firstNumber(r, ['customerId', 'customer_id']),
+    dateAccepted: firstString(r, ['dateAccepted', 'date_accepted']),
+    dateCreated: firstString(r, ['dateCreated', 'date_created']),
+    dateEarliestDebit: firstString(r, ['dateEarliestDebit', 'date_earliest_debit']),
+    dateRevoked: firstString(r, ['dateRevoked', 'date_revoked']),
+    dateUpdated: firstString(r, ['dateUpdated', 'date_updated']),
+    ipAddress: firstString(r, ['ipAddress', 'ip_address']),
+    merchantAuthorized: merchantAuthorizedNum === 1,
+    type: firstNumber(r, ['type', 'Type']),
+    status: firstNumber(r, ['status', 'Status']),
+    raw: r,
+  };
+}
+
+function decodeACHTransaction(raw: unknown): HelcimACHTransaction {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const testNum = firstNumber(r, ['test', 'Test']);
+  return {
+    id: firstNumber(r, ['id', 'Id']) ?? 0,
+    merchantId: firstNumber(r, ['merchantId', 'merchant_id']),
+    dateCreated: firstString(r, ['dateCreated', 'date_created']),
+    statusAuth: firstNumber(r, ['statusAuth', 'status_auth']),
+    statusClearing: firstNumber(r, ['statusClearing', 'status_clearing']),
+    batchId: firstNumber(r, ['batchId', 'batch_id']),
+    bankAccountId: firstNumber(r, ['bankAccountId', 'bank_account_id']),
+    bankAccountL4: firstString(r, ['bankAccountL4l4', 'bankAccountL4', 'bank_account_l4']),
+    transactionType: firstNumber(r, ['transactionType', 'transaction_type']),
+    amount: firstNumber(r, ['amount', 'Amount']),
+    currency: firstNumber(r, ['currency', 'Currency']),
+    approvalCode: firstString(r, ['approvalCode', 'approval_code']),
+    test: testNum !== null ? testNum === 1 : null,
+    acquirerTransactionId: firstString(r, ['acquirerTransactionId', 'acquirer_transaction_id']),
+    responseMessage: firstString(r, ['responseMessage', 'response_message']),
+    statusBatch: firstNumber(r, ['statusBatch', 'status_batch']),
+    dateClosed: firstString(r, ['dateClosed', 'date_closed']),
+    customerCode: firstString(r, ['customerCode', 'customer_code']),
+    invoiceNumber: firstString(r, ['invoiceNumber', 'invoice_number']),
+    orderId: firstNumber(r, ['orderId', 'order_id']),
+    raw: r,
+  };
+}
+
+function decodeInvoice(raw: unknown): HelcimInvoice {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const lineItemsRaw = firstArray(r, ['lineItems', 'line_items', 'items']) ?? [];
+  return {
+    id: firstNumber(r, ['id', 'Id']) ?? 0,
+    invoiceNumber: firstString(r, ['invoiceNumber', 'invoice_number']),
+    customerId: firstNumber(r, ['customerId', 'customer_id']),
+    customerCode: firstString(r, ['customerCode', 'customer_code']),
+    dateCreated: firstString(r, ['dateCreated', 'date_created']),
+    dateUpdated: firstString(r, ['dateUpdated', 'date_updated']),
+    status: firstString(r, ['status', 'Status']),
+    amount: firstNumber(r, ['amount', 'Amount', 'totalAmount', 'total_amount']),
+    currency: firstString(r, ['currency', 'Currency']),
+    notes: firstString(r, ['notes', 'Notes']),
+    lineItems: lineItemsRaw.map((item) => {
+      const li = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>;
+      return {
+        sku: firstString(li, ['sku', 'SKU']),
+        description: firstString(li, ['description', 'Description']),
+        quantity: firstNumber(li, ['quantity', 'Quantity']),
+        price: firstNumber(li, ['price', 'Price']),
+        total: firstNumber(li, ['total', 'Total']),
+        taxAmount: firstNumber(li, ['taxAmount', 'tax_amount']),
+        discountAmount: firstNumber(li, ['discountAmount', 'discount_amount']),
+      };
+    }),
     raw: r,
   };
 }
@@ -582,6 +907,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (input.customStyling) {
       body.customStyling = input.customStyling;
     }
+    if (input.paymentMethod) body.paymentMethod = input.paymentMethod;
+    if (input.digitalWallet) body.digitalWallet = input.digitalWallet;
     if (input.confirmationScreen !== undefined) body.confirmationScreen = input.confirmationScreen;
     if (input.allowExit !== undefined) body.allowExit = input.allowExit;
 
@@ -787,6 +1114,383 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     return arr.map(decodeCardTransaction);
   }
 
+  // ─── Bank accounts ─────────────────────────────────────────────────────
+  async function createBankAccount(
+    customerId: number,
+    input: CreateBankAccountInput
+  ): Promise<{ id: number; message: string }> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim createBankAccount requires a positive integer customerId');
+    }
+    assertNonEmptyString(input.bankAccountNumber, 'createBankAccount bankAccountNumber');
+    assertNonEmptyString(input.countryAlpha2, 'createBankAccount countryAlpha2');
+    assertNonEmptyString(input.provinceAlpha2, 'createBankAccount provinceAlpha2');
+    assertNonEmptyString(input.city, 'createBankAccount city');
+    assertNonEmptyString(input.postalCode, 'createBankAccount postalCode');
+    assertNonEmptyString(input.streetAddress, 'createBankAccount streetAddress');
+    const body: Record<string, unknown> = {
+      accountCorporate: input.accountCorporate,
+      accountType: input.accountType,
+      bankAccountNumber: input.bankAccountNumber,
+      city: input.city,
+      countryAlpha2: input.countryAlpha2,
+      provinceAlpha2: input.provinceAlpha2,
+      postalCode: input.postalCode,
+      streetAddress: input.streetAddress,
+    };
+    if (input.bankFinancialNumber) body.bankFinancialNumber = input.bankFinancialNumber;
+    if (input.bankTransitNumber) body.bankTransitNumber = input.bankTransitNumber;
+    if (input.bankRoutingNumber) body.bankRoutingNumber = input.bankRoutingNumber;
+    if (input.firstName) body.firstName = input.firstName;
+    if (input.lastName) body.lastName = input.lastName;
+    if (input.companyName) body.companyName = input.companyName;
+    const raw = await request('POST', `/customers/${customerId}/bank-accounts`, { body });
+    const data = (raw.data ?? raw) as Record<string, unknown>;
+    const id = firstNumber(data, ['id', 'Id']) ?? 0;
+    const message = firstString(data, ['message', 'Message']) ?? '';
+    return { id, message };
+  }
+
+  async function getCustomerBankAccounts(customerId: number): Promise<HelcimBankAccount[]> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim getCustomerBankAccounts requires a positive integer customerId');
+    }
+    const raw = await request('GET', `/customers/${customerId}/bank-accounts`);
+    const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data', 'bankAccounts', 'bank_accounts']) ?? []);
+    return arr.map(decodeBankAccount);
+  }
+
+  async function getBankAccount(customerId: number, bankAccountId: number): Promise<HelcimBankAccount> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim getBankAccount requires a positive integer customerId');
+    }
+    if (!Number.isInteger(bankAccountId) || bankAccountId <= 0) {
+      throw new Error('Helcim getBankAccount requires a positive integer bankAccountId');
+    }
+    const raw = await request('GET', `/customers/${customerId}/bank-accounts/${bankAccountId}`);
+    const data = (raw.data ?? raw) as Record<string, unknown>;
+    return decodeBankAccount(data);
+  }
+
+  async function setBankAccountDefault(customerId: number, bankAccountId: number): Promise<boolean> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim setBankAccountDefault requires a positive integer customerId');
+    }
+    if (!Number.isInteger(bankAccountId) || bankAccountId <= 0) {
+      throw new Error('Helcim setBankAccountDefault requires a positive integer bankAccountId');
+    }
+    await request('PATCH', `/customers/${customerId}/bank-accounts/${bankAccountId}/default`);
+    return true;
+  }
+
+  async function requestNewBankAccount(customerId: number): Promise<{ message: string }> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim requestNewBankAccount requires a positive integer customerId');
+    }
+    const raw = await request('POST', `/customers/${customerId}/bank-accounts/request`);
+    const message = firstString(raw, ['message', 'Message']) ?? '';
+    return { message };
+  }
+
+  // ─── PAD agreements ────────────────────────────────────────────────────
+  async function getPADs(customerId: number): Promise<HelcimPADAgreement[]> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim getPADs requires a positive integer customerId');
+    }
+    const raw = await request('GET', `/customers/${customerId}/pads`);
+    const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data', 'pads', 'Pads']) ?? []);
+    return arr.map(decodePADAgreement);
+  }
+
+  async function getPAD(customerId: number, padId: number): Promise<HelcimPADAgreement> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim getPAD requires a positive integer customerId');
+    }
+    if (!Number.isInteger(padId) || padId <= 0) {
+      throw new Error('Helcim getPAD requires a positive integer padId');
+    }
+    const raw = await request('GET', `/customers/${customerId}/pads/${padId}`);
+    const data = (raw.data ?? raw) as Record<string, unknown>;
+    return decodePADAgreement(data);
+  }
+
+  async function updatePAD(
+    customerId: number,
+    padId: number,
+    updates: { accepted?: boolean; status?: number }
+  ): Promise<HelcimPADAgreement> {
+    if (!Number.isInteger(customerId) || customerId <= 0) {
+      throw new Error('Helcim updatePAD requires a positive integer customerId');
+    }
+    if (!Number.isInteger(padId) || padId <= 0) {
+      throw new Error('Helcim updatePAD requires a positive integer padId');
+    }
+    const body: Record<string, unknown> = {};
+    if (updates.accepted !== undefined) body.accepted = updates.accepted ? 1 : 0;
+    if (updates.status !== undefined) body.status = updates.status;
+    const raw = await request('PUT', `/customers/${customerId}/pads/${padId}`, { body });
+    const data = (raw.data ?? raw) as Record<string, unknown>;
+    return decodePADAgreement(data);
+  }
+
+  // ─── ACH transactions ──────────────────────────────────────────────────
+  async function processACHWithdraw(
+    input: ProcessACHWithdrawInput,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimACHTransaction> {
+    if (!Number.isInteger(input.bankAccountId) || input.bankAccountId <= 0) {
+      throw new Error('Helcim processACHWithdraw requires a positive integer bankAccountId');
+    }
+    if (!Number.isInteger(input.customerId) || input.customerId <= 0) {
+      throw new Error('Helcim processACHWithdraw requires a positive integer customerId');
+    }
+    assertPositiveAmount(input.amount, 'processACHWithdraw amount');
+    if (input.currencyId !== 1 && input.currencyId !== 2) {
+      throw new Error('Helcim processACHWithdraw currencyId must be 1 (CAD) or 2 (USD)');
+    }
+    const body: Record<string, unknown> = {
+      bankAccountId: input.bankAccountId,
+      customerId: input.customerId,
+      amount: input.amount,
+      currencyId: input.currencyId,
+    };
+    if (input.orderId !== undefined) body.orderId = input.orderId;
+    const raw = await request('PUT', '/ach/withdraw', { body, idempotencyKey });
+    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
+    return decodeACHTransaction(txn);
+  }
+
+  async function getACHTransaction(transactionId: number): Promise<HelcimACHTransaction> {
+    if (!Number.isInteger(transactionId) || transactionId <= 0) {
+      throw new Error('Helcim getACHTransaction requires a positive integer transactionId');
+    }
+    const raw = await request('GET', `/ach/transactions/${transactionId}`);
+    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
+    return decodeACHTransaction(txn);
+  }
+
+  async function getACHTransactions(params: {
+    customerId?: number;
+    page?: number;
+    limit?: number;
+  } = {}): Promise<HelcimACHTransaction[]> {
+    const raw = await request('GET', '/ach/transactions', {
+      query: {
+        customerId: params.customerId,
+        page: params.page,
+        limit: params.limit,
+      },
+    });
+    const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data', 'transactions']) ?? []);
+    return arr.map(decodeACHTransaction);
+  }
+
+  async function refundACH(
+    transactionId: number,
+    amount: number,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimACHTransaction> {
+    if (!Number.isInteger(transactionId) || transactionId <= 0) {
+      throw new Error('Helcim refundACH requires a positive integer transactionId');
+    }
+    assertPositiveAmount(amount, 'refundACH amount');
+    const raw = await request('POST', `/ach/refund/${transactionId}`, {
+      body: { amount },
+      idempotencyKey,
+    });
+    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
+    return decodeACHTransaction(txn);
+  }
+
+  async function voidACH(
+    transactionId: number,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimACHTransaction> {
+    if (!Number.isInteger(transactionId) || transactionId <= 0) {
+      throw new Error('Helcim voidACH requires a positive integer transactionId');
+    }
+    const raw = await request('POST', `/ach/void/${transactionId}`, { idempotencyKey });
+    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
+    return decodeACHTransaction(txn);
+  }
+
+  async function cancelACH(
+    transactionId: number,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimACHTransaction> {
+    if (!Number.isInteger(transactionId) || transactionId <= 0) {
+      throw new Error('Helcim cancelACH requires a positive integer transactionId');
+    }
+    const raw = await request('POST', `/ach/cancel/${transactionId}`, { idempotencyKey });
+    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
+    return decodeACHTransaction(txn);
+  }
+
+  // ─── Payment API (one-time card transactions) ──────────────────────────
+  async function processPurchase(
+    input: ProcessPurchaseInput,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimCardTransaction> {
+    assertPositiveAmount(input.amount, 'processPurchase amount');
+    assertNonEmptyString(input.currency, 'processPurchase currency');
+    assertNonEmptyString(input.ipAddress, 'processPurchase ipAddress');
+    if (!input.cardData || typeof input.cardData !== 'object') {
+      throw new Error('Helcim processPurchase requires cardData');
+    }
+    const body: Record<string, unknown> = {
+      amount: input.amount,
+      currency: input.currency,
+      ipAddress: input.ipAddress,
+      cardData: input.cardData,
+    };
+    if (input.customerCode) body.customerCode = input.customerCode;
+    if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
+    if (input.orderId !== undefined) body.orderId = input.orderId;
+    if (input.ecommerce !== undefined) body.ecommerce = input.ecommerce;
+    if (input.terminalId !== undefined) body.terminalId = input.terminalId;
+    if (input.billingAddress) body.billingAddress = addressToPayload(input.billingAddress);
+    if (input.invoiceRequest) body.invoiceRequest = input.invoiceRequest;
+    const raw = await request('POST', '/payment/purchase', { body, idempotencyKey });
+    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
+    return decodeCardTransaction(txn);
+  }
+
+  async function processPreauth(
+    input: ProcessPreauthInput,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimCardTransaction> {
+    assertPositiveAmount(input.amount, 'processPreauth amount');
+    assertNonEmptyString(input.currency, 'processPreauth currency');
+    assertNonEmptyString(input.ipAddress, 'processPreauth ipAddress');
+    if (!input.cardData || typeof input.cardData !== 'object') {
+      throw new Error('Helcim processPreauth requires cardData');
+    }
+    const body: Record<string, unknown> = {
+      amount: input.amount,
+      currency: input.currency,
+      ipAddress: input.ipAddress,
+      cardData: input.cardData,
+    };
+    if (input.customerCode) body.customerCode = input.customerCode;
+    if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
+    if (input.ecommerce !== undefined) body.ecommerce = input.ecommerce;
+    if (input.terminalId !== undefined) body.terminalId = input.terminalId;
+    if (input.billingAddress) body.billingAddress = addressToPayload(input.billingAddress);
+    const raw = await request('POST', '/payment/preauth', { body, idempotencyKey });
+    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
+    return decodeCardTransaction(txn);
+  }
+
+  async function capturePreauth(
+    input: CapturePreauthInput,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimCardTransaction> {
+    if (!Number.isInteger(input.cardTransactionId) || input.cardTransactionId <= 0) {
+      throw new Error('Helcim capturePreauth requires a positive integer cardTransactionId');
+    }
+    assertPositiveAmount(input.amount, 'capturePreauth amount');
+    assertNonEmptyString(input.currency, 'capturePreauth currency');
+    assertNonEmptyString(input.ipAddress, 'capturePreauth ipAddress');
+    const body: Record<string, unknown> = {
+      cardTransactionId: input.cardTransactionId,
+      amount: input.amount,
+      currency: input.currency,
+      ipAddress: input.ipAddress,
+    };
+    if (input.orderId !== undefined) body.orderId = input.orderId;
+    const raw = await request('POST', '/payment/capture', { body, idempotencyKey });
+    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
+    return decodeCardTransaction(txn);
+  }
+
+  async function refundPurchase(
+    input: RefundPurchaseInput,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimCardTransaction> {
+    if (!Number.isInteger(input.cardTransactionId) || input.cardTransactionId <= 0) {
+      throw new Error('Helcim refundPurchase requires a positive integer cardTransactionId');
+    }
+    assertPositiveAmount(input.amount, 'refundPurchase amount');
+    assertNonEmptyString(input.ipAddress, 'refundPurchase ipAddress');
+    const body: Record<string, unknown> = {
+      cardTransactionId: input.cardTransactionId,
+      amount: input.amount,
+      ipAddress: input.ipAddress,
+    };
+    if (input.customerCode) body.customerCode = input.customerCode;
+    if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
+    const raw = await request('POST', '/payment/refund', { body, idempotencyKey });
+    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
+    return decodeCardTransaction(txn);
+  }
+
+  async function reversePurchase(
+    input: ReversePurchaseInput,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimCardTransaction> {
+    if (!Number.isInteger(input.cardTransactionId) || input.cardTransactionId <= 0) {
+      throw new Error('Helcim reversePurchase requires a positive integer cardTransactionId');
+    }
+    assertNonEmptyString(input.ipAddress, 'reversePurchase ipAddress');
+    const body: Record<string, unknown> = {
+      cardTransactionId: input.cardTransactionId,
+      ipAddress: input.ipAddress,
+    };
+    const raw = await request('POST', '/payment/reverse', { body, idempotencyKey });
+    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
+    return decodeCardTransaction(txn);
+  }
+
+  // ─── Invoices ──────────────────────────────────────────────────────────
+  async function createInvoice(
+    input: CreateInvoiceInput,
+    idempotencyKey: string = generateIdempotencyKey()
+  ): Promise<HelcimInvoice> {
+    assertNonEmptyString(input.customerCode, 'createInvoice customerCode');
+    if (!input.lineItems || input.lineItems.length === 0) {
+      throw new Error('Helcim createInvoice requires at least one line item');
+    }
+    const body: Record<string, unknown> = {
+      customerCode: input.customerCode,
+      lineItems: input.lineItems,
+    };
+    if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
+    if (input.notes) body.notes = input.notes;
+    if (input.tipAmount !== undefined) body.tipAmount = input.tipAmount;
+    if (input.depositAmount !== undefined) body.depositAmount = input.depositAmount;
+    const raw = await request('POST', '/invoices', { body, idempotencyKey });
+    const arr = firstArray(raw, ['data']) ?? [raw];
+    return decodeInvoice(arr[0] ?? raw);
+  }
+
+  async function getInvoices(params: {
+    customerCode?: string;
+    page?: number;
+    limit?: number;
+    status?: string;
+  } = {}): Promise<HelcimInvoice[]> {
+    const raw = await request('GET', '/invoices', {
+      query: {
+        customerCode: params.customerCode,
+        page: params.page,
+        limit: params.limit,
+        status: params.status,
+      },
+    });
+    const arr = firstArray(raw, ['data', 'invoices', 'Invoices']) ?? [];
+    return arr.map(decodeInvoice);
+  }
+
+  async function getInvoice(invoiceId: number): Promise<HelcimInvoice> {
+    if (!Number.isInteger(invoiceId) || invoiceId <= 0) {
+      throw new Error('Helcim getInvoice requires a positive integer invoiceId');
+    }
+    const raw = await request('GET', `/invoices/${invoiceId}`);
+    const arr = firstArray(raw, ['data']);
+    if (arr && arr.length > 0) return decodeInvoice(arr[0]);
+    return decodeInvoice(raw.data ?? raw);
+  }
+
   return {
     connectionTest,
     createCustomer,
@@ -806,6 +1510,33 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     processSubscriptionPayment,
     getCardTransaction,
     getCardTransactions,
+    // Bank accounts
+    createBankAccount,
+    getCustomerBankAccounts,
+    getBankAccount,
+    setBankAccountDefault,
+    requestNewBankAccount,
+    // PAD agreements
+    getPADs,
+    getPAD,
+    updatePAD,
+    // ACH transactions
+    processACHWithdraw,
+    getACHTransaction,
+    getACHTransactions,
+    refundACH,
+    voidACH,
+    cancelACH,
+    // Payment API (one-time card)
+    processPurchase,
+    processPreauth,
+    capturePreauth,
+    refundPurchase,
+    reversePurchase,
+    // Invoices
+    createInvoice,
+    getInvoices,
+    getInvoice,
   };
 }
 
@@ -821,5 +1552,9 @@ export {
   decodePaymentPlan,
   decodeSubscription,
   decodeSubscriptionPayment,
+  decodeBankAccount,
+  decodePADAgreement,
+  decodeACHTransaction,
+  decodeInvoice,
   isProviderErrorStatus,
 };
