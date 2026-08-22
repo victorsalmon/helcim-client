@@ -74,8 +74,10 @@ export function verifyHelcimWebhook(
  */
 export interface HelcimWebhookEvent {
   type: string | null;
-  /** Transaction id for cardTransaction events; null otherwise. */
+  /** Transaction id for cardTransaction/achTransaction events; null otherwise. */
   transactionId: string | null;
+  /** Subscription id for subscriptionPayment events; null otherwise. */
+  subscriptionId: string | null;
   /** Raw parsed body for the caller to inspect. */
   raw: Record<string, unknown>;
 }
@@ -87,16 +89,17 @@ export function parseHelcimWebhookBody(
   try {
     parsed = JSON.parse(rawBody);
   } catch {
-    return { type: null, transactionId: null, raw: {} };
+    return { type: null, transactionId: null, subscriptionId: null, raw: {} };
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    return { type: null, transactionId: null, raw: {} };
+    return { type: null, transactionId: null, subscriptionId: null, raw: {} };
   }
   const record = parsed as Record<string, unknown>;
   const type =
     typeof record.type === 'string' ? record.type : null;
   // cardTransaction: { id, type }  → id is the transaction id
   // terminalCancel:  { data: { ... }, type }
+  // subscriptionPayment: { subscriptionId, type } or { data: { subscriptionId }, type }
   const directId =
     typeof record.id === 'string' || typeof record.id === 'number'
       ? String(record.id)
@@ -110,9 +113,23 @@ export function parseHelcimWebhookBody(
             : null;
         })()
       : null;
+  const directSubId =
+    typeof record.subscriptionId === 'string' || typeof record.subscriptionId === 'number'
+      ? String(record.subscriptionId)
+      : null;
+  const nestedSubId =
+    record.data && typeof record.data === 'object' && !Array.isArray(record.data)
+      ? (() => {
+          const d = record.data as Record<string, unknown>;
+          return typeof d.subscriptionId === 'string' || typeof d.subscriptionId === 'number'
+            ? String(d.subscriptionId)
+            : null;
+        })()
+      : null;
   return {
     type,
     transactionId: directId ?? nestedId,
+    subscriptionId: directSubId ?? nestedSubId,
     raw: record,
   };
 }
