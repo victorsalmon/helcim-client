@@ -93,6 +93,92 @@ describe('verifyHelcimWebhook', () => {
     expect(verifyHelcimWebhook('id', 'ts', 'body', 'sig', '')).toBe(false);
   });
 
+  it('rejects when only webhookId is empty (others valid)', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    expect(verifyHelcimWebhook('', ts, body, `v1,${sig}`, VERIFIER)).toBe(false);
+  });
+
+  it('rejects when only webhookTimestamp is empty (others valid)', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    expect(verifyHelcimWebhook(id, '', body, `v1,${sig}`, VERIFIER)).toBe(false);
+  });
+
+  it('rejects when only rawBody is empty (others valid)', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    expect(verifyHelcimWebhook(id, ts, '', `v1,${sig}`, VERIFIER)).toBe(false);
+  });
+
+  it('rejects when only signatureHeader is empty (others valid)', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    expect(verifyHelcimWebhook(id, ts, body, '', VERIFIER)).toBe(false);
+  });
+
+  it('rejects when only verifierToken is empty (others valid)', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    expect(verifyHelcimWebhook(id, ts, body, `v1,${sig}`, '')).toBe(false);
+  });
+
+  it('rejects a verifier token that decodes to zero bytes', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    // Empty string base64-decodes to zero bytes
+    expect(verifyHelcimWebhook(id, ts, body, `v1,${sig}`, '')).toBe(false);
+  });
+
+  it('handles signatures with extra whitespace between entries', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    const wrongSig = sign(Buffer.from('wrong').toString('base64'), id, ts, body);
+    // Multiple spaces and tabs between entries
+    expect(verifyHelcimWebhook(id, ts, body, `v1,${wrongSig}   v1,${sig}`, VERIFIER)).toBe(true);
+  });
+
+  it('handles signature entry without comma (uses full entry as sig)', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    // No "v1," prefix — the whole entry is the signature
+    expect(verifyHelcimWebhook(id, ts, body, sig, VERIFIER)).toBe(true);
+  });
+
+  it('skips empty signature entries in the list', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const sig = sign(VERIFIER, id, ts, body);
+    // Entry with comma but empty sig part, followed by valid entry
+    expect(verifyHelcimWebhook(id, ts, body, `v1, ${sig}`, VERIFIER)).toBe(true);
+  });
+
+  it('rejects when no signature in the list matches', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const wrongSig1 = sign(Buffer.from('wrong1').toString('base64'), id, ts, body);
+    const wrongSig2 = sign(Buffer.from('wrong2').toString('base64'), id, ts, body);
+    expect(verifyHelcimWebhook(id, ts, body, `v1,${wrongSig1} v1,${wrongSig2}`, VERIFIER)).toBe(false);
+  });
+
   it('rejects an invalid base64 verifier token', () => {
     const id = 'evt_123';
     const ts = '1700000000';

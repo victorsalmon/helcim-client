@@ -27,6 +27,16 @@ describe('util — sha256', () => {
   it('differs for different inputs', () => {
     expect(sha256('abc')).not.toBe(sha256('abd'));
   });
+
+  it('produces correct hash for unicode input (UTF-8 encoding)', () => {
+    // SHA-256("café") = 850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e
+    expect(sha256('café')).toBe('850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e');
+  });
+
+  it('produces correct hash for ASCII input', () => {
+    // SHA-256("hello") = 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+    expect(sha256('hello')).toBe('2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824');
+  });
 });
 
 describe('util — generateIdempotencyKey', () => {
@@ -64,6 +74,24 @@ describe('util — firstString', () => {
   it('returns null when no key matches', () => {
     expect(firstString({ a: '' }, ['a', 'b'])).toBeNull();
   });
+
+  it('skips non-string non-number values (boolean, object, null)', () => {
+    expect(firstString({ a: true, b: 'x' }, ['a', 'b'])).toBe('x');
+    expect(firstString({ a: null, b: 'y' }, ['a', 'b'])).toBe('y');
+    expect(firstString({ a: { x: 1 }, b: 'z' }, ['a', 'b'])).toBe('z');
+  });
+
+  it('skips whitespace-only string values', () => {
+    expect(firstString({ a: '   ', b: 'x' }, ['a', 'b'])).toBe('x');
+  });
+
+  it('coerces 0 to "0"', () => {
+    expect(firstString({ a: 0 }, ['a'])).toBe('0');
+  });
+
+  it('coerces negative numbers', () => {
+    expect(firstString({ a: -42 }, ['a'])).toBe('-42');
+  });
 });
 
 describe('util — firstNumber', () => {
@@ -81,6 +109,41 @@ describe('util — firstNumber', () => {
 
   it('returns null when nothing matches', () => {
     expect(firstNumber({ a: 'abc' }, ['a'])).toBeNull();
+  });
+
+  it('skips non-finite number values (Infinity, -Infinity)', () => {
+    expect(firstNumber({ a: Infinity, b: 5 }, ['a', 'b'])).toBe(5);
+    expect(firstNumber({ a: -Infinity, b: 3 }, ['a', 'b'])).toBe(3);
+  });
+
+  it('skips non-number non-string values (boolean, object, null)', () => {
+    expect(firstNumber({ a: true, b: 5 }, ['a', 'b'])).toBe(5);
+    expect(firstNumber({ a: null, b: 3 }, ['a', 'b'])).toBe(3);
+    expect(firstNumber({ a: { x: 1 }, b: 7 }, ['a', 'b'])).toBe(7);
+  });
+
+  it('skips whitespace-only string values', () => {
+    expect(firstNumber({ a: '   ', b: 5 }, ['a', 'b'])).toBe(5);
+  });
+
+  it('skips non-numeric string values', () => {
+    expect(firstNumber({ a: 'abc', b: 5 }, ['a', 'b'])).toBe(5);
+  });
+
+  it('returns 0 directly when value is 0', () => {
+    expect(firstNumber({ a: 0 }, ['a'])).toBe(0);
+  });
+
+  it('returns negative numbers directly', () => {
+    expect(firstNumber({ a: -42 }, ['a'])).toBe(-42);
+  });
+
+  it('parses numeric strings with whitespace', () => {
+    expect(firstNumber({ a: '  42  ' }, ['a'])).toBe(42);
+  });
+
+  it('skips NaN results from Number()', () => {
+    expect(firstNumber({ a: '123abc' }, ['a'])).toBeNull();
   });
 });
 
@@ -102,6 +165,22 @@ describe('util — firstBoolean', () => {
 
   it('returns null for unrecognized values', () => {
     expect(firstBoolean({ a: 'yes' }, ['a'])).toBeNull();
+  });
+
+  it('skips non-boolean non-string values (number, object, null)', () => {
+    expect(firstBoolean({ a: 1, b: true }, ['a', 'b'])).toBe(true);
+    expect(firstBoolean({ a: null, b: false }, ['a', 'b'])).toBe(false);
+    expect(firstBoolean({ a: { x: 1 }, b: true }, ['a', 'b'])).toBe(true);
+  });
+
+  it('trims and lowercases string values before matching', () => {
+    expect(firstBoolean({ a: '  TRUE  ' }, ['a'])).toBe(true);
+    expect(firstBoolean({ a: '  False  ' }, ['a'])).toBe(false);
+  });
+
+  it('returns null for non-boolean-like strings', () => {
+    expect(firstBoolean({ a: 'maybe' }, ['a'])).toBeNull();
+    expect(firstBoolean({ a: '2' }, ['a'])).toBeNull();
   });
 });
 

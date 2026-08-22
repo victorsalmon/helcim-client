@@ -55,6 +55,24 @@ describe('validateHelcimPayHash', () => {
     expect(validateHelcimPayHash({ a: 1 }, 'hash', '')).toBe(false);
   });
 
+  it('rejects when only data is empty (falsy)', () => {
+    expect(validateHelcimPayHash({} as any, 'hash', 'secret')).toBe(false);
+  });
+
+  it('rejects when only hash is empty', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    expect(validateHelcimPayHash(data, '', secret)).toBe(false);
+  });
+
+  it('rejects when only secretToken is empty', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    expect(validateHelcimPayHash(data, hash, '')).toBe(false);
+  });
+
   it('handles unicode characters in data (matches Helcim escaped-unicode hashing)', () => {
     const data = { name: 'José — café' };
     const secret = 's';
@@ -99,6 +117,127 @@ describe('parseHelcimPayEventMessage', () => {
     const result = parseHelcimPayEventMessage(msg);
     expect(result.data).toBeNull();
     expect(result.hash).toBe('h');
+  });
+
+  it('returns nulls when parsed JSON is a primitive (number)', () => {
+    const result = parseHelcimPayEventMessage('42');
+    expect(result.status).toBeNull();
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns nulls when parsed JSON is a string', () => {
+    const result = parseHelcimPayEventMessage('"hello"');
+    expect(result.status).toBeNull();
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns nulls when parsed JSON is null', () => {
+    const result = parseHelcimPayEventMessage('null');
+    expect(result.status).toBeNull();
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns nulls when parsed JSON is a boolean', () => {
+    const result = parseHelcimPayEventMessage('true');
+    expect(result.status).toBeNull();
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns null status when status is neither number nor string', () => {
+    const msg = JSON.stringify({ status: true, data: { data: {}, hash: 'h' } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.status).toBeNull();
+  });
+
+  it('returns null status when status is a non-numeric string', () => {
+    const msg = JSON.stringify({ status: 'abc', data: { data: {}, hash: 'h' } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.status).toBeNull();
+  });
+
+  it('coerces string status "0" to null (0 is falsy, so || null kicks in)', () => {
+    const msg = JSON.stringify({ status: '0', data: { data: {}, hash: 'h' } });
+    const result = parseHelcimPayEventMessage(msg);
+    // Number('0') || null → 0 || null → null (0 is falsy)
+    expect(result.status).toBeNull();
+  });
+
+  it('coerces non-zero numeric string status to number', () => {
+    const msg = JSON.stringify({ status: '42', data: { data: {}, hash: 'h' } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.status).toBe(42);
+  });
+
+  it('returns null data when outer.data is not an object (is array)', () => {
+    const msg = JSON.stringify({ status: 1, data: [1, 2, 3] });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns null data when outer.data is a primitive', () => {
+    const msg = JSON.stringify({ status: 1, data: 'not-object' });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns null data when outer.data is null', () => {
+    const msg = JSON.stringify({ status: 1, data: null });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns null data when inner data is an array', () => {
+    const msg = JSON.stringify({ status: 1, data: { data: [1, 2], hash: 'h' } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.data).toBeNull();
+    expect(result.hash).toBe('h');
+  });
+
+  it('returns null data when inner data is a primitive', () => {
+    const msg = JSON.stringify({ status: 1, data: { data: 42, hash: 'h' } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.data).toBeNull();
+    expect(result.hash).toBe('h');
+  });
+
+  it('returns null data when inner data is null', () => {
+    const msg = JSON.stringify({ status: 1, data: { data: null, hash: 'h' } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.data).toBeNull();
+    expect(result.hash).toBe('h');
+  });
+
+  it('returns null hash when dataWrapper.hash is not a string', () => {
+    const msg = JSON.stringify({ status: 1, data: { data: {}, hash: 123 } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns null hash when dataWrapper.hash is missing', () => {
+    const msg = JSON.stringify({ status: 1, data: { data: {} } });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns status and null data/hash when outer.data is missing entirely', () => {
+    const msg = JSON.stringify({ status: 1 });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.status).toBe(1);
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns status from outer object even when data is missing', () => {
+    const msg = JSON.stringify({ status: 5 });
+    const result = parseHelcimPayEventMessage(msg);
+    expect(result.status).toBe(5);
   });
 });
 

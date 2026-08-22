@@ -69,4 +69,57 @@ describe('Helcim configuration', () => {
     const cfg = createHelcimConfigFromEnv({ HELCIM_API_TOKEN: '  tok-1  ' });
     expect(cfg!.apiToken).toBe('tok-1');
   });
+
+  it('trims whitespace from HELCIM_BASE_URL before use', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_BASE_URL: '  https://custom.helcim.example/v2  ',
+    });
+    expect(cfg!.baseUrl).toBe('https://custom.helcim.example/v2');
+  });
+
+  it('strips multiple trailing slashes from HELCIM_BASE_URL', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_BASE_URL: 'https://custom.helcim.example/v2///',
+    });
+    expect(cfg!.baseUrl).toBe('https://custom.helcim.example/v2');
+  });
+
+  it('treats a whitespace-only HELCIM_BASE_URL as unset', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_BASE_URL: '   ',
+    });
+    expect(cfg!.baseUrl).toBe(HELCIM_TEST_BASE_URL);
+  });
+
+  it('trims and lowercases HELCIM_ENV', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_ENV: '  PRODUCTION  ',
+    });
+    expect(cfg!.baseUrl).toBe(HELCIM_PRODUCTION_BASE_URL);
+  });
+
+  it('treats unset HELCIM_ENV as empty string (test URL)', () => {
+    const cfg = createHelcimConfigFromEnv({ HELCIM_API_TOKEN: 'tok-1' });
+    expect(cfg!.baseUrl).toBe(HELCIM_TEST_BASE_URL);
+  });
+
+  it('trims whitespace from the webhook verifier token', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_WEBHOOK_VERIFIER_TOKEN: '  verifier-abc  ',
+    });
+    expect(cfg!.webhookVerifierToken).toBe('verifier-abc');
+  });
+
+  it('omits webhook verifier token when whitespace-only', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_WEBHOOK_VERIFIER_TOKEN: '   ',
+    });
+    expect(cfg!.webhookVerifierToken).toBeUndefined();
+  });
 });
