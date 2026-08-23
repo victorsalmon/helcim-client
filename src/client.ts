@@ -786,11 +786,13 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       }
     }
     if (!response.ok) {
-      const errors = firstArray(raw, ['errors', 'Errors']) ?? [];
+      const providerErrors = raw.errors ?? raw.Errors;
       const message =
-        errors.length > 0 && typeof errors[0] === 'string'
-          ? errors[0]
-          : `Helcim ${method} ${path} failed with HTTP ${response.status}`;
+        typeof providerErrors === 'string' && providerErrors.trim()
+          ? providerErrors
+          : Array.isArray(providerErrors) && typeof providerErrors[0] === 'string'
+            ? providerErrors[0]
+            : `Helcim ${method} ${path} failed with HTTP ${response.status}`;
       throw new Error(message);
     }
     // Recurring API wraps responses in { data: [...] } or { data: {...} }.

@@ -5,13 +5,14 @@ import { sha256 } from './util.js';
  *
  * After a HelcimPay.js payment, the iFrame emits a response containing the
  * transaction data and a `hash`. To verify integrity, JSON-encode the
- * transaction data (with sorted keys, no whitespace), append the `secretToken`
+ * transaction data (with no whitespace), append the `secretToken`
  * from the initialize response, and SHA-256 hash the result. The hash must
  * match the one returned by Helcim.
  *
  * Helcim calculates the hash on the JSON-escaped unicode representation of
- * special characters, so we use `JSON.stringify` with no replacer (which
- * produces escaped unicode for non-ASCII) and compact separators.
+ * special characters. JavaScript's `JSON.stringify` leaves those characters
+ * literal, so the serialized payload is converted to UTF-16 `\\uXXXX` escapes
+ * before hashing.
  *
  * @param data - the `data` object from the HelcimPay.js response
  * @param hash - the `hash` string from the HelcimPay.js response
@@ -24,10 +25,14 @@ export function validateHelcimPayHash(
   secretToken: string
 ): boolean {
   if (!data || !hash || !secretToken) return false;
-  // Compact JSON encoding (no whitespace), matching Helcim's server-side
-  // json_encode with default flags. JSON.stringify already escapes non-ASCII
-  // to \uXXXX, which matches Helcim's "JSON-escaped unicode representation."
-  const jsonEncoded = JSON.stringify(data);
+  // Compact JSON encoding matching Helcim's server-side json_encode default.
+  // JSON.stringify does not escape non-ASCII characters, so convert each
+  // UTF-16 code unit to the `\\uXXXX` format Helcim hashes. Using code units
+  // deliberately encodes astral characters as the same surrogate pairs PHP
+  // json_encode produces.
+  const jsonEncoded = JSON.stringify(data).replace(/[\u007f-\uffff]/g, (character) =>
+    `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+  );
   const computed = sha256(jsonEncoded + secretToken);
   // Case-insensitive comparison — both are hex digests.
   return computed.toLowerCase() === hash.trim().toLowerCase();
