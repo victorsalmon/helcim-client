@@ -13,7 +13,7 @@
     "related": false
   },
   "coverageAnalysis": "perTest",
-  "concurrency": 2,
+  "concurrency": 8,
   "timeoutMS": 60000,
   "timeoutFactor": 2,
   "ignoreStatic": true,
