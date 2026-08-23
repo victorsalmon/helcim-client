@@ -44,12 +44,12 @@
   "author": "Clock Lobster <dev@clocklobster.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clocklobster/helcim-client.git"
+    "url": "git+https://github.com/victorsalmon/helcim-client.git"
   },
   "bugs": {
-    "url": "https://github.com/clocklobster/helcim-client/issues"
+    "url": "https://github.com/victorsalmon/helcim-client/issues"
   },
-  "homepage": "https://github.com/clocklobster/helcim-client#readme",
+  "homepage": "https://github.com/victorsalmon/helcim-client#readme",
   "devDependencies": {
     "@fast-check/vitest": "^0.2.0",
     "@stryker-mutator/core": "^10.0.0",
