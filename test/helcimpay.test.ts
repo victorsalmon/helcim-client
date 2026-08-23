@@ -9,6 +9,15 @@ function computeHash(data: Record<string, unknown>, secret: string): string {
     .digest('hex');
 }
 
+function computeHelcimHash(data: Record<string, unknown>, secret: string): string {
+  const json = JSON.stringify(data).replace(/[\u007f-\uffff]/g, (character) =>
+    Array.from(character)
+      .map((codePoint) => `\\u${codePoint.codePointAt(0)!.toString(16).padStart(4, '0')}`)
+      .join('')
+  );
+  return createHash('sha256').update(json + secret, 'utf8').digest('hex');
+}
+
 describe('validateHelcimPayHash', () => {
   it('accepts a valid hash', () => {
     const data = { transactionId: 42, status: 'APPROVED', amount: 1.0 };
@@ -73,10 +82,10 @@ describe('validateHelcimPayHash', () => {
     expect(validateHelcimPayHash(data, hash, '')).toBe(false);
   });
 
-  it('handles unicode characters in data (matches Helcim escaped-unicode hashing)', () => {
+  it('handles unicode characters using Helcim escaped-unicode hashing', () => {
     const data = { name: 'José — café' };
     const secret = 's';
-    const hash = computeHash(data, secret);
+    const hash = computeHelcimHash(data, secret);
     expect(validateHelcimPayHash(data, hash, secret)).toBe(true);
   });
 });

@@ -402,6 +402,17 @@ describe('client — getCardTransaction', () => {
 });
 
 describe('client — error handling', () => {
+  it('preserves a Helcim string error response', async () => {
+    const { fetchImpl } = mockFetch({
+      status: 401,
+      body: { errors: 'Unauthorized' },
+    });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(
+      client.createCustomer({ contactName: 'X' })
+    ).rejects.toThrow(/^Unauthorized$/);
+  });
+
   it('throws with the first error message on a non-2xx response', async () => {
     const { fetchImpl } = mockFetch({
       status: 400,
