@@ -222,6 +222,12 @@ describe('decodePaymentPlan — first-key isolation', () => {
   it('decodes addOnIds from "addOnIds" (first key only)', () => {
     expect(decodePaymentPlan({ addOnIds: [1, 2] }).addOnIds).toEqual([1, 2]);
   });
+
+  it('coerces string addOnIds to numbers', () => {
+    expect(decodePaymentPlan({ addOnIds: ['1', '2'] }).addOnIds).toEqual([1, 2]);
+    expect(decodePaymentPlan({ addOnIds: ['not-a-number', '5'] }).addOnIds).toEqual([0, 5]);
+    expect(decodePaymentPlan({ addOnIds: ['abc'] }).addOnIds).toEqual([0]);
+  });
   it('decodes isProrated from "isProrated" (first key only)', () => {
     expect(decodePaymentPlan({ isProrated: 'yes' }).isProrated).toBe('yes');
   });
@@ -308,6 +314,11 @@ describe('decodeSubscription — first-key isolation', () => {
   });
   it('decodes addOnIds from "addOnIds" (first key only)', () => {
     expect(decodeSubscription({ addOnIds: [1, 2] }).addOnIds).toEqual([1, 2]);
+  });
+
+  it('coerces string addOnIds to numbers', () => {
+    expect(decodeSubscription({ addOnIds: ['1', '2'] }).addOnIds).toEqual([1, 2]);
+    expect(decodeSubscription({ addOnIds: ['not-a-number', '5'] }).addOnIds).toEqual([0, 5]);
   });
   it('decodes payments from "payments" (first key only)', () => {
     expect(decodeSubscription({ payments: [{ id: 1 }] }).payments).toHaveLength(1);
