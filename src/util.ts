@@ -99,9 +99,9 @@ export function firstArray(
  * and `errors` arrays on failure responses.
  */
 export function isProviderErrorStatus(raw: unknown): boolean {
-  if (!raw || typeof raw !== 'object') return false;
+  if (!raw) return false;
   const record = raw as Record<string, unknown>;
-  const status = String(record.status ?? record.Status ?? '').trim().toLowerCase();
+  const status = String(record.status ?? record.Status).trim().toLowerCase();
   return ['declined', 'failed', 'error'].includes(status);
 }
 

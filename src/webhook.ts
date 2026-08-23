@@ -55,12 +55,10 @@ export function verifyHelcimWebhook(
     // Constant-time comparison to prevent timing attacks.
     const actualBytes = Buffer.from(sig);
     const expectedBytes = Buffer.from(expected);
-    if (actualBytes.length === expectedBytes.length) {
-      try {
-        if (timingSafeEqual(actualBytes, expectedBytes)) return true;
-      } catch {
-        continue;
-      }
+    try {
+      if (timingSafeEqual(actualBytes, expectedBytes)) return true;
+    } catch {
+      continue;
     }
   }
   return false;

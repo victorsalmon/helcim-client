@@ -28,7 +28,7 @@ function resolveBaseUrl(env: NodeJS.ProcessEnv): string {
   // HELCIM_ENV=production → prod URL; HELCIM_ENV=test (or unset) → test URL.
   // This lets a product opt into prod by setting HELCIM_ENV=production without
   // hardcoding the full URL.
-  const envStage = (env.HELCIM_ENV ?? '').trim().toLowerCase();
+  const envStage = env.HELCIM_ENV?.trim().toLowerCase();
   if (envStage === 'production' || envStage === 'prod') return HELCIM_PRODUCTION_BASE_URL;
   return HELCIM_TEST_BASE_URL;
 }
