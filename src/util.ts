@@ -5,7 +5,7 @@ import { createHash, randomUUID } from 'node:crypto';
  * validation: hash = sha256(jsonEncodedData + secretToken).
  */
 export function sha256(value: string): string {
-  return createHash('sha256').update(value, 'utf8').digest('hex');
+  return createHash('sha256').update(value).digest('hex');
 }
 
 /**
@@ -101,7 +101,7 @@ export function firstArray(
 export function isProviderErrorStatus(raw: unknown): boolean {
   if (!raw || typeof raw !== 'object') return false;
   const record = raw as Record<string, unknown>;
-  const status = String(record.status ?? record.Status ?? '').toLowerCase();
+  const status = String(record.status ?? record.Status).toLowerCase();
   return ['declined', 'failed', 'error'].includes(status);
 }
 

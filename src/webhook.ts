@@ -31,12 +31,7 @@ export function verifyHelcimWebhook(
   }
 
   const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
-  let verifierKeyBytes: Buffer;
-  try {
-    verifierKeyBytes = Buffer.from(verifierToken, 'base64');
-  } catch {
-    return false;
-  }
+  const verifierKeyBytes = Buffer.from(verifierToken, 'base64');
   if (verifierKeyBytes.length === 0) return false;
 
   // The signature header is a space-delimited list of "version,signature".
@@ -56,11 +51,7 @@ export function verifyHelcimWebhook(
     const actualBytes = Buffer.from(sig, 'utf8');
     const expectedBytes = Buffer.from(expected, 'utf8');
     if (actualBytes.length === expectedBytes.length) {
-      try {
-        if (timingSafeEqual(actualBytes, expectedBytes)) return true;
-      } catch {
-        continue;
-      }
+      if (timingSafeEqual(actualBytes, expectedBytes)) return true;
     }
   }
   return false;
