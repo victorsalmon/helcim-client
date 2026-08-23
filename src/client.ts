@@ -702,7 +702,7 @@ function decodeInvoice(raw: unknown): HelcimInvoice {
 // ─── Client factory ─────────────────────────────────────────────────────────
 
 function assertPositiveAmount(value: number, name: string): void {
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+  if (!Number.isFinite(value) || value <= 0) {
     throw new Error(`Helcim ${name} requires a positive finite amount`);
   }
 }
@@ -967,7 +967,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       throw new Error('Helcim getPaymentPlan requires a positive integer planId');
     }
     const raw = await request('GET', `/payment-plans/${planId}`);
-    const arr = firstArray(raw, ['data']) ?? [raw];
+    const arr = firstArray(raw, ['data']) ?? [];
     return decodePaymentPlan(arr[0] ?? raw);
   }
 
@@ -1035,7 +1035,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     const raw = await request('GET', `/subscriptions/${subscriptionId}`, {
       query: includeSubObjects ? { includeSubObjects: true } : {},
     });
-    const arr = firstArray(raw, ['data']) ?? [raw];
+    const arr = firstArray(raw, ['data']) ?? [];
     return decodeSubscription(arr[0] ?? raw);
   }
 
@@ -1083,7 +1083,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       body: { subscriptionId, paymentNumber },
       idempotencyKey,
     });
-    const arr = firstArray(raw, ['data']) ?? [raw];
+    const arr = firstArray(raw, ['data']) ?? [];
     return decodeSubscription(arr[0] ?? raw);
   }
 
@@ -1461,7 +1461,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (input.tipAmount !== undefined) body.tipAmount = input.tipAmount;
     if (input.depositAmount !== undefined) body.depositAmount = input.depositAmount;
     const raw = await request('POST', '/invoices', { body, idempotencyKey });
-    const arr = firstArray(raw, ['data']) ?? [raw];
+    const arr = firstArray(raw, ['data']) ?? [];
     return decodeInvoice(arr[0] ?? raw);
   }
 

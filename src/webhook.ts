@@ -46,15 +46,15 @@ export function verifyHelcimWebhook(
     const commaIdx = entry.indexOf(',');
     const sig =
       commaIdx >= 0 ? entry.slice(commaIdx + 1) : entry;
-    if (!sig) continue;
 
     const expected = createHmac('sha256', verifierKeyBytes)
-      .update(signedContent, 'utf8')
-      .digest('base64');
+      .update(signedContent)
+      .digest()
+      .toString('base64');
 
     // Constant-time comparison to prevent timing attacks.
-    const actualBytes = Buffer.from(sig, 'utf8');
-    const expectedBytes = Buffer.from(expected, 'utf8');
+    const actualBytes = Buffer.from(sig);
+    const expectedBytes = Buffer.from(expected);
     if (actualBytes.length === expectedBytes.length) {
       try {
         if (timingSafeEqual(actualBytes, expectedBytes)) return true;

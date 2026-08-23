@@ -5,7 +5,7 @@ import { createHash, randomUUID } from 'node:crypto';
  * validation: hash = sha256(jsonEncodedData + secretToken).
  */
 export function sha256(value: string): string {
-  return createHash('sha256').update(value, 'utf8').digest('hex');
+  return createHash('sha256').update(value).digest('hex');
 }
 
 /**
@@ -34,7 +34,7 @@ export function firstString(
   for (const key of keys) {
     const value = record[key];
     if (typeof value === 'string' && value.trim()) return value.trim();
-    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+    if (Number.isFinite(value)) return String(value);
   }
   return null;
 }
@@ -49,7 +49,7 @@ export function firstNumber(
 ): number | null {
   for (const key of keys) {
     const value = record[key];
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (Number.isFinite(value)) return Number(value);
     if (typeof value === 'string' && value.trim()) {
       const n = Number(value);
       if (Number.isFinite(n)) return n;
