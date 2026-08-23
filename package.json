@@ -1,9 +1,8 @@
 {
-  "name": "@clocklobster/helcim-client",
+  "name": "helcim-client",
   "version": "0.1.0",
-  "description": "Product-neutral Helcim API client — Payment API, Recurring API (payment plans + subscriptions), Customer/Card vault, HelcimPay.js checkout session init, webhook + response-hash verification. Used by currents-bookkeeping and other Clocklobster SaaS products.",
-  "private": true,
-  "license": "UNLICENSED",
+  "description": "A product-neutral, type-safe Helcim API client for Node.js. Covers the Payment API, Recurring API (payment plans + subscriptions), customer/card vault, HelcimPay.js checkout sessions, webhook verification, and HelcimPay response-hash verification.",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,17 +17,39 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "docs",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "postinstall": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:mutation": "stryker run || node scripts/verify-mutation-report.mjs",
-    "test:compliance": "vitest run test/compliance-contracts.test.ts"
+    "test:compliance": "vitest run test/compliance-contracts.test.ts",
+    "prepublishOnly": "npm run build && npm run test"
   },
+  "keywords": [
+    "helcim",
+    "payments",
+    "canada",
+    "fintech",
+    "webhooks",
+    "payment-processing",
+    "typescript"
+  ],
+  "author": "Clock Lobster <dev@clocklobster.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clocklobster/helcim-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/clocklobster/helcim-client/issues"
+  },
+  "homepage": "https://github.com/clocklobster/helcim-client#readme",
   "devDependencies": {
     "@fast-check/vitest": "^0.2.0",
     "@stryker-mutator/core": "^10.0.0",
