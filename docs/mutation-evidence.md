@@ -1,34 +1,58 @@
-# Helcim mutation evidence
+# Mutation evidence
 
-Run from `C:\Repos\saas-modules`:
+Run from the package root:
 
-```powershell
-pnpm --filter @clocklobster/helcim-client test:mutation
+```bash
+npm run test:mutation
 ```
 
-The portfolio completed on 2026-08-23 with 1,902 mutants: 1,770 killed,
-114 survived, 16 with no coverage, 0 timeouts, and 0 execution errors. Stryker
-reported a 93.16% score (93.85% when no-coverage mutants are excluded). The
-critical-file scores were: `client.ts` 95.19%, `config.ts` 96.97%,
-`util.ts` 95.10%, `helcimpay.ts` 85.14%, and `webhook.ts` 71.43%.
+The latest public snapshot was generated on 2026-08-23.
 
-The configured Stryker break threshold is 59%; the package-level report
-verifier additionally requires at least 90%, rejects timeouts/runtime/compile
-errors, and prints the status breakdown. On Windows, Stryker may return a
-cleanup-only `taskkill ... Access denied` after writing the complete report.
-`test:mutation` invokes `scripts/verify-mutation-report.mjs` on that path so a
-complete, error-free report is not failed by checker-process cleanup. The
-verifier never masks mutant execution errors or a score below 90%.
+| Metric | Value |
+|---|---|
+| Total mutants instrumented | 1,846 |
+| Killed | 1,781 |
+| Survived | 55 |
+| No coverage | 8 |
+| Timeouts | 0 |
+| Errors | 0 |
+| **Total mutation score** | **96.58 %** |
+| **Covered mutation score** | **97.00 %** |
 
-Survivors were reviewed in the generated HTML/JSON report. The remaining
-survivors are concentrated in provider-shape normalization, defensive parser
-branches, and equivalent encoding/string-literal transformations; they are
-not unreviewed failures. No Helcim credential, signature, hash, token-binding,
-or sensitive-data-redaction test is allowed to rely solely on a survivor: the
-focused contract suite and the compliance static gate cover those invariants.
+### Per-file scores
 
-Artifacts:
+| File | Total score | Covered score | Survived | No coverage |
+|---|---|---|---|---|
+| `src/client.ts` | 96.97 % | 97.35 % | 41 | 6 |
+| `src/config.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/helcimpay.ts` | 89.23 % | 89.23 % | 7 | 0 |
+| `src/util.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/webhook.ts` | 91.59 % | 93.33 % | 7 | 2 |
 
-- `stryker-report/mutation/report.json`
-- `reports/mutation/mutation.html`
-- `scripts/verify-mutation-report.mjs`
+## What the pipeline enforces
+
+The configured Stryker break threshold is **59 %**. The package-level report verifier additionally requires:
+
+* Total mutation score **>= 90 %**.
+* Zero timeout mutants.
+* Zero runtime/compile error mutants.
+
+The `test:mutation` script runs `stryker run || node scripts/verify-mutation-report.mjs`. On Windows, Stryker may print a cleanup-only `taskkill ... Access denied` message after it has already written the complete report; the verifier parses the JSON report directly so that this harmless cleanup noise does not fail the gate.
+
+## Artifacts
+
+* `stryker-report/mutation/report.json` — machine-readable Stryker results.
+* `reports/mutation/mutation.html` — human-readable HTML report.
+* `scripts/verify-mutation-report.mjs` — threshold and error checker.
+
+## Reviewing survivors
+
+Survivors were reviewed in the generated HTML/JSON report. The remaining survivors are concentrated in:
+
+* Provider-shape normalization (`client.ts`).
+* Defensive parser branches (`helcimpay.ts`, `webhook.ts`).
+* Equivalent encoding/string-literal transformations (`client.ts`, `webhook.ts`).
+
+No credential, signature, hash, token-binding, or sensitive-data-redaction test relies solely on a survivor. The focused contract suite and the compliance static gate cover those invariants.
+
+For instructions on how to re-test and how to classify survivors, see [`QUALITY.md`](./QUALITY.md).
