@@ -266,6 +266,16 @@ fcTest.prop([
   expect(validateHelcimPayHash(tampered, hash, secret)).toBe(false);
 });
 
+fcTest.prop([
+  fc.stringOf(fc.constantFrom('é', '—', '中', '😀', 'a', 'Z', ' '), { minLength: 1, maxLength: 40 })
+    .filter((value) => /[^\x00-\x7f]/.test(value)),
+  fc.string({ minLength: 1, maxLength: 40 }),
+])('validates every Helcim escaped-Unicode string payload', (name, secret) => {
+  const data = { name };
+  const hash = computeHelcimHash(data, secret);
+  expect(validateHelcimPayHash(data, hash, secret)).toBe(true);
+});
+
 fcTest.prop([fc.string()])(
   'parseHelcimPayEventMessage never throws for any string input',
   (msg) => {
