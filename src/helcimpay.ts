@@ -71,16 +71,12 @@ export function parseHelcimPayEventMessage(
       : typeof outer.status === 'string'
         ? Number(outer.status) || null
         : null;
-  const dataWrapper =
-    outer.data && typeof outer.data === 'object' && !Array.isArray(outer.data)
-      ? (outer.data as Record<string, unknown>)
-      : null;
-  if (!dataWrapper) return { status, data: null, hash: null };
+  const dataWrapper = outer.data as Record<string, unknown> | undefined;
   const innerData =
-    dataWrapper.data && typeof dataWrapper.data === 'object' && !Array.isArray(dataWrapper.data)
+    typeof dataWrapper?.data === 'object' && dataWrapper.data !== null && !Array.isArray(dataWrapper.data)
       ? (dataWrapper.data as Record<string, unknown>)
       : null;
   const hash =
-    typeof dataWrapper.hash === 'string' ? dataWrapper.hash : null;
+    typeof dataWrapper?.hash === 'string' ? dataWrapper.hash : null;
   return { status, data: innerData, hash };
 }

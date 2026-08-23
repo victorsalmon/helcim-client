@@ -102,27 +102,18 @@ export function parseHelcimWebhookBody(
     typeof record.id === 'string' || typeof record.id === 'number'
       ? String(record.id)
       : null;
+  const data = record.data as Record<string, unknown> | undefined;
   const nestedId =
-    record.data && typeof record.data === 'object' && !Array.isArray(record.data)
-      ? (() => {
-          const d = record.data as Record<string, unknown>;
-          return typeof d.transactionId === 'string' || typeof d.transactionId === 'number'
-            ? String(d.transactionId)
-            : null;
-        })()
+    typeof data?.transactionId === 'string' || typeof data?.transactionId === 'number'
+      ? String(data.transactionId)
       : null;
   const directSubId =
     typeof record.subscriptionId === 'string' || typeof record.subscriptionId === 'number'
       ? String(record.subscriptionId)
       : null;
   const nestedSubId =
-    record.data && typeof record.data === 'object' && !Array.isArray(record.data)
-      ? (() => {
-          const d = record.data as Record<string, unknown>;
-          return typeof d.subscriptionId === 'string' || typeof d.subscriptionId === 'number'
-            ? String(d.subscriptionId)
-            : null;
-        })()
+    typeof data?.subscriptionId === 'string' || typeof data?.subscriptionId === 'number'
+      ? String(data.subscriptionId)
       : null;
   return {
     type,
