@@ -22,12 +22,6 @@ export interface HelcimConfig {
 export const HELCIM_PRODUCTION_BASE_URL = 'https://api.helcim.com/v2';
 export const HELCIM_TEST_BASE_URL = 'https://api.helcim.test/v2';
 
-function required(env: NodeJS.ProcessEnv, name: string): string {
-  const value = env[name]?.trim();
-  if (!value) throw new Error(`Helcim is enabled but ${name} is missing`);
-  return value;
-}
-
 function resolveBaseUrl(env: NodeJS.ProcessEnv): string {
   const explicit = env.HELCIM_BASE_URL?.trim();
   if (explicit) return explicit.replace(/\/+$/, '');

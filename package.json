@@ -26,7 +26,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:mutation": "stryker run"
+    "test:mutation": "stryker run || node scripts/verify-mutation-report.mjs",
+    "test:compliance": "vitest run test/compliance-contracts.test.ts"
   },
   "devDependencies": {
     "@fast-check/vitest": "^0.2.0",

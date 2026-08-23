@@ -7,6 +7,7 @@ import {
   firstNumber,
   firstBoolean,
   firstArray,
+  isProviderErrorStatus,
   optionalString,
 } from '../src/index.js';
 
@@ -204,6 +205,25 @@ describe('util — optionalString', () => {
     expect(optionalString('   ')).toBeUndefined();
     expect(optionalString(undefined)).toBeUndefined();
     expect(optionalString(null)).toBeUndefined();
+  });
+});
+
+describe('util — isProviderErrorStatus', () => {
+  it('recognizes declined, failed, and error statuses case-insensitively', () => {
+    expect(isProviderErrorStatus({ status: 'DECLINED' })).toBe(true);
+    expect(isProviderErrorStatus({ Status: 'failed' })).toBe(true);
+    expect(isProviderErrorStatus({ status: ' Error ' })).toBe(true);
+  });
+
+  it('returns false for approved, empty, unknown, and non-object values', () => {
+    expect(isProviderErrorStatus({ status: 'APPROVED' })).toBe(false);
+    expect(isProviderErrorStatus({ status: '' })).toBe(false);
+    expect(isProviderErrorStatus({ status: 'pending' })).toBe(false);
+    expect(isProviderErrorStatus({})).toBe(false);
+    expect(isProviderErrorStatus(null)).toBe(false);
+    expect(isProviderErrorStatus(undefined)).toBe(false);
+    expect(isProviderErrorStatus('declined')).toBe(false);
+    expect(isProviderErrorStatus(42)).toBe(false);
   });
 });
 

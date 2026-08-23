@@ -101,7 +101,7 @@ export function firstArray(
 export function isProviderErrorStatus(raw: unknown): boolean {
   if (!raw || typeof raw !== 'object') return false;
   const record = raw as Record<string, unknown>;
-  const status = String(record.status ?? record.Status ?? '').toLowerCase();
+  const status = String(record.status ?? record.Status ?? '').trim().toLowerCase();
   return ['declined', 'failed', 'error'].includes(status);
 }
 
