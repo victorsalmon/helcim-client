@@ -93,9 +93,9 @@ flowchart LR
 ## Installation
 
 ```bash
-npm install helcim-client
+npm install @clocklobster/helcim-client
 # or
-pnpm add helcim-client
+pnpm add @clocklobster/helcim-client
 ```
 
 ---
@@ -103,7 +103,7 @@ pnpm add helcim-client
 ## Quick start
 
 ```typescript
-import { createHelcimClient, buildHelcimConfig } from 'helcim-client';
+import { createHelcimClient, buildHelcimConfig } from '@clocklobster/helcim-client';
 import { fetch } from 'undici'; // or global fetch if Node >= 18
 
 const config = buildHelcimConfig({
@@ -133,7 +133,7 @@ const customer = await helcim.createCustomer({
 ### Verify a webhook
 
 ```typescript
-import { verifyHelcimWebhook } from 'helcim-client';
+import { verifyHelcimWebhook } from '@clocklobster/helcim-client';
 
 const ok = verifyHelcimWebhook(
   webhookId,         // from `webhook-id` header
@@ -149,7 +149,7 @@ if (!ok) return new Response('unauthorized', { status: 401 });
 ### Validate a HelcimPay response
 
 ```typescript
-import { validateHelcimPayHash } from 'helcim-client';
+import { validateHelcimPayHash } from '@clocklobster/helcim-client';
 
 const valid = validateHelcimPayHash(
   responseData,  // the parsed JSON object HelcimPay posted back
