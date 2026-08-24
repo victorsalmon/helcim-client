@@ -769,6 +769,13 @@ function assertNonEmptyString(value: unknown, name: string): void {
   }
 }
 
+/** Throw if a required id is not a positive integer. */
+function assertPositiveInteger(value: number, operation: string, field: string): void {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(`Helcim ${operation} requires a positive integer ${field}`);
+  }
+}
+
 /** Convert a decoded address back into a request payload, omitting empty optional fields. */
 function addressToPayload(addr: HelcimAddress): Record<string, string | undefined> {
   return {
@@ -893,9 +900,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Retrieve a single customer by id. */
   async function getCustomer(customerId: number): Promise<HelcimCustomer> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim getCustomer requires a positive integer customerId');
-    }
+    assertPositiveInteger(customerId, 'getCustomer', 'customerId');
     const raw = await request('GET', `/customers/${customerId}`);
     return decodeCustomer(raw);
   }
@@ -920,9 +925,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
   // ─── Customer cards ────────────────────────────────────────────────────
   /** List the cards stored for a customer, optionally filtered by token. */
   async function getCustomerCards(customerId: number, cardToken?: string): Promise<HelcimCard[]> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim getCustomerCards requires a positive integer customerId');
-    }
+    assertPositiveInteger(customerId, 'getCustomerCards', 'customerId');
     const raw = await request('GET', `/customers/${customerId}/cards`, {
       query: { cardToken },
     });
@@ -932,12 +935,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Set the default card for a customer. */
   async function setCustomerCardDefault(customerId: number, cardId: number): Promise<HelcimCustomer[]> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim setCustomerCardDefault requires a positive integer customerId');
-    }
-    if (!Number.isInteger(cardId) || cardId <= 0) {
-      throw new Error('Helcim setCustomerCardDefault requires a positive integer cardId');
-    }
+    assertPositiveInteger(customerId, 'setCustomerCardDefault', 'customerId');
+    assertPositiveInteger(cardId, 'setCustomerCardDefault', 'cardId');
     const raw = await request('PATCH', `/customers/${customerId}/cards/${cardId}/default`);
     const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data']) ?? [raw]);
     return arr.map(decodeCustomer);
@@ -1035,9 +1034,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Retrieve a single payment plan by id. */
   async function getPaymentPlan(planId: number): Promise<HelcimPaymentPlan> {
-    if (!Number.isInteger(planId) || planId <= 0) {
-      throw new Error('Helcim getPaymentPlan requires a positive integer planId');
-    }
+    assertPositiveInteger(planId, 'getPaymentPlan', 'planId');
     const raw = await request('GET', `/payment-plans/${planId}`);
     const arr = firstArray(raw, ['data']);
     return decodePaymentPlan(arr?.[0] ?? raw.data ?? raw);
@@ -1058,9 +1055,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Delete a payment plan by id. */
   async function deletePaymentPlan(planId: number): Promise<boolean> {
-    if (!Number.isInteger(planId) || planId <= 0) {
-      throw new Error('Helcim deletePaymentPlan requires a positive integer planId');
-    }
+    assertPositiveInteger(planId, 'deletePaymentPlan', 'planId');
     await request('DELETE', `/payment-plans/${planId}`);
     return true;
   }
@@ -1071,9 +1066,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     input: CreateSubscriptionInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimSubscription> {
-    if (!Number.isInteger(input.paymentPlanId) || input.paymentPlanId <= 0) {
-      throw new Error('Helcim createSubscription requires a positive integer paymentPlanId');
-    }
+    assertPositiveInteger(input.paymentPlanId, 'createSubscription', 'paymentPlanId');
     assertNonEmptyString(input.customerCode, 'createSubscription customerCode');
     const sub: Record<string, unknown> = {
       paymentPlanId: input.paymentPlanId,
@@ -1105,9 +1098,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     subscriptionId: number,
     includeSubObjects = false
   ): Promise<HelcimSubscription> {
-    if (!Number.isInteger(subscriptionId) || subscriptionId <= 0) {
-      throw new Error('Helcim getSubscription requires a positive integer subscriptionId');
-    }
+    assertPositiveInteger(subscriptionId, 'getSubscription', 'subscriptionId');
     const raw = await request('GET', `/subscriptions/${subscriptionId}`, {
       query: includeSubObjects ? { includeSubObjects: true } : {},
     });
@@ -1138,9 +1129,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Delete a subscription by id. */
   async function deleteSubscription(subscriptionId: number): Promise<boolean> {
-    if (!Number.isInteger(subscriptionId) || subscriptionId <= 0) {
-      throw new Error('Helcim deleteSubscription requires a positive integer subscriptionId');
-    }
+    assertPositiveInteger(subscriptionId, 'deleteSubscription', 'subscriptionId');
     await request('DELETE', `/subscriptions/${subscriptionId}`);
     return true;
   }
@@ -1152,12 +1141,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     paymentNumber: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimSubscription> {
-    if (!Number.isInteger(subscriptionId) || subscriptionId <= 0) {
-      throw new Error('Helcim processSubscriptionPayment requires a positive integer subscriptionId');
-    }
-    if (!Number.isInteger(paymentNumber) || paymentNumber <= 0) {
-      throw new Error('Helcim processSubscriptionPayment requires a positive integer paymentNumber');
-    }
+    assertPositiveInteger(subscriptionId, 'processSubscriptionPayment', 'subscriptionId');
+    assertPositiveInteger(paymentNumber, 'processSubscriptionPayment', 'paymentNumber');
     const raw = await request('POST', '/procedures/process-payment', {
       body: { subscriptionId, paymentNumber },
       idempotencyKey,
@@ -1169,9 +1154,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
   // ─── Card transactions ─────────────────────────────────────────────────
   /** Retrieve a single card transaction by id. */
   async function getCardTransaction(transactionId: number): Promise<HelcimCardTransaction> {
-    if (!Number.isInteger(transactionId) || transactionId <= 0) {
-      throw new Error('Helcim getCardTransaction requires a positive integer transactionId');
-    }
+    assertPositiveInteger(transactionId, 'getCardTransaction', 'transactionId');
     const raw = await request('GET', `/card-transactions/${transactionId}`);
     return decodeCardTransaction(raw);
   }
@@ -1203,9 +1186,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     customerId: number,
     input: CreateBankAccountInput
   ): Promise<{ id: number; message: string }> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim createBankAccount requires a positive integer customerId');
-    }
+    assertPositiveInteger(customerId, 'createBankAccount', 'customerId');
     assertNonEmptyString(input.bankAccountNumber, 'createBankAccount bankAccountNumber');
     assertNonEmptyString(input.countryAlpha2, 'createBankAccount countryAlpha2');
     assertNonEmptyString(input.provinceAlpha2, 'createBankAccount provinceAlpha2');
@@ -1237,9 +1218,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** List a customer's bank accounts. */
   async function getCustomerBankAccounts(customerId: number): Promise<HelcimBankAccount[]> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim getCustomerBankAccounts requires a positive integer customerId');
-    }
+    assertPositiveInteger(customerId, 'getCustomerBankAccounts', 'customerId');
     const raw = await request('GET', `/customers/${customerId}/bank-accounts`);
     const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data', 'bankAccounts', 'bank_accounts']) ?? []);
     return arr.map(decodeBankAccount);
@@ -1247,12 +1226,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Retrieve a single bank account for a customer. */
   async function getBankAccount(customerId: number, bankAccountId: number): Promise<HelcimBankAccount> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim getBankAccount requires a positive integer customerId');
-    }
-    if (!Number.isInteger(bankAccountId) || bankAccountId <= 0) {
-      throw new Error('Helcim getBankAccount requires a positive integer bankAccountId');
-    }
+    assertPositiveInteger(customerId, 'getBankAccount', 'customerId');
+    assertPositiveInteger(bankAccountId, 'getBankAccount', 'bankAccountId');
     const raw = await request('GET', `/customers/${customerId}/bank-accounts/${bankAccountId}`);
     const data = (raw.data ?? raw) as Record<string, unknown>;
     return decodeBankAccount(data);
@@ -1260,21 +1235,15 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Set a customer's default bank account. */
   async function setBankAccountDefault(customerId: number, bankAccountId: number): Promise<boolean> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim setBankAccountDefault requires a positive integer customerId');
-    }
-    if (!Number.isInteger(bankAccountId) || bankAccountId <= 0) {
-      throw new Error('Helcim setBankAccountDefault requires a positive integer bankAccountId');
-    }
+    assertPositiveInteger(customerId, 'setBankAccountDefault', 'customerId');
+    assertPositiveInteger(bankAccountId, 'setBankAccountDefault', 'bankAccountId');
     await request('PATCH', `/customers/${customerId}/bank-accounts/${bankAccountId}/default`);
     return true;
   }
 
   /** Request that a customer add a new bank account via Helcim's hosted flow. */
   async function requestNewBankAccount(customerId: number): Promise<{ message: string }> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim requestNewBankAccount requires a positive integer customerId');
-    }
+    assertPositiveInteger(customerId, 'requestNewBankAccount', 'customerId');
     const raw = await request('POST', `/customers/${customerId}/bank-accounts/request`);
     const message = firstString(raw, ['message', 'Message']) ?? '';
     return { message };
@@ -1283,9 +1252,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
   // ─── PAD agreements ────────────────────────────────────────────────────
   /** List pre-authorized debit (PAD) agreements for a customer. */
   async function getPADs(customerId: number): Promise<HelcimPADAgreement[]> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim getPADs requires a positive integer customerId');
-    }
+    assertPositiveInteger(customerId, 'getPADs', 'customerId');
     const raw = await request('GET', `/customers/${customerId}/pads`);
     const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data', 'pads', 'Pads']) ?? []);
     return arr.map(decodePADAgreement);
@@ -1293,12 +1260,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Retrieve a single PAD agreement for a customer. */
   async function getPAD(customerId: number, padId: number): Promise<HelcimPADAgreement> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim getPAD requires a positive integer customerId');
-    }
-    if (!Number.isInteger(padId) || padId <= 0) {
-      throw new Error('Helcim getPAD requires a positive integer padId');
-    }
+    assertPositiveInteger(customerId, 'getPAD', 'customerId');
+    assertPositiveInteger(padId, 'getPAD', 'padId');
     const raw = await request('GET', `/customers/${customerId}/pads/${padId}`);
     const data = (raw.data ?? raw) as Record<string, unknown>;
     return decodePADAgreement(data);
@@ -1310,12 +1273,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     padId: number,
     updates: { accepted?: boolean; status?: number }
   ): Promise<HelcimPADAgreement> {
-    if (!Number.isInteger(customerId) || customerId <= 0) {
-      throw new Error('Helcim updatePAD requires a positive integer customerId');
-    }
-    if (!Number.isInteger(padId) || padId <= 0) {
-      throw new Error('Helcim updatePAD requires a positive integer padId');
-    }
+    assertPositiveInteger(customerId, 'updatePAD', 'customerId');
+    assertPositiveInteger(padId, 'updatePAD', 'padId');
     const body: Record<string, unknown> = {};
     if (updates.accepted !== undefined) body.accepted = updates.accepted ? 1 : 0;
     body.status = updates.status;
@@ -1330,12 +1289,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     input: ProcessACHWithdrawInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    if (!Number.isInteger(input.bankAccountId) || input.bankAccountId <= 0) {
-      throw new Error('Helcim processACHWithdraw requires a positive integer bankAccountId');
-    }
-    if (!Number.isInteger(input.customerId) || input.customerId <= 0) {
-      throw new Error('Helcim processACHWithdraw requires a positive integer customerId');
-    }
+    assertPositiveInteger(input.bankAccountId, 'processACHWithdraw', 'bankAccountId');
+    assertPositiveInteger(input.customerId, 'processACHWithdraw', 'customerId');
     assertPositiveAmount(input.amount, 'processACHWithdraw amount');
     if (input.currencyId !== 1 && input.currencyId !== 2) {
       throw new Error('Helcim processACHWithdraw currencyId must be 1 (CAD) or 2 (USD)');
@@ -1354,9 +1309,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Retrieve a single ACH transaction by id. */
   async function getACHTransaction(transactionId: number): Promise<HelcimACHTransaction> {
-    if (!Number.isInteger(transactionId) || transactionId <= 0) {
-      throw new Error('Helcim getACHTransaction requires a positive integer transactionId');
-    }
+    assertPositiveInteger(transactionId, 'getACHTransaction', 'transactionId');
     const raw = await request('GET', `/ach/transactions/${transactionId}`);
     const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
     return decodeACHTransaction(txn);
@@ -1385,9 +1338,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     amount: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    if (!Number.isInteger(transactionId) || transactionId <= 0) {
-      throw new Error('Helcim refundACH requires a positive integer transactionId');
-    }
+    assertPositiveInteger(transactionId, 'refundACH', 'transactionId');
     assertPositiveAmount(amount, 'refundACH amount');
     const raw = await request('POST', `/ach/refund/${transactionId}`, {
       body: { amount },
@@ -1402,9 +1353,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     transactionId: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    if (!Number.isInteger(transactionId) || transactionId <= 0) {
-      throw new Error('Helcim voidACH requires a positive integer transactionId');
-    }
+    assertPositiveInteger(transactionId, 'voidACH', 'transactionId');
     const raw = await request('POST', `/ach/void/${transactionId}`, { idempotencyKey });
     const txn = (raw.transaction ?? raw) as Record<string, unknown>;
     return decodeACHTransaction(txn);
@@ -1415,9 +1364,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     transactionId: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    if (!Number.isInteger(transactionId) || transactionId <= 0) {
-      throw new Error('Helcim cancelACH requires a positive integer transactionId');
-    }
+    assertPositiveInteger(transactionId, 'cancelACH', 'transactionId');
     const raw = await request('POST', `/ach/cancel/${transactionId}`, { idempotencyKey });
     const txn = (raw.transaction ?? raw) as Record<string, unknown>;
     return decodeACHTransaction(txn);
@@ -1485,9 +1432,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     input: CapturePreauthInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimCardTransaction> {
-    if (!Number.isInteger(input.cardTransactionId) || input.cardTransactionId <= 0) {
-      throw new Error('Helcim capturePreauth requires a positive integer cardTransactionId');
-    }
+    assertPositiveInteger(input.cardTransactionId, 'capturePreauth', 'cardTransactionId');
     assertPositiveAmount(input.amount, 'capturePreauth amount');
     assertNonEmptyString(input.currency, 'capturePreauth currency');
     assertNonEmptyString(input.ipAddress, 'capturePreauth ipAddress');
@@ -1508,9 +1453,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     input: RefundPurchaseInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimCardTransaction> {
-    if (!Number.isInteger(input.cardTransactionId) || input.cardTransactionId <= 0) {
-      throw new Error('Helcim refundPurchase requires a positive integer cardTransactionId');
-    }
+    assertPositiveInteger(input.cardTransactionId, 'refundPurchase', 'cardTransactionId');
     assertPositiveAmount(input.amount, 'refundPurchase amount');
     assertNonEmptyString(input.ipAddress, 'refundPurchase ipAddress');
     const body: Record<string, unknown> = {
@@ -1530,9 +1473,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     input: ReversePurchaseInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimCardTransaction> {
-    if (!Number.isInteger(input.cardTransactionId) || input.cardTransactionId <= 0) {
-      throw new Error('Helcim reversePurchase requires a positive integer cardTransactionId');
-    }
+    assertPositiveInteger(input.cardTransactionId, 'reversePurchase', 'cardTransactionId');
     assertNonEmptyString(input.ipAddress, 'reversePurchase ipAddress');
     const body: Record<string, unknown> = {
       cardTransactionId: input.cardTransactionId,
@@ -1588,9 +1529,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 
   /** Retrieve a single invoice by id. */
   async function getInvoice(invoiceId: number): Promise<HelcimInvoice> {
-    if (!Number.isInteger(invoiceId) || invoiceId <= 0) {
-      throw new Error('Helcim getInvoice requires a positive integer invoiceId');
-    }
+    assertPositiveInteger(invoiceId, 'getInvoice', 'invoiceId');
     const raw = await request('GET', `/invoices/${invoiceId}`);
     const arr = firstArray(raw, ['data']);
     return decodeInvoice(arr?.[0] ?? raw.data ?? raw);
