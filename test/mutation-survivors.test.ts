@@ -351,3 +351,20 @@ describe('payment API mutation survivors', () => {
     })).rejects.toThrow(/cardData/);
   });
 });
+
+// ─── unwrapRecord mutation survivors ─────────────────────────────────────────
+//
+// `unwrapRecord` guards its key lookups with `value && typeof value === 'object'`
+// to skip primitives/arrays. These tests kill mutants that weaken that guard.
+
+describe('unwrapRecord fallback isolation', () => {
+  it('getACHTransaction skips a primitive transaction and decodes data', async () => {
+    const { fetchImpl } = mockFetch({
+      body: { transaction: 'not-an-object', data: { id: 1, bankAccountId: 5 } },
+    });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const txn = await client.getACHTransaction(1);
+    expect(txn.id).toBe(1);
+    expect(txn.bankAccountId).toBe(5);
+  });
+});
