@@ -709,6 +709,12 @@ describe('createSubscription contract', () => {
     await expect(c.createSubscription(baseInput)).rejects.toThrow(/no subscriptions/);
   });
 
+  it('throws when response has no data field', async () => {
+    const { fetchImpl } = mockFetch({ body: {} });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(c.createSubscription(baseInput)).rejects.toThrow(/no subscriptions/);
+  });
+
   it('auto-generates 25-char idempotency key', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { data: [{ id: 10 }] } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
@@ -805,6 +811,13 @@ describe('getSubscriptions contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     const r = await c.getSubscriptions({});
     expect(r).toHaveLength(2);
+  });
+
+  it('returns empty array when response has no subscription fields', async () => {
+    const { fetchImpl } = mockFetch({ body: {} });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const r = await c.getSubscriptions({});
+    expect(r).toHaveLength(0);
   });
 });
 

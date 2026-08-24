@@ -257,6 +257,13 @@ describe('getACHTransactions contract', () => {
     expect(r).toHaveLength(1);
     expect(r[0].id).toBe(4);
   });
+
+  it('returns empty array when response has no transaction fields', async () => {
+    const { fetchImpl } = mockFetch({ body: {} });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const r = await c.getACHTransactions({});
+    expect(r).toHaveLength(0);
+  });
 });
 
 // ─── refundACH ───────────────────────────────────────────────────────────────
@@ -1010,12 +1017,16 @@ describe('createInvoice contract', () => {
     expect(r.invoiceNumber).toBe('INV100');
   });
 
-  it('falls back to raw object when no data array', async () => {
+  it('throws when response data array is empty', async () => {
+    const { fetchImpl } = mockFetch({ body: { data: [] } });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(c.createInvoice(baseInput)).rejects.toThrow(/no invoices/);
+  });
+
+  it('throws when response has no data field', async () => {
     const { fetchImpl } = mockFetch({ body: { id: 200, invoiceNumber: 'INV200' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    const r = await c.createInvoice(baseInput);
-    expect(r.id).toBe(200);
-    expect(r.invoiceNumber).toBe('INV200');
+    await expect(c.createInvoice(baseInput)).rejects.toThrow(/no invoices/);
   });
 });
 

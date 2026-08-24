@@ -316,6 +316,13 @@ describe('getCustomerCards contract', () => {
     expect(r).toHaveLength(1);
     expect(r[0].cardToken).toBe('t4');
   });
+
+  it('returns empty array when response has no card fields', async () => {
+    const { fetchImpl } = mockFetch({ body: {} });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const r = await c.getCustomerCards(1);
+    expect(r).toHaveLength(0);
+  });
 });
 
 // ─── setCustomerCardDefault ──────────────────────────────────────────────────

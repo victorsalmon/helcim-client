@@ -337,6 +337,13 @@ describe('getCustomerBankAccounts contract', () => {
     expect(r).toHaveLength(1);
     expect(r[0].bankToken).toBe('t4');
   });
+
+  it('returns empty array when response has no bank account fields', async () => {
+    const { fetchImpl } = mockFetch({ body: {} });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const r = await c.getCustomerBankAccounts(1);
+    expect(r).toHaveLength(0);
+  });
 });
 
 // ─── getBankAccount ──────────────────────────────────────────────────────────
@@ -537,6 +544,13 @@ describe('getPADs contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     const r = await c.getPADs(1);
     expect(r).toHaveLength(1);
+  });
+
+  it('returns empty array when response has no PAD fields', async () => {
+    const { fetchImpl } = mockFetch({ body: {} });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const r = await c.getPADs(1);
+    expect(r).toHaveLength(0);
   });
 });
 

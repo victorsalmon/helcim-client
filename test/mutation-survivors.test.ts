@@ -75,6 +75,12 @@ describe('decoder default arrays and missing fields', () => {
   it('decodeACHTransaction returns null test when absent', () => {
     expect(decodeACHTransaction({}).test).toBeNull();
   });
+
+  it('decodeAddress returns null when the raw value is a primitive', () => {
+    expect(decodeCustomer({ billingAddress: 'not-an-object' }).billingAddress).toBeNull();
+    expect(decodeCustomer({ billingAddress: 42 }).billingAddress).toBeNull();
+    expect(decodeCustomer({ shippingAddress: null }).shippingAddress).toBeNull();
+  });
 });
 
 describe('decoder first-key coverage for StringLiteral survivors', () => {
@@ -116,6 +122,14 @@ describe('webhook edge cases for surviving mutants', () => {
     const body = '{"type":"cardTransaction","id":42}';
     const emptyKeySig = sign('', id, ts, body);
     expect(verifyHelcimWebhook(id, ts, body, `v1,${emptyKeySig}`, '')).toBe(false);
+  });
+
+  it('rejects a base64 token that decodes to zero bytes even with a valid empty-key HMAC', () => {
+    const id = 'evt_123';
+    const ts = '1700000000';
+    const body = '{"type":"cardTransaction","id":42}';
+    const emptyKeySig = sign('=', id, ts, body);
+    expect(verifyHelcimWebhook(id, ts, body, `v1,${emptyKeySig}`, '=')).toBe(false);
   });
 
   it('rejects an empty sig entry even when a later entry is valid', () => {
@@ -250,6 +264,12 @@ describe('client request query and header guards', () => {
     expect(result.id).toBe(0);
     expect(result.customerCode).toBe('');
   });
+
+  it('falls back to the HTTP status message when a non-2xx response body is the JSON literal null', async () => {
+    const { fetchImpl } = mockFetch({ status: 404, text: 'null' });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(client.getCustomer(1)).rejects.toThrow(/failed with HTTP 404/);
+  });
 });
 
 // ─── Bank account response second-key coverage ───────────────────────────────
@@ -272,6 +292,30 @@ describe('bank account response second-key coverage', () => {
     });
     expect(result.id).toBe(45367);
     expect(result.message).toBe('Successfully created new bank account');
+  });
+
+  it('createBankAccount defaults message to "" when the response has no message field', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: { data: { Id: 45367 } } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const result = await client.createBankAccount(123, {
+      accountCorporate: 1,
+      accountType: 1,
+      bankAccountNumber: '123456789',
+      city: 'Calgary',
+      countryAlpha2: 'CA',
+      provinceAlpha2: 'AB',
+      postalCode: 'T2P5E9',
+      streetAddress: '440 2 Ave SW',
+    });
+    expect(result.id).toBe(45367);
+    expect(result.message).toBe('');
+  });
+
+  it('getCustomerBankAccounts returns an empty array when the response has no bank account fields', async () => {
+    const { fetchImpl } = mockFetch({ body: {} });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    const result = await client.getCustomerBankAccounts(123);
+    expect(result).toEqual([]);
   });
 });
 
