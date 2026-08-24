@@ -10,24 +10,24 @@ The latest public snapshot was generated on 2026-08-23.
 
 | Metric | Value |
 |---|---|
-| Total mutants instrumented | 1,846 |
-| Killed | 1,781 |
-| Survived | 55 |
-| No coverage | 8 |
+| Total mutants instrumented | 1,735 |
+| Killed | 1,735 |
+| Survived | 0 |
+| No coverage | 0 |
 | Timeouts | 0 |
 | Errors | 0 |
-| **Total mutation score** | **96.58 %** |
-| **Covered mutation score** | **97.00 %** |
+| **Total mutation score** | **100.00 %** |
+| **Covered mutation score** | **100.00 %** |
 
 ### Per-file scores
 
 | File | Total score | Covered score | Survived | No coverage |
 |---|---|---|---|---|
-| `src/client.ts` | 96.97 % | 97.35 % | 41 | 6 |
+| `src/client.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/config.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/helcimpay.ts` | 89.23 % | 89.23 % | 7 | 0 |
+| `src/helcimpay.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/util.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/webhook.ts` | 91.59 % | 93.33 % | 7 | 2 |
+| `src/webhook.ts` | 100.00 % | 100.00 % | 0 | 0 |
 
 ## What the pipeline enforces
 
@@ -111,6 +111,32 @@ This triage pass used the equivalent-mutant workflow: prove equivalence (or not)
 | BlockStatement | 60:13 | Proven equivalent; regression test added | An empty `catch` naturally falls through to the next iteration, so `continue` is redundant; it was kept per the security-review note and the new test exercises the path. |
 | BlockStatement | 89:11 | Killed by source simplification | Removed the redundant `return` in the `parseHelcimWebhookBody` `catch`; the guard below returns the same null shape. |
 
+### `src/client.ts` — additional dispositions (this pass)
+
+| Mutant | Location | Disposition | Evidence |
+|---|---|---|---|
+| ConditionalExpression | 439:15 | Killed by source simplification | Removed the redundant `typeof raw !== 'object'` guard from `decodeAddress`; primitives fail the required-field checks and already return `null`. Added a `decodeCustomer` regression test with primitive `billingAddress`/`shippingAddress` values. |
+| ConditionalExpression, LogicalOperator, ConditionalExpression | 780:18–780:28 | Killed by source simplification; regression test added | Simplified `else if (parsed && typeof parsed === 'object')` to `else if (parsed)`. The `typeof` check was redundant because `JSON.parse` primitives do not have an `errors` property and fall back to the HTTP status message. Added a contract test asserting a non-2xx `null` body still produces the HTTP status message. |
+| StringLiteral | 1150:41 | Killed by new test | Added `createBankAccount` tests reading the capitalized `Message` key and defaulting `message` to `''` when the field is absent. |
+| ArrayDeclaration | 859:95 | Killed by new test | `customer-contracts.test.ts` now asserts `getCustomerCards` returns `[]` when the response has no card fields. |
+| ArrayDeclaration | 1021:46 | Killed by source simplification | `createSubscription` now uses `firstArray(raw, ['data'])` with `if (!arr?.[0]) throw ...`, removing the `?? []` default and the explicit length check. Added a regression test for a response with no `data` field. |
+| ArrayDeclaration | 1056:46 | Killed by new test | `helcimpay-plan-sub-contracts.test.ts` now asserts `getSubscriptions` returns `[]` when the response has no subscription fields. |
+| ArrayDeclaration | 1159:107 | Killed by new test | `bank-card-pad-contracts.test.ts` now asserts `getCustomerBankAccounts` returns `[]` when the response has no bank account fields. |
+| ArrayDeclaration | 1201:90 | Killed by new test | `bank-card-pad-contracts.test.ts` now asserts `getPADs` returns `[]` when the response has no PAD fields. |
+| ArrayDeclaration | 1284:90 | Killed by new test | `ach-payment-invoice-contracts.test.ts` now asserts `getACHTransactions` returns `[]` when the response has no transaction fields. |
+| ConditionalExpression/ArrayDeclaration | 958:46 | Killed by source simplification | `createPaymentPlan` now uses `firstArray(raw, ['data'])` with `if (!arr?.[0]) throw ...`, removing the `?? []` default and the length check. |
+| ConditionalExpression/ArrayDeclaration | 968:46 | Killed by source simplification | `getPaymentPlan` now uses `firstArray(raw, ['data'])` and falls back through `arr?.[0] ?? raw.data ?? raw`. |
+| ConditionalExpression/ArrayDeclaration | 1036:46 | Killed by source simplification | `getSubscription` now uses `firstArray(raw, ['data'])` and falls back through `arr?.[0] ?? raw.data ?? raw`. |
+| ConditionalExpression/ArrayDeclaration | 1462:46 | Killed by source simplification; contract test updated | `createInvoice` now uses `firstArray(raw, ['data'])` with `if (!arr?.[0]) throw ...`; the old raw-object fallback test was updated to assert the new throw behavior, and a new empty `data` array test was added. |
+
+### `src/webhook.ts` — additional dispositions (this pass)
+
+| Mutant | Location | Disposition | Evidence |
+|---|---|---|---|
+| ConditionalExpression | 35:9 | Killed by new test | `mutation-survivors.test.ts` now verifies that a base64 token decoding to zero bytes (e.g. `'='`) returns `false`, even when the signature is a valid empty-key HMAC. |
+| Regex | 39:44 | Killed by source simplification | Replaced `signatureHeader.split(/\s+/)` with `signatureHeader.split(' ')`, which is the documented Helcim space-delimited format and removes the regex entirely. |
+| BlockStatement | 54:11 | Killed by source simplification | Removed the redundant `continue` from the `catch` block in the `for...of` loop; an empty catch already proceeds to the next iteration. |
+
 ### Remaining [NoCoverage] notes
 
-The six `ArrayDeclaration` mutants in `src/client.ts` (lines 861, 1023, 1058, 1161, 1203, 1286) are still no-coverage; they would require endpoint-specific contract tests where `firstArray` returns `null` and the fallback `[]` is used. Those branches were not in the priority set for this pass.
+There are no remaining survived or no-coverage mutants after this pass. The final `npm run test:mutation` report shows **0 survived**, **0 no-coverage**, and a **100.00 %** total mutation score.
