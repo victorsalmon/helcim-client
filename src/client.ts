@@ -833,6 +833,40 @@ function assertPositiveInteger(value: number, operation: string, field: string):
   }
 }
 
+/**
+ * Unwrap a record by looking for the first nested object among a list of keys.
+ *
+ * Helcim wraps some transaction responses in `transaction` or `data`; other
+ * endpoints return the object directly. This helper picks the first object
+ * found in the precedence order, falling back to the raw record itself.
+ */
+function unwrapRecord(raw: Record<string, unknown>, keys: string[]): Record<string, unknown> {
+  for (const key of keys) {
+    const value = raw[key];
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+  }
+  return raw;
+}
+
+/** Unwrap a record that may be nested under a `data` key. */
+function unwrapDataObject(raw: Record<string, unknown>): Record<string, unknown> {
+  return unwrapRecord(raw, ['data']);
+}
+
+/**
+ * Decode the first item in `raw.data` (when it is an array), or the `data`
+ * object itself, or the raw record if neither is present.
+ */
+function decodeFirstInData<T>(
+  raw: Record<string, unknown>,
+  decoder: (raw: unknown) => T
+): T {
+  const arr = firstArray(raw, ['data']);
+  return decoder(arr?.[0] ?? raw.data ?? raw);
+}
+
 /** Convert a decoded address back into a request payload, omitting empty optional fields. */
 function addressToPayload(addr: HelcimAddress): Record<string, string | undefined> {
   return {
@@ -1093,8 +1127,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
   async function getPaymentPlan(planId: number): Promise<HelcimPaymentPlan> {
     assertPositiveInteger(planId, 'getPaymentPlan', 'planId');
     const raw = await request('GET', `/payment-plans/${planId}`);
-    const arr = firstArray(raw, ['data']);
-    return decodePaymentPlan(arr?.[0] ?? raw.data ?? raw);
+    return decodeFirstInData(raw, decodePaymentPlan);
   }
 
   /** List payment plans, optionally filtered by status or paginated. */
@@ -1159,8 +1192,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     const raw = await request('GET', `/subscriptions/${subscriptionId}`, {
       query: includeSubObjects ? { includeSubObjects: true } : {},
     });
-    const arr = firstArray(raw, ['data']);
-    return decodeSubscription(arr?.[0] ?? raw.data ?? raw);
+    return decodeFirstInData(raw, decodeSubscription);
   }
 
   /** List subscriptions, optionally filtered by customer or payment plan. */
@@ -1267,7 +1299,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (input.lastName) body.lastName = input.lastName;
     if (input.companyName) body.companyName = input.companyName;
     const raw = await request('POST', `/customers/${customerId}/bank-accounts`, { body });
-    const data = (raw.data ?? raw) as Record<string, unknown>;
+    const data = unwrapDataObject(raw);
     const id = firstNumber(data, ['id', 'Id']) ?? 0;
     const message = firstString(data, ['message', 'Message']) ?? '';
     return { id, message };
@@ -1286,8 +1318,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     assertPositiveInteger(customerId, 'getBankAccount', 'customerId');
     assertPositiveInteger(bankAccountId, 'getBankAccount', 'bankAccountId');
     const raw = await request('GET', `/customers/${customerId}/bank-accounts/${bankAccountId}`);
-    const data = (raw.data ?? raw) as Record<string, unknown>;
-    return decodeBankAccount(data);
+    return decodeBankAccount(unwrapDataObject(raw));
   }
 
   /** Set a customer's default bank account. */
@@ -1320,8 +1351,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     assertPositiveInteger(customerId, 'getPAD', 'customerId');
     assertPositiveInteger(padId, 'getPAD', 'padId');
     const raw = await request('GET', `/customers/${customerId}/pads/${padId}`);
-    const data = (raw.data ?? raw) as Record<string, unknown>;
-    return decodePADAgreement(data);
+    return decodePADAgreement(unwrapDataObject(raw));
   }
 
   /** Update a PAD agreement (acceptance or status). */
@@ -1336,8 +1366,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (updates.accepted !== undefined) body.accepted = numericBoolean(updates.accepted);
     body.status = updates.status;
     const raw = await request('PUT', `/customers/${customerId}/pads/${padId}`, { body });
-    const data = (raw.data ?? raw) as Record<string, unknown>;
-    return decodePADAgreement(data);
+    return decodePADAgreement(unwrapDataObject(raw));
   }
 
   // ─── ACH transactions ──────────────────────────────────────────────────
@@ -1363,16 +1392,14 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     };
     body.orderId = input.orderId;
     const raw = await request('PUT', '/ach/withdraw', { body, idempotencyKey });
-    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
-    return decodeACHTransaction(txn);
+    return decodeACHTransaction(unwrapRecord(raw, ['transaction']));
   }
 
   /** Retrieve a single ACH transaction by id. */
   async function getACHTransaction(transactionId: number): Promise<HelcimACHTransaction> {
     assertPositiveInteger(transactionId, 'getACHTransaction', 'transactionId');
     const raw = await request('GET', `/ach/transactions/${transactionId}`);
-    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
-    return decodeACHTransaction(txn);
+    return decodeACHTransaction(unwrapRecord(raw, ['transaction', 'data']));
   }
 
   /** List ACH transactions, optionally filtered by customer. */
@@ -1404,8 +1431,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       body: { amount },
       idempotencyKey,
     });
-    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
-    return decodeACHTransaction(txn);
+    return decodeACHTransaction(unwrapRecord(raw, ['transaction']));
   }
 
   /** Void an ACH transaction before it is settled. */
@@ -1415,8 +1441,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
   ): Promise<HelcimACHTransaction> {
     assertPositiveInteger(transactionId, 'voidACH', 'transactionId');
     const raw = await request('POST', `/ach/void/${transactionId}`, { idempotencyKey });
-    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
-    return decodeACHTransaction(txn);
+    return decodeACHTransaction(unwrapRecord(raw, ['transaction']));
   }
 
   /** Cancel a pending ACH transaction. */
@@ -1426,8 +1451,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
   ): Promise<HelcimACHTransaction> {
     assertPositiveInteger(transactionId, 'cancelACH', 'transactionId');
     const raw = await request('POST', `/ach/cancel/${transactionId}`, { idempotencyKey });
-    const txn = (raw.transaction ?? raw) as Record<string, unknown>;
-    return decodeACHTransaction(txn);
+    return decodeACHTransaction(unwrapRecord(raw, ['transaction']));
   }
 
   // ─── Payment API (one-time card transactions) ──────────────────────────
@@ -1456,8 +1480,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (input.billingAddress) body.billingAddress = addressToPayload(input.billingAddress);
     if (input.invoiceRequest) body.invoiceRequest = input.invoiceRequest;
     const raw = await request('POST', '/payment/purchase', { body, idempotencyKey });
-    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
-    return decodeCardTransaction(txn);
+    return decodeCardTransaction(unwrapRecord(raw, ['transaction', 'data']));
   }
 
   /** Place a hold (preauthorization) on a card. */
@@ -1483,8 +1506,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     body.terminalId = input.terminalId;
     if (input.billingAddress) body.billingAddress = addressToPayload(input.billingAddress);
     const raw = await request('POST', '/payment/preauth', { body, idempotencyKey });
-    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
-    return decodeCardTransaction(txn);
+    return decodeCardTransaction(unwrapRecord(raw, ['transaction', 'data']));
   }
 
   /** Capture a previously placed preauthorization. */
@@ -1504,8 +1526,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     };
     body.orderId = input.orderId;
     const raw = await request('POST', '/payment/capture', { body, idempotencyKey });
-    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
-    return decodeCardTransaction(txn);
+    return decodeCardTransaction(unwrapRecord(raw, ['transaction', 'data']));
   }
 
   /** Refund a settled card purchase. */
@@ -1524,8 +1545,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (input.customerCode) body.customerCode = input.customerCode;
     if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
     const raw = await request('POST', '/payment/refund', { body, idempotencyKey });
-    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
-    return decodeCardTransaction(txn);
+    return decodeCardTransaction(unwrapRecord(raw, ['transaction', 'data']));
   }
 
   /** Reverse a same-day card purchase before it is settled. */
@@ -1540,8 +1560,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       ipAddress: input.ipAddress,
     };
     const raw = await request('POST', '/payment/reverse', { body, idempotencyKey });
-    const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
-    return decodeCardTransaction(txn);
+    return decodeCardTransaction(unwrapRecord(raw, ['transaction', 'data']));
   }
 
   // ─── Invoices ──────────────────────────────────────────────────────────
@@ -1591,8 +1610,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
   async function getInvoice(invoiceId: number): Promise<HelcimInvoice> {
     assertPositiveInteger(invoiceId, 'getInvoice', 'invoiceId');
     const raw = await request('GET', `/invoices/${invoiceId}`);
-    const arr = firstArray(raw, ['data']);
-    return decodeInvoice(arr?.[0] ?? raw.data ?? raw);
+    return decodeFirstInData(raw, decodeInvoice);
   }
 
   return {
