@@ -36,7 +36,7 @@ export function verifyHelcimWebhook(
 
   // The signature header is a space-delimited list of "version,signature".
   // We accept the webhook if ANY signature in the list matches.
-  const signatures = signatureHeader.split(/\s+/);
+  const signatures = signatureHeader.split(' ');
   for (const entry of signatures) {
     const commaIdx = entry.indexOf(',');
     const sig = entry.slice(commaIdx + 1);
@@ -52,7 +52,6 @@ export function verifyHelcimWebhook(
     try {
       if (timingSafeEqual(actualBytes, expectedBytes)) return true;
     } catch {
-      continue;
     }
   }
   return false;

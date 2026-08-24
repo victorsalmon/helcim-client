@@ -436,7 +436,7 @@ export interface HelcimInvoice {
 // ─── Response decoders ──────────────────────────────────────────────────────
 
 function decodeAddress(raw: unknown): HelcimAddress | null {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  if (!raw || Array.isArray(raw)) return null;
   const r = raw as Record<string, unknown>;
   const name = firstString(r, ['name', 'Name']);
   const street1 = firstString(r, ['street1', 'Street1', 'street_1']);
@@ -777,7 +777,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       if (Array.isArray(parsed)) {
         // Some list endpoints return a bare array; wrap it for uniform handling.
         raw = { data: parsed };
-      } else if (parsed && typeof parsed === 'object') {
+      } else if (parsed) {
         raw = parsed as Record<string, unknown>;
       }
     } catch {
@@ -955,8 +955,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (input.addOnIds) plan.addOnIds = input.addOnIds;
     if (input.isProrated) plan.isProrated = input.isProrated;
     const raw = await request('POST', '/payment-plans', { body: { paymentPlans: [plan] } });
-    const arr = firstArray(raw, ['data']) ?? [];
-    if (arr.length === 0) throw new Error('Helcim createPaymentPlan returned no plans');
+    const arr = firstArray(raw, ['data']);
+    if (!arr?.[0]) throw new Error('Helcim createPaymentPlan returned no plans');
     return decodePaymentPlan(arr[0]);
   }
 
@@ -965,8 +965,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       throw new Error('Helcim getPaymentPlan requires a positive integer planId');
     }
     const raw = await request('GET', `/payment-plans/${planId}`);
-    const arr = firstArray(raw, ['data']) ?? [];
-    return decodePaymentPlan(arr[0] ?? raw);
+    const arr = firstArray(raw, ['data']);
+    return decodePaymentPlan(arr?.[0] ?? raw.data ?? raw);
   }
 
   async function getPaymentPlans(params: {
@@ -1018,8 +1018,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       body: { subscriptions: [sub] },
       idempotencyKey,
     });
-    const arr = firstArray(raw, ['data']) ?? [];
-    if (arr.length === 0) throw new Error('Helcim createSubscription returned no subscriptions');
+    const arr = firstArray(raw, ['data']);
+    if (!arr?.[0]) throw new Error('Helcim createSubscription returned no subscriptions');
     return decodeSubscription(arr[0]);
   }
 
@@ -1033,8 +1033,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     const raw = await request('GET', `/subscriptions/${subscriptionId}`, {
       query: includeSubObjects ? { includeSubObjects: true } : {},
     });
-    const arr = firstArray(raw, ['data']) ?? [];
-    return decodeSubscription(arr[0] ?? raw);
+    const arr = firstArray(raw, ['data']);
+    return decodeSubscription(arr?.[0] ?? raw.data ?? raw);
   }
 
   async function getSubscriptions(params: {
@@ -1459,8 +1459,9 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     body.tipAmount = input.tipAmount;
     body.depositAmount = input.depositAmount;
     const raw = await request('POST', '/invoices', { body, idempotencyKey });
-    const arr = firstArray(raw, ['data']) ?? [];
-    return decodeInvoice(arr[0] ?? raw);
+    const arr = firstArray(raw, ['data']);
+    if (!arr?.[0]) throw new Error('Helcim createInvoice returned no invoices');
+    return decodeInvoice(arr[0]);
   }
 
   async function getInvoices(params: {
