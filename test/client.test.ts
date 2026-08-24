@@ -760,10 +760,10 @@ describe('client — Payment API', () => {
       amount: 50,
       currency: 'CAD',
       ipAddress: '10.0.0.1',
-      cardData: { cardNumber: '5454545454545454', cardExpiry: '1257', cardCVV: '100', cardHolderName: 'Example' },
+      cardData: { cardNumber: '0000000000000000', cardExpiry: '1257', cardCVV: '123', cardHolderName: 'Example' },
     });
     const body = JSON.parse(calls[0].body!);
-    expect(body.cardData.cardNumber).toBe('5454545454545454');
+    expect(body.cardData.cardNumber).toBe('0000000000000000');
   });
 
   it('processPurchase rejects non-positive amount', async () => {
