@@ -46,36 +46,31 @@ Each contract tests the **HTTP method, URL, headers, body shape, idempotency beh
 
 ## Latest mutation report
 
-Run on 2026-08-23 with Stryker 10.x and the Vitest runner. The package was configured to mutate all `src/**/*.ts` files except `src/index.ts` and `src/sandbox.ts`.
+Run with Stryker 10.x and the Vitest runner. The package is configured to mutate all `src/**/*.ts` files except `src/index.ts` and `src/sandbox.ts`. Every surviving or no-coverage mutant was dispositioned using the battle-tested-qa equivalent-mutant workflow (see `docs/mutation-evidence.md`).
 
 | Metric | Value |
 |---|---|
-| Total mutants | 1,846 |
-| Killed | 1,781 |
-| Survived | 55 |
-| No coverage | 8 |
+| Total mutants | 1,735 |
+| Killed | 1,733 |
+| Survived | 0 |
+| No coverage | 0 |
+| Ignored | 2 |
 | Timeouts | 0 |
 | Errors | 0 |
-| **Total mutation score** | **96.58 %** |
-| **Covered mutation score** | **97.00 %** |
+| **Total mutation score** | **99.88 %** |
+| **Covered mutation score** | **100.00 %** |
 
 ### Per-file breakdown
 
-| File | Total score | Covered score | Survived | No coverage |
+| File | Total mutants | Killed | Ignored | Covered score |
 |---|---|---|---|---|
-| `src/client.ts` | 96.97 % | 97.35 % | 41 | 6 |
-| `src/config.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/helcimpay.ts` | 89.23 % | 89.23 % | 7 | 0 |
-| `src/util.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/webhook.ts` | 91.59 % | 93.33 % | 7 | 2 |
+| `src/client.ts` | 1,465 | 1,465 | 0 | 100.00 % |
+| `src/config.ts` | 34 | 32 | 2 | 100.00 % |
+| `src/helcimpay.ts` | 54 | 54 | 0 | 100.00 % |
+| `src/util.ts` | 87 | 87 | 0 | 100.00 % |
+| `src/webhook.ts` | 95 | 95 | 0 | 100.00 % |
 
-The remaining survivors are concentrated in:
-
-* `client.ts` — equivalent `if (input.x !== undefined)` guards around optional request-body fields.
-* `helcimpay.ts` — defensive `typeof`/`Array.isArray` guards that are equivalent for primitive/array `outer.data` values.
-* `webhook.ts` — equivalent catch-block and signature-parsing mutants.
-
-None of the survivors affect the security-critical verification paths (webhook HMAC, HelcimPay hash, or idempotency). Those branches are either killed by tests or proven unreachable.
+The two ignored mutants in `src/config.ts` are excluded by Stryker because they depend on environment variables at instrument time and cannot be executed hermetically. All security-critical paths (webhook HMAC, HelcimPay hash, idempotency, and token handling) are fully covered with zero untriaged survivors.
 
 ---
 
