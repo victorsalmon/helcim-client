@@ -31,21 +31,15 @@ export function verifyHelcimWebhook(
   }
 
   const signedContent = `${webhookId}.${webhookTimestamp}.${rawBody}`;
-  let verifierKeyBytes: Buffer;
-  try {
-    verifierKeyBytes = Buffer.from(verifierToken, 'base64');
-  } catch {
-    return false;
-  }
+  const verifierKeyBytes = Buffer.from(verifierToken, 'base64');
   if (verifierKeyBytes.length === 0) return false;
 
   // The signature header is a space-delimited list of "version,signature".
   // We accept the webhook if ANY signature in the list matches.
-  const signatures = signatureHeader.split(/\s+/).filter(Boolean);
+  const signatures = signatureHeader.split(/\s+/);
   for (const entry of signatures) {
     const commaIdx = entry.indexOf(',');
-    const sig =
-      commaIdx >= 0 ? entry.slice(commaIdx + 1) : entry;
+    const sig = entry.slice(commaIdx + 1);
 
     const expected = createHmac('sha256', verifierKeyBytes)
       .update(signedContent)
@@ -87,7 +81,7 @@ export function parseHelcimWebhookBody(
   try {
     parsed = JSON.parse(rawBody);
   } catch {
-    return { type: null, transactionId: null, subscriptionId: null, raw: {} };
+    // Fall through to the guard below; it returns the same empty shape.
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return { type: null, transactionId: null, subscriptionId: null, raw: {} };
