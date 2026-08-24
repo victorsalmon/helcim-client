@@ -19,9 +19,18 @@ export interface HelcimConfig {
   webhookVerifierToken?: string;
 }
 
+/** Production Helcim Payment / Recurring API base URL. */
 export const HELCIM_PRODUCTION_BASE_URL = 'https://api.helcim.com/v2';
+
+/** Developer test Helcim API base URL (test cards, no real charges). */
 export const HELCIM_TEST_BASE_URL = 'https://api.helcim.test/v2';
 
+/**
+ * Resolve the Helcim base URL from environment variables.
+ *
+ * `HELCIM_BASE_URL` takes precedence, then `HELCIM_ENV` (`production`/`prod`
+ * or `test`/unset), defaulting to the test URL so production is opt-in.
+ */
 function resolveBaseUrl(env: NodeJS.ProcessEnv): string {
   const explicit = env.HELCIM_BASE_URL?.trim();
   if (explicit) return explicit.replace(/\/+$/, '');

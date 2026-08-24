@@ -1,6 +1,13 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 /**
+ * Webhook verification and parsing.
+ *
+ * Helcim signs every webhook with HMAC-SHA256. This module validates those
+ * signatures and normalizes the inconsistent payload shapes.
+ */
+
+/**
  * Verify a Helcim webhook signature.
  *
  * Helcim signs every webhook with HMAC-SHA256. The header `webhook-signature`

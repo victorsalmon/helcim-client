@@ -1,6 +1,13 @@
 import { sha256 } from './util.js';
 
 /**
+ * HelcimPay.js helpers.
+ *
+ * Initialize a checkout session and validate the response hash so callers can
+ * trust the returned card transaction id.
+ */
+
+/**
  * Validate a HelcimPay.js transaction response hash.
  *
  * After a HelcimPay.js payment, the iFrame emits a response containing the

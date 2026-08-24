@@ -1,3 +1,7 @@
+/**
+ * Public exports for `@clocklobster/helcim-client`.
+ */
+
 export type { HelcimConfig } from './config.js';
 export {
   createHelcimConfigFromEnv,

@@ -1,6 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto';
 
 /**
+ * Shared primitives used by the rest of the Helcim client.
+ *
+ * These helpers isolate provider payload shape variations (camelCase,
+ * PascalCase, snake_case) and provide small crypto/string utilities.
+ */
+
+/**
  * SHA-256 hex digest of a UTF-8 string. Used for HelcimPay.js response-hash
  * validation: hash = sha256(jsonEncodedData + secretToken).
  */
@@ -51,8 +58,8 @@ export function firstNumber(
     const value = record[key];
     if (Number.isFinite(value)) return Number(value);
     if (typeof value === 'string' && value.trim()) {
-      const n = Number(value);
-      if (Number.isFinite(n)) return n;
+      const parsedNumber = Number(value);
+      if (Number.isFinite(parsedNumber)) return parsedNumber;
     }
   }
   return null;
@@ -70,9 +77,9 @@ export function firstBoolean(
     const value = record[key];
     if (typeof value === 'boolean') return value;
     if (typeof value === 'string') {
-      const v = value.trim().toLowerCase();
-      if (v === 'true' || v === '1') return true;
-      if (v === 'false' || v === '0') return false;
+      const normalizedValue = value.trim().toLowerCase();
+      if (normalizedValue === 'true' || normalizedValue === '1') return true;
+      if (normalizedValue === 'false' || normalizedValue === '0') return false;
     }
   }
   return null;

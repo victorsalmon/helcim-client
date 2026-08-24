@@ -4,6 +4,13 @@ import { isProviderErrorStatus } from './util.js';
 export { isProviderErrorStatus };
 
 /**
+ * Sandbox helpers.
+ *
+ * These are used by integration tests and one-off scripts to safely exercise
+ * the Helcim test environment without affecting production data.
+ */
+
+/**
  * Whether sandbox integration tests should run.
  *
  * Tests and scripts gate on this flag so a normal `npm test` never reaches
