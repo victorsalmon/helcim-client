@@ -768,22 +768,20 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     const response = await fetchImpl(url.toString(), {
       method,
       headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      body: JSON.stringify(opts.body),
     });
     const text = await response.text();
     let raw: Record<string, unknown> = {};
-    if (text) {
-      try {
-        const parsed = JSON.parse(text) as unknown;
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          raw = parsed as Record<string, unknown>;
-        } else if (Array.isArray(parsed)) {
-          // Some list endpoints return a bare array; wrap it for uniform handling.
-          raw = { data: parsed };
-        }
-      } catch {
-        // Non-JSON error body — do not echo into logs (may contain sensitive data).
+    try {
+      const parsed = JSON.parse(text) as unknown;
+      if (Array.isArray(parsed)) {
+        // Some list endpoints return a bare array; wrap it for uniform handling.
+        raw = { data: parsed };
+      } else if (parsed && typeof parsed === 'object') {
+        raw = parsed as Record<string, unknown>;
       }
+    } catch {
+      // Non-JSON or empty body — leave raw as {}. Do not echo into logs.
     }
     if (!response.ok) {
       const providerErrors = raw.errors ?? raw.Errors;
@@ -911,8 +909,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     }
     if (input.paymentMethod) body.paymentMethod = input.paymentMethod;
     if (input.digitalWallet) body.digitalWallet = input.digitalWallet;
-    if (input.confirmationScreen !== undefined) body.confirmationScreen = input.confirmationScreen;
-    if (input.allowExit !== undefined) body.allowExit = input.allowExit;
+    body.confirmationScreen = input.confirmationScreen;
+    body.allowExit = input.allowExit;
 
     const raw = await request('POST', '/helcim-pay/initialize', { body });
     const checkoutToken = firstString(raw, ['checkoutToken', 'checkout_token']);
@@ -944,14 +942,14 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       termType: input.termType,
     };
     if (input.status) plan.status = input.status;
-    if (input.cardTerminalId !== undefined) plan.cardTerminalId = input.cardTerminalId;
-    if (input.setupAmount !== undefined) plan.setupAmount = input.setupAmount;
+    plan.cardTerminalId = input.cardTerminalId;
+    plan.setupAmount = input.setupAmount;
     if (input.billSetupImmediately) plan.billSetupImmediately = input.billSetupImmediately;
-    if (input.billingPeriodIncrements !== undefined) plan.billingPeriodIncrements = input.billingPeriodIncrements;
-    if (input.freeTrialPeriod !== undefined) plan.freeTrialPeriod = input.freeTrialPeriod;
+    plan.billingPeriodIncrements = input.billingPeriodIncrements;
+    plan.freeTrialPeriod = input.freeTrialPeriod;
     if (input.taxType) plan.taxType = input.taxType;
     if (input.taxCalculation) plan.taxCalculation = input.taxCalculation;
-    if (input.termLength !== undefined) plan.termLength = input.termLength;
+    plan.termLength = input.termLength;
     if (input.paymentMethod) plan.paymentMethod = input.paymentMethod;
     if (input.businessEmail) plan.businessEmail = input.businessEmail;
     if (input.addOnIds) plan.addOnIds = input.addOnIds;
@@ -1005,16 +1003,16 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       customerCode: input.customerCode,
     };
     if (input.dateActivated) sub.dateActivated = input.dateActivated;
-    if (input.useCustomSetupAmount !== undefined) sub.useCustomSetupAmount = input.useCustomSetupAmount;
-    if (input.setupAmount !== undefined) sub.setupAmount = input.setupAmount;
+    sub.useCustomSetupAmount = input.useCustomSetupAmount;
+    sub.setupAmount = input.setupAmount;
     if (input.recurringAmount !== undefined) {
       assertPositiveAmount(input.recurringAmount, 'createSubscription recurringAmount');
       sub.recurringAmount = input.recurringAmount;
     }
-    if (input.withFreeTrialPeriod !== undefined) sub.withFreeTrialPeriod = input.withFreeTrialPeriod;
-    if (input.freeTrialPeriod !== undefined) sub.freeTrialPeriod = input.freeTrialPeriod;
+    sub.withFreeTrialPeriod = input.withFreeTrialPeriod;
+    sub.freeTrialPeriod = input.freeTrialPeriod;
     if (input.paymentMethod) sub.paymentMethod = input.paymentMethod;
-    if (input.maxCycles !== undefined) sub.maxCycles = input.maxCycles;
+    sub.maxCycles = input.maxCycles;
     if (input.addOns) sub.addOns = input.addOns;
     const raw = await request('POST', '/subscriptions', {
       body: { subscriptions: [sub] },
@@ -1229,7 +1227,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     }
     const body: Record<string, unknown> = {};
     if (updates.accepted !== undefined) body.accepted = updates.accepted ? 1 : 0;
-    if (updates.status !== undefined) body.status = updates.status;
+    body.status = updates.status;
     const raw = await request('PUT', `/customers/${customerId}/pads/${padId}`, { body });
     const data = (raw.data ?? raw) as Record<string, unknown>;
     return decodePADAgreement(data);
@@ -1256,7 +1254,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       amount: input.amount,
       currencyId: input.currencyId,
     };
-    if (input.orderId !== undefined) body.orderId = input.orderId;
+    body.orderId = input.orderId;
     const raw = await request('PUT', '/ach/withdraw', { body, idempotencyKey });
     const txn = (raw.transaction ?? raw) as Record<string, unknown>;
     return decodeACHTransaction(txn);
@@ -1347,9 +1345,9 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     };
     if (input.customerCode) body.customerCode = input.customerCode;
     if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
-    if (input.orderId !== undefined) body.orderId = input.orderId;
-    if (input.ecommerce !== undefined) body.ecommerce = input.ecommerce;
-    if (input.terminalId !== undefined) body.terminalId = input.terminalId;
+    body.orderId = input.orderId;
+    body.ecommerce = input.ecommerce;
+    body.terminalId = input.terminalId;
     if (input.billingAddress) body.billingAddress = addressToPayload(input.billingAddress);
     if (input.invoiceRequest) body.invoiceRequest = input.invoiceRequest;
     const raw = await request('POST', '/payment/purchase', { body, idempotencyKey });
@@ -1375,8 +1373,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     };
     if (input.customerCode) body.customerCode = input.customerCode;
     if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
-    if (input.ecommerce !== undefined) body.ecommerce = input.ecommerce;
-    if (input.terminalId !== undefined) body.terminalId = input.terminalId;
+    body.ecommerce = input.ecommerce;
+    body.terminalId = input.terminalId;
     if (input.billingAddress) body.billingAddress = addressToPayload(input.billingAddress);
     const raw = await request('POST', '/payment/preauth', { body, idempotencyKey });
     const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
@@ -1399,7 +1397,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
       currency: input.currency,
       ipAddress: input.ipAddress,
     };
-    if (input.orderId !== undefined) body.orderId = input.orderId;
+    body.orderId = input.orderId;
     const raw = await request('POST', '/payment/capture', { body, idempotencyKey });
     const txn = (raw.transaction ?? raw.data ?? raw) as Record<string, unknown>;
     return decodeCardTransaction(txn);
@@ -1458,8 +1456,8 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     };
     if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
     if (input.notes) body.notes = input.notes;
-    if (input.tipAmount !== undefined) body.tipAmount = input.tipAmount;
-    if (input.depositAmount !== undefined) body.depositAmount = input.depositAmount;
+    body.tipAmount = input.tipAmount;
+    body.depositAmount = input.depositAmount;
     const raw = await request('POST', '/invoices', { body, idempotencyKey });
     const arr = firstArray(raw, ['data']) ?? [];
     return decodeInvoice(arr[0] ?? raw);
@@ -1489,8 +1487,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     }
     const raw = await request('GET', `/invoices/${invoiceId}`);
     const arr = firstArray(raw, ['data']);
-    if (arr && arr.length > 0) return decodeInvoice(arr[0]);
-    return decodeInvoice(raw.data ?? raw);
+    return decodeInvoice(arr?.[0] ?? raw.data ?? raw);
   }
 
   return {
