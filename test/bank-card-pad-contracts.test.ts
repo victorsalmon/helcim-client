@@ -145,11 +145,11 @@ describe('createBankAccount contract', () => {
     accountCorporate: 1 as const,
     accountType: 1 as const,
     bankAccountNumber: '123456789',
-    city: 'Calgary',
+    city: 'Example City',
     countryAlpha2: 'CA',
     provinceAlpha2: 'AB',
-    postalCode: 'T2P5E9',
-    streetAddress: '440 2 Ave SW',
+    postalCode: 'A1A 1A1',
+    streetAddress: '123 Example St',
   };
 
   it('POSTs to /customers/{id}/bank-accounts with required fields', async () => {
@@ -161,11 +161,11 @@ describe('createBankAccount contract', () => {
     assertBodyField(calls[0], 'accountCorporate', 1);
     assertBodyField(calls[0], 'accountType', 1);
     assertBodyField(calls[0], 'bankAccountNumber', '123456789');
-    assertBodyField(calls[0], 'city', 'Calgary');
+    assertBodyField(calls[0], 'city', 'Example City');
     assertBodyField(calls[0], 'countryAlpha2', 'CA');
     assertBodyField(calls[0], 'provinceAlpha2', 'AB');
-    assertBodyField(calls[0], 'postalCode', 'T2P5E9');
-    assertBodyField(calls[0], 'streetAddress', '440 2 Ave SW');
+    assertBodyField(calls[0], 'postalCode', 'A1A 1A1');
+    assertBodyField(calls[0], 'streetAddress', '123 Example St');
   });
 
   it('includes all optional fields when provided', async () => {
@@ -176,16 +176,16 @@ describe('createBankAccount contract', () => {
       bankFinancialNumber: '003',
       bankTransitNumber: '23456',
       bankRoutingNumber: '123456789',
-      firstName: 'John',
-      lastName: 'Doe',
-      companyName: 'Acme',
+      firstName: 'Example',
+      lastName: 'Customer',
+      companyName: 'Example Inc.',
     });
     assertBodyField(calls[0], 'bankFinancialNumber', '003');
     assertBodyField(calls[0], 'bankTransitNumber', '23456');
     assertBodyField(calls[0], 'bankRoutingNumber', '123456789');
-    assertBodyField(calls[0], 'firstName', 'John');
-    assertBodyField(calls[0], 'lastName', 'Doe');
-    assertBodyField(calls[0], 'companyName', 'Acme');
+    assertBodyField(calls[0], 'firstName', 'Example');
+    assertBodyField(calls[0], 'lastName', 'Customer');
+    assertBodyField(calls[0], 'companyName', 'Example Inc.');
   });
 
   it('omits all optional fields when not provided', async () => {

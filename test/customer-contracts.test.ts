@@ -51,26 +51,26 @@ describe('createCustomer contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.createCustomer({
       customerCode: 'CST100',
-      contactName: 'Jane',
-      businessName: 'Acme',
+      contactName: 'Example Customer',
+      businessName: 'Example Inc.',
       cellPhone: '555-1234',
-      billingAddress: { name: 'Jane', street1: '1 St', postalCode: 'H0H0H0' },
-      shippingAddress: { name: 'Jane', street1: '2 St', postalCode: 'H0H0H0' },
+      billingAddress: { name: 'Example Customer', street1: '1 St', postalCode: 'H0H0H0' },
+      shippingAddress: { name: 'Example Customer', street1: '2 St', postalCode: 'H0H0H0' },
     });
     assertMethod(calls[0], 'POST');
     assertPath(calls[0], '/customers');
     assertBodyField(calls[0], 'customerCode', 'CST100');
-    assertBodyField(calls[0], 'contactName', 'Jane');
-    assertBodyField(calls[0], 'businessName', 'Acme');
+    assertBodyField(calls[0], 'contactName', 'Example Customer');
+    assertBodyField(calls[0], 'businessName', 'Example Inc.');
     assertBodyField(calls[0], 'cellPhone', '555-1234');
-    assertBodyPath(calls[0], 'billingAddress.name', 'Jane');
-    assertBodyPath(calls[0], 'shippingAddress.name', 'Jane');
+    assertBodyPath(calls[0], 'billingAddress.name', 'Example Customer');
+    assertBodyPath(calls[0], 'shippingAddress.name', 'Example Customer');
   });
 
   it('omits all optional fields when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { id: 1 } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.createCustomer({ contactName: 'Jane' });
+    await c.createCustomer({ contactName: 'Example Customer' });
     assertBodyFieldAbsent(calls[0], 'customerCode');
     assertBodyFieldAbsent(calls[0], 'businessName');
     assertBodyFieldAbsent(calls[0], 'cellPhone');
@@ -81,16 +81,16 @@ describe('createCustomer contract', () => {
   it('includes only contactName when only contactName is provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { id: 1 } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.createCustomer({ contactName: 'Jane' });
-    assertBodyField(calls[0], 'contactName', 'Jane');
+    await c.createCustomer({ contactName: 'Example Customer' });
+    assertBodyField(calls[0], 'contactName', 'Example Customer');
     assertBodyFieldAbsent(calls[0], 'businessName');
   });
 
   it('includes only businessName when only businessName is provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { id: 1 } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.createCustomer({ businessName: 'Acme' });
-    assertBodyField(calls[0], 'businessName', 'Acme');
+    await c.createCustomer({ businessName: 'Example Inc.' });
+    assertBodyField(calls[0], 'businessName', 'Example Inc.');
     assertBodyFieldAbsent(calls[0], 'contactName');
   });
 
@@ -124,7 +124,7 @@ describe('createCustomer contract', () => {
   it('accepts businessName-only (no contactName)', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { id: 1 } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.createCustomer({ businessName: 'Acme' });
+    await c.createCustomer({ businessName: 'Example Inc.' });
     assertMethod(calls[0], 'POST');
     assertPath(calls[0], '/customers');
   });

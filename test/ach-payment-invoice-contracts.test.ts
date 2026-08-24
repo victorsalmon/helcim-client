@@ -465,7 +465,7 @@ describe('processPurchase contract', () => {
       orderId: 99,
       ecommerce: true,
       terminalId: 5,
-      billingAddress: { name: 'Jane', street1: '1 St', postalCode: 'H0H0H0' },
+      billingAddress: { name: 'Example Customer', street1: '1 St', postalCode: 'H0H0H0' },
       invoiceRequest: { lineItems: [{ description: 'x', quantity: 1, price: 5, total: 5 }] },
     });
     assertBodyField(calls[0], 'customerCode', 'CST1');
@@ -473,7 +473,7 @@ describe('processPurchase contract', () => {
     assertBodyField(calls[0], 'orderId', 99);
     assertBodyField(calls[0], 'ecommerce', true);
     assertBodyField(calls[0], 'terminalId', 5);
-    assertBodyPath(calls[0], 'billingAddress.name', 'Jane');
+    assertBodyPath(calls[0], 'billingAddress.name', 'Example Customer');
     assertBodyPath(calls[0], 'invoiceRequest.lineItems.0.description', 'x');
   });
 
@@ -589,13 +589,13 @@ describe('processPreauth contract', () => {
       invoiceNumber: 'INV1',
       ecommerce: true,
       terminalId: 5,
-      billingAddress: { name: 'Jane', street1: '1 St', postalCode: 'H0H0H0' },
+      billingAddress: { name: 'Example Customer', street1: '1 St', postalCode: 'H0H0H0' },
     });
     assertBodyField(calls[0], 'customerCode', 'CST1');
     assertBodyField(calls[0], 'invoiceNumber', 'INV1');
     assertBodyField(calls[0], 'ecommerce', true);
     assertBodyField(calls[0], 'terminalId', 5);
-    assertBodyPath(calls[0], 'billingAddress.name', 'Jane');
+    assertBodyPath(calls[0], 'billingAddress.name', 'Example Customer');
   });
 
   it('omits all optional fields when not provided', async () => {

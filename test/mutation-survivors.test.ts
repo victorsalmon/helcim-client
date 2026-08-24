@@ -284,11 +284,11 @@ describe('bank account response second-key coverage', () => {
       accountCorporate: 1,
       accountType: 1,
       bankAccountNumber: '123456789',
-      city: 'Calgary',
+      city: 'Example City',
       countryAlpha2: 'CA',
       provinceAlpha2: 'AB',
-      postalCode: 'T2P5E9',
-      streetAddress: '440 2 Ave SW',
+      postalCode: 'A1A 1A1',
+      streetAddress: '123 Example St',
     });
     expect(result.id).toBe(45367);
     expect(result.message).toBe('Successfully created new bank account');
@@ -301,11 +301,11 @@ describe('bank account response second-key coverage', () => {
       accountCorporate: 1,
       accountType: 1,
       bankAccountNumber: '123456789',
-      city: 'Calgary',
+      city: 'Example City',
       countryAlpha2: 'CA',
       provinceAlpha2: 'AB',
-      postalCode: 'T2P5E9',
-      streetAddress: '440 2 Ave SW',
+      postalCode: 'A1A 1A1',
+      streetAddress: '123 Example St',
     });
     expect(result.id).toBe(45367);
     expect(result.message).toBe('');

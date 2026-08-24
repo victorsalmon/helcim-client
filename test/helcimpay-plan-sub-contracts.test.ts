@@ -129,20 +129,20 @@ describe('initializeHelcimPay contract', () => {
     await c.initializeHelcimPay({
       paymentType: 'verify',
       customerRequest: {
-        contactName: 'Jane',
-        businessName: 'Acme',
+        contactName: 'Example Customer',
+        businessName: 'Example Inc.',
         customerCode: 'CST1',
         cellPhone: '555',
-        billingAddress: { name: 'Jane', street1: '1 St', postalCode: 'H0H0H0' },
-        shippingAddress: { name: 'Jane', street1: '2 St', postalCode: 'H0H0H0' },
+        billingAddress: { name: 'Example Customer', street1: '1 St', postalCode: 'H0H0H0' },
+        shippingAddress: { name: 'Example Customer', street1: '2 St', postalCode: 'H0H0H0' },
       },
     });
-    assertBodyPath(calls[0], 'customerRequest.contactName', 'Jane');
-    assertBodyPath(calls[0], 'customerRequest.businessName', 'Acme');
+    assertBodyPath(calls[0], 'customerRequest.contactName', 'Example Customer');
+    assertBodyPath(calls[0], 'customerRequest.businessName', 'Example Inc.');
     assertBodyPath(calls[0], 'customerRequest.customerCode', 'CST1');
     assertBodyPath(calls[0], 'customerRequest.cellPhone', '555');
-    assertBodyPath(calls[0], 'customerRequest.billingAddress.name', 'Jane');
-    assertBodyPath(calls[0], 'customerRequest.shippingAddress.name', 'Jane');
+    assertBodyPath(calls[0], 'customerRequest.billingAddress.name', 'Example Customer');
+    assertBodyPath(calls[0], 'customerRequest.shippingAddress.name', 'Example Customer');
   });
 
   it('omits customerRequest optional fields when not provided', async () => {
@@ -150,7 +150,7 @@ describe('initializeHelcimPay contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
-      customerRequest: { contactName: 'Jane' },
+      customerRequest: { contactName: 'Example Customer' },
     });
     assertBodyPathAbsent(calls[0], 'customerRequest.businessName');
     assertBodyPathAbsent(calls[0], 'customerRequest.customerCode');
@@ -164,9 +164,9 @@ describe('initializeHelcimPay contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
-      invoiceRequest: { contactName: 'Jane', lineItems: [{ description: 'x', quantity: 1, price: 5, total: 5 }] },
+      invoiceRequest: { contactName: 'Example Customer', lineItems: [{ description: 'x', quantity: 1, price: 5, total: 5 }] },
     });
-    assertBodyPath(calls[0], 'invoiceRequest.contactName', 'Jane');
+    assertBodyPath(calls[0], 'invoiceRequest.contactName', 'Example Customer');
   });
 
   it('omits invoiceRequest when not provided', async () => {

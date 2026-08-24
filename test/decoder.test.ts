@@ -29,7 +29,7 @@ describe('decodeAddress — alternate key spellings', () => {
   const base = { name: 'N', street1: 'S1', postalCode: 'P' };
 
   it('decodes name from "Name"', () => {
-    expect(decodeAddress({ Name: 'Jane', street1: 'S1', postalCode: 'P' })?.name).toBe('Jane');
+    expect(decodeAddress({ Name: 'Example', street1: 'S1', postalCode: 'P' })?.name).toBe('Example');
   });
   it('decodes street1 from "Street1" and "street_1"', () => {
     expect(decodeAddress({ name: 'N', Street1: 'X', postalCode: 'P' })?.street1).toBe('X');
@@ -75,8 +75,8 @@ describe('decodeCard — alternate key spellings', () => {
     expect(decodeCard({ Id: 7 }).id).toBe(7);
   });
   it('decodes cardHolderName from "cardHolder" and "card_holder_name"', () => {
-    expect(decodeCard({ cardHolder: 'Jane' }).cardHolderName).toBe('Jane');
-    expect(decodeCard({ card_holder_name: 'Bob' }).cardHolderName).toBe('Bob');
+    expect(decodeCard({ cardHolder: 'Example' }).cardHolderName).toBe('Example');
+    expect(decodeCard({ card_holder_name: 'ExampleB' }).cardHolderName).toBe('ExampleB');
   });
   it('decodes cardF6L4 from "cardF4L6" and "card_f6l4"', () => {
     expect(decodeCard({ cardF4L6: '1234567890' }).cardF6L4).toBe('1234567890');
@@ -104,10 +104,10 @@ describe('decodeCustomer — alternate key spellings', () => {
     expect(decodeCustomer({ customer_code: 'CST1' }).customerCode).toBe('CST1');
   });
   it('decodes businessName from "business_name"', () => {
-    expect(decodeCustomer({ business_name: 'Acme' }).businessName).toBe('Acme');
+    expect(decodeCustomer({ business_name: 'Example Inc.' }).businessName).toBe('Example Inc.');
   });
   it('decodes contactName from "contact_name"', () => {
-    expect(decodeCustomer({ contact_name: 'Jane' }).contactName).toBe('Jane');
+    expect(decodeCustomer({ contact_name: 'Example' }).contactName).toBe('Example');
   });
   it('decodes cellPhone from "cellphone" and "cell_phone"', () => {
     expect(decodeCustomer({ cellphone: '555' }).cellPhone).toBe('555');
@@ -169,7 +169,7 @@ describe('decodeCardTransaction — alternate key spellings', () => {
     expect(decodeCardTransaction({ card_number: '****1234' }).cardNumber).toBe('****1234');
   });
   it('decodes cardHolderName from "card_holder_name"', () => {
-    expect(decodeCardTransaction({ card_holder_name: 'Jane' }).cardHolderName).toBe('Jane');
+    expect(decodeCardTransaction({ card_holder_name: 'Example' }).cardHolderName).toBe('Example');
   });
   it('decodes customerCode from "customer_code"', () => {
     expect(decodeCardTransaction({ customer_code: 'CST1' }).customerCode).toBe('CST1');

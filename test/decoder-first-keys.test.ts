@@ -51,7 +51,7 @@ describe('decodeCard — first-key isolation', () => {
     expect(decodeCard({ id: 42 }).id).toBe(42);
   });
   it('decodes cardHolderName from "cardHolderName" (first key only)', () => {
-    expect(decodeCard({ cardHolderName: 'Jane' }).cardHolderName).toBe('Jane');
+    expect(decodeCard({ cardHolderName: 'Example' }).cardHolderName).toBe('Example');
   });
   it('decodes cardF6L4 from "cardF6L4" (first key only)', () => {
     expect(decodeCard({ cardF6L4: '5454' }).cardF6L4).toBe('5454');
@@ -78,10 +78,10 @@ describe('decodeCustomer — first-key isolation', () => {
     expect(decodeCustomer({ customerCode: 'CST1' }).customerCode).toBe('CST1');
   });
   it('decodes businessName from "businessName" (first key only)', () => {
-    expect(decodeCustomer({ businessName: 'Acme' }).businessName).toBe('Acme');
+    expect(decodeCustomer({ businessName: 'Example Inc.' }).businessName).toBe('Example Inc.');
   });
   it('decodes contactName from "contactName" (first key only)', () => {
-    expect(decodeCustomer({ contactName: 'Jane' }).contactName).toBe('Jane');
+    expect(decodeCustomer({ contactName: 'Example' }).contactName).toBe('Example');
   });
   it('decodes cellPhone from "cellPhone" (first key only)', () => {
     expect(decodeCustomer({ cellPhone: '555' }).cellPhone).toBe('555');
@@ -139,7 +139,7 @@ describe('decodeCardTransaction — first-key isolation', () => {
     expect(decodeCardTransaction({ cardNumber: '5454' }).cardNumber).toBe('5454');
   });
   it('decodes cardHolderName from "cardHolderName" (first key only)', () => {
-    expect(decodeCardTransaction({ cardHolderName: 'Jane' }).cardHolderName).toBe('Jane');
+    expect(decodeCardTransaction({ cardHolderName: 'Example' }).cardHolderName).toBe('Example');
   });
   it('decodes customerCode from "customerCode" (first key only)', () => {
     expect(decodeCardTransaction({ customerCode: 'CST1' }).customerCode).toBe('CST1');
@@ -587,11 +587,11 @@ describe('createBankAccount response first-key isolation', () => {
     accountCorporate: 1 as const,
     accountType: 1 as const,
     bankAccountNumber: '123456789',
-    city: 'Calgary',
+    city: 'Example City',
     countryAlpha2: 'CA',
     provinceAlpha2: 'AB',
-    postalCode: 'T2P5E9',
-    streetAddress: '440 2 Ave SW',
+    postalCode: 'A1A 1A1',
+    streetAddress: '123 Example St',
   };
 
   it('reads id from "id" (first key) in response', async () => {

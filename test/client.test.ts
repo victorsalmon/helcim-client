@@ -79,14 +79,14 @@ describe('client — auth headers', () => {
 describe('client — createCustomer', () => {
   it('posts to /customers with the customer body', async () => {
     const { fetchImpl, calls } = mockFetch({
-      body: { id: 1, customerCode: 'CST100', contactName: 'Jane' },
+      body: { id: 1, customerCode: 'CST100', contactName: 'Example Customer' },
     });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     const result = await client.createCustomer({
-      contactName: 'Jane Doe',
-      businessName: 'Acme',
+      contactName: 'Example Customer Customer',
+      businessName: 'Example Inc.',
       billingAddress: {
-        name: 'Jane Doe',
+        name: 'Example Customer Customer',
         street1: '1 St',
         postalCode: 'H0H0H0',
         country: 'CAN',
@@ -96,12 +96,12 @@ describe('client — createCustomer', () => {
     expect(calls[0].method).toBe('POST');
     expect(calls[0].url).toBe('https://api.helcim.test/v2/customers');
     const body = JSON.parse(calls[0].body!);
-    expect(body.contactName).toBe('Jane Doe');
-    expect(body.businessName).toBe('Acme');
-    expect(body.billingAddress.name).toBe('Jane Doe');
+    expect(body.contactName).toBe('Example Customer Customer');
+    expect(body.businessName).toBe('Example Inc.');
+    expect(body.billingAddress.name).toBe('Example Customer Customer');
     expect(body.billingAddress.country).toBe('CAN');
     expect(result.customerCode).toBe('CST100');
-    expect(result.contactName).toBe('Jane');
+    expect(result.contactName).toBe('Example Customer');
     expect(result.id).toBe(1);
   });
 
@@ -115,8 +115,8 @@ describe('client — createCustomer', () => {
     const { fetchImpl, calls } = mockFetch({ body: { id: 1, customerCode: 'C' } });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     await client.createCustomer({
-      contactName: 'Jane',
-      billingAddress: { name: 'Jane', street1: '1 St', postalCode: 'H0H0H0' },
+      contactName: 'Example Customer',
+      billingAddress: { name: 'Example Customer', street1: '1 St', postalCode: 'H0H0H0' },
     });
     const body = JSON.parse(calls[0].body!);
     expect(body.billingAddress.street2).toBeUndefined();
@@ -230,11 +230,11 @@ describe('client — initializeHelcimPay', () => {
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     await client.initializeHelcimPay({
       paymentType: 'verify',
-      customerRequest: { contactName: 'Jane', businessName: 'Acme' },
+      customerRequest: { contactName: 'Example Customer', businessName: 'Example Inc.' },
     });
     const body = JSON.parse(calls[0].body!);
-    expect(body.customerRequest.contactName).toBe('Jane');
-    expect(body.customerRequest.businessName).toBe('Acme');
+    expect(body.customerRequest.contactName).toBe('Example Customer');
+    expect(body.customerRequest.businessName).toBe('Example Inc.');
   });
 
   it('throws if customerRequest is missing contactName', async () => {
@@ -511,13 +511,13 @@ describe('client — bank accounts', () => {
       bankAccountNumber: '123456789',
       bankFinancialNumber: '003',
       bankTransitNumber: '23456',
-      city: 'Calgary',
+      city: 'Example City',
       countryAlpha2: 'CA',
       provinceAlpha2: 'AB',
-      postalCode: 'T2P5E9',
-      streetAddress: '440 2 Ave SW',
-      firstName: 'John',
-      lastName: 'Doe',
+      postalCode: 'A1A 1A1',
+      streetAddress: '123 Example St',
+      firstName: 'Example',
+      lastName: 'Customer',
     });
     expect(calls[0].method).toBe('POST');
     expect(calls[0].url).toBe('https://api.helcim.test/v2/customers/123/bank-accounts');
@@ -538,18 +538,18 @@ describe('client — bank accounts', () => {
       accountType: 2,
       bankAccountNumber: '987654321',
       bankRoutingNumber: '123456789',
-      city: 'New York',
+      city: 'Example City',
       countryAlpha2: 'US',
       provinceAlpha2: 'NY',
-      postalCode: '10001',
-      streetAddress: '123 Main St',
-      companyName: 'Acme Inc',
+      postalCode: '99999',
+      streetAddress: '123 Example St',
+      companyName: 'Example Inc. Inc',
     });
     const body = JSON.parse(calls[0].body!);
     expect(body.bankRoutingNumber).toBe('123456789');
     expect(body.bankFinancialNumber).toBeUndefined();
     expect(body.bankTransitNumber).toBeUndefined();
-    expect(body.companyName).toBe('Acme Inc');
+    expect(body.companyName).toBe('Example Inc. Inc');
   });
 
   it('createBankAccount rejects invalid customerId', async () => {
@@ -760,7 +760,7 @@ describe('client — Payment API', () => {
       amount: 50,
       currency: 'CAD',
       ipAddress: '10.0.0.1',
-      cardData: { cardNumber: '5454545454545454', cardExpiry: '1257', cardCVV: '100', cardHolderName: 'John' },
+      cardData: { cardNumber: '5454545454545454', cardExpiry: '1257', cardCVV: '100', cardHolderName: 'Example' },
     });
     const body = JSON.parse(calls[0].body!);
     expect(body.cardData.cardNumber).toBe('5454545454545454');

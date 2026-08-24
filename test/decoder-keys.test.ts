@@ -19,7 +19,7 @@ import {
 
 describe('decodeAddress alternate keys', () => {
   it('reads name from Name (PascalCase)', () => {
-    expect(decodeAddress({ Name: 'Jane', street1: '1 St', postalCode: 'H0H' })?.name).toBe('Jane');
+    expect(decodeAddress({ Name: 'Example', street1: '1 St', postalCode: 'H0H' })?.name).toBe('Example');
   });
 
   it('reads street1 from Street1 and street_1', () => {
@@ -40,7 +40,7 @@ describe('decodeAddress alternate keys', () => {
   });
 
   it('reads city from City', () => {
-    expect(decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', City: 'Calgary' })?.city).toBe('Calgary');
+    expect(decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', City: 'Example City' })?.city).toBe('Example City');
   });
 
   it('reads province from Province', () => {
@@ -66,8 +66,8 @@ describe('decodeCard alternate keys', () => {
   });
 
   it('reads cardHolderName from cardHolder and card_holder_name', () => {
-    expect(decodeCard({ cardHolder: 'Jane' }).cardHolderName).toBe('Jane');
-    expect(decodeCard({ card_holder_name: 'John' }).cardHolderName).toBe('John');
+    expect(decodeCard({ cardHolder: 'Example' }).cardHolderName).toBe('Example');
+    expect(decodeCard({ card_holder_name: 'ExampleC' }).cardHolderName).toBe('ExampleC');
   });
 
   it('reads cardF6L4 from cardF4L6 and card_f6l4', () => {
@@ -102,11 +102,11 @@ describe('decodeCustomer alternate keys', () => {
   });
 
   it('reads businessName from business_name', () => {
-    expect(decodeCustomer({ business_name: 'Acme' }).businessName).toBe('Acme');
+    expect(decodeCustomer({ business_name: 'Example Inc.' }).businessName).toBe('Example Inc.');
   });
 
   it('reads contactName from contact_name', () => {
-    expect(decodeCustomer({ contact_name: 'Jane' }).contactName).toBe('Jane');
+    expect(decodeCustomer({ contact_name: 'Example' }).contactName).toBe('Example');
   });
 
   it('reads cellPhone from cellphone and cell_phone', () => {
@@ -182,7 +182,7 @@ describe('decodeCardTransaction alternate keys', () => {
   });
 
   it('reads cardHolderName from card_holder_name', () => {
-    expect(decodeCardTransaction({ card_holder_name: 'Jane' }).cardHolderName).toBe('Jane');
+    expect(decodeCardTransaction({ card_holder_name: 'Example' }).cardHolderName).toBe('Example');
   });
 
   it('reads customerCode from customer_code', () => {
