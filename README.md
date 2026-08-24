@@ -103,29 +103,27 @@ pnpm add @clocklobster/helcim-client
 ## Quick start
 
 ```typescript
-import { createHelcimClient, buildHelcimConfig } from '@clocklobster/helcim-client';
+import { createHelcimClient, createHelcimConfigFromEnv } from '@clocklobster/helcim-client';
 import { fetch } from 'undici'; // or global fetch if Node >= 18
 
-const config = buildHelcimConfig({
-  apiToken: process.env.HELCIM_API_TOKEN!,
-  env: 'test', // or 'production'
-});
-
-if (!config) throw new Error('Helcim is not configured');
+// Configuration is read from the consuming application's environment.
+// Required: HELCIM_API_TOKEN. Optional: HELCIM_ENV / HELCIM_BASE_URL / HELCIM_WEBHOOK_VERIFIER_TOKEN.
+const config = createHelcimConfigFromEnv();
+if (!config) throw new Error('Helcim is not configured — set HELCIM_API_TOKEN');
 
 const helcim = createHelcimClient(config, fetch);
 
 // Create a customer
 const customer = await helcim.createCustomer({
-  customerCode: 'cust-001',
-  contactName: 'Jane Doe',
+  customerCode: 'example-001',
+  contactName: 'Example Customer',
   billingAddress: {
-    name: 'Jane Doe',
-    street1: '123 Main St',
-    city: 'Calgary',
+    name: 'Example Customer',
+    street1: '123 Example St',
+    city: 'Example City',
     province: 'AB',
     country: 'CA',
-    postalCode: 'T2P0A4',
+    postalCode: 'A1A 1A1',
   },
 });
 ```
@@ -168,20 +166,20 @@ This package is built with a **property-based + mutation-validated** QA pipeline
 |---|---|---|
 | Unit & contract tests | `npm test` | Vitest + `@fast-check/vitest` property tests |
 | Compliance contracts | `npm run test:compliance` | Idempotency, field presence, and endpoint-shape invariants |
-| Mutation testing | `npm run test:mutation` | Stryker + Vitest; current score **96.58 %** |
+| Mutation testing | `npm run test:mutation` | Stryker + Vitest; current **covered score 100.00 %** |
 
-Latest Stryker run (public copy):
+Latest Stryker run:
 
-| File | Mutation score | Survived | No coverage |
-|---|---|---|---|
-| `src/client.ts` | 96.97 % | 41 | 6 |
-| `src/config.ts` | 100.00 % | 0 | 0 |
-| `src/helcimpay.ts` | 89.23 % | 7 | 0 |
-| `src/util.ts` | 100.00 % | 0 | 0 |
-| `src/webhook.ts` | 91.59 % | 7 | 2 |
-| **Total** | **96.58 %** | **55** | **8** |
+| File | Total mutants | Killed | Ignored | Covered score |
+|---|---|---|---|---|
+| `src/client.ts` | 1,465 | 1,465 | 0 | 100.00 % |
+| `src/config.ts` | 34 | 32 | 2 | 100.00 % |
+| `src/helcimpay.ts` | 54 | 54 | 0 | 100.00 % |
+| `src/util.ts` | 87 | 87 | 0 | 100.00 % |
+| `src/webhook.ts` | 95 | 95 | 0 | 100.00 % |
+| **Total** | **1,735** | **1,733** | **2** | **100.00 %** |
 
-The surviving mutants are almost entirely equivalent defensive guards (e.g., redundant `typeof` checks, defensive catch-block fallbacks) or fallback branches in the optional-body construction that are protected by other tests. No credential, signature, or hash-verification mutant is allowed to survive untriaged.
+The two ignored mutants in `src/config.ts` depend on environment variables at instrument time and cannot be executed hermetically; they are neither survivors nor no-coverage. All security-critical paths (credential handling, webhook HMAC, HelcimPay hash, and idempotency) are fully triaged with zero untriaged survivors.
 
 See [`docs/QUALITY.md`](./docs/QUALITY.md) for the full QA runbook and [`docs/PRICING.md`](./docs/PRICING.md) for the cost comparison.
 
