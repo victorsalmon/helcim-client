@@ -35,8 +35,21 @@ export type {
   ReversePurchaseInput,
   CreateInvoiceInput,
   HelcimClient,
+  HelcimBankAccountOwnership,
+  HelcimBankAccountType,
+  HelcimACHCurrency,
+  HelcimNumericBoolean,
 } from './client.js';
-export { createHelcimClient, ACH_STATUS_AUTH, ACH_STATUS_CLEARING } from './client.js';
+export {
+  createHelcimClient,
+  ACH_STATUS_AUTH,
+  ACH_STATUS_CLEARING,
+  HELCIM_BANK_ACCOUNT_OWNERSHIP,
+  HELCIM_BANK_ACCOUNT_TYPE,
+  HELCIM_ACH_CURRENCY,
+  HELCIM_BOOLEAN_TRUE,
+  HELCIM_BOOLEAN_FALSE,
+} from './client.js';
 export {
   decodeAddress,
   decodeCard,

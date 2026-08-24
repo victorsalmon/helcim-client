@@ -197,6 +197,63 @@ export const ACH_STATUS_CLEARING = {
   SETTLED_DECLINED: 4,
 } as const;
 
+/**
+ * Bank account ownership values.
+ *
+ * Helcim stores these as integers in the bank-account endpoint.
+ */
+export const HELCIM_BANK_ACCOUNT_OWNERSHIP = {
+  PERSONAL: 1,
+  CORPORATE: 2,
+} as const;
+
+export type HelcimBankAccountOwnership =
+  (typeof HELCIM_BANK_ACCOUNT_OWNERSHIP)[keyof typeof HELCIM_BANK_ACCOUNT_OWNERSHIP];
+
+/**
+ * Bank account type values.
+ *
+ * Helcim stores these as integers in the bank-account endpoint.
+ */
+export const HELCIM_BANK_ACCOUNT_TYPE = {
+  CHECKING: 1,
+  SAVINGS: 2,
+} as const;
+
+export type HelcimBankAccountType =
+  (typeof HELCIM_BANK_ACCOUNT_TYPE)[keyof typeof HELCIM_BANK_ACCOUNT_TYPE];
+
+/**
+ * ACH withdrawal currency values.
+ *
+ * `currencyId` on ACH withdrawals is an integer, unlike card transactions
+ * which use an ISO currency string.
+ */
+export const HELCIM_ACH_CURRENCY = {
+  CAD: 1,
+  USD: 2,
+} as const;
+
+export type HelcimACHCurrency =
+  (typeof HELCIM_ACH_CURRENCY)[keyof typeof HELCIM_ACH_CURRENCY];
+
+/**
+ * Helcim's numeric boolean convention.
+ *
+ * Several endpoints use `1` for true and `0` for false. These constants make
+ * that convention explicit in decoders and request bodies.
+ */
+export const HELCIM_BOOLEAN_TRUE = 1 as const;
+export const HELCIM_BOOLEAN_FALSE = 0 as const;
+
+export type HelcimNumericBoolean =
+  typeof HELCIM_BOOLEAN_TRUE | typeof HELCIM_BOOLEAN_FALSE;
+
+/** Convert a boolean into Helcim's numeric convention (true = 1, false = 0). */
+function numericBoolean(value: boolean): HelcimNumericBoolean {
+  return value ? HELCIM_BOOLEAN_TRUE : HELCIM_BOOLEAN_FALSE;
+}
+
 export interface HelcimACHTransaction {
   id: number;
   merchantId: number | null;
@@ -243,7 +300,7 @@ export interface InitializeHelcimPayInput {
   /** Payment method shown in the modal: cc (cards), ach (bank), cc-ach (both). */
   paymentMethod?: 'cc' | 'ach' | 'cc-ach';
   /** Digital wallet overrides — google-pay. */
-  digitalWallet?: { 'google-pay'?: 0 | 1 };
+  digitalWallet?: { 'google-pay'?: HelcimNumericBoolean };
   customerRequest?: {
     contactName: string;
     businessName?: string;
@@ -314,10 +371,10 @@ export interface CreateSubscriptionInput {
 }
 
 export interface CreateBankAccountInput {
-  /** Account ownership: 1 = Personal, 2 = Corporate. */
-  accountCorporate: 1 | 2;
-  /** Account type: 1 = Checking, 2 = Savings. */
-  accountType: 1 | 2;
+  /** Account ownership. */
+  accountCorporate: HelcimBankAccountOwnership;
+  /** Account type. */
+  accountType: HelcimBankAccountType;
   bankAccountNumber: string;
   /** 3-digit financial number (Canadian bank accounts). */
   bankFinancialNumber?: string;
@@ -339,8 +396,8 @@ export interface ProcessACHWithdrawInput {
   bankAccountId: number;
   customerId: number;
   amount: number;
-  /** Currency: 1 = CAD, 2 = USD. */
-  currencyId: 1 | 2;
+  /** Currency for the ACH withdrawal. */
+  currencyId: HelcimACHCurrency;
   orderId?: number;
 }
 
@@ -653,8 +710,8 @@ function decodeBankAccount(raw: unknown): HelcimBankAccount {
     bankToken: firstString(record, ['bankToken', 'bank_token']),
     accountType: accountType ?? null,
     accountCorporate: accountCorporate ?? null,
-    verified: verifiedNum !== null ? verifiedNum === 1 : null,
-    ready: readyNum !== null ? readyNum === 1 : null,
+    verified: verifiedNum !== null ? verifiedNum === HELCIM_BOOLEAN_TRUE : null,
+    ready: readyNum !== null ? readyNum === HELCIM_BOOLEAN_TRUE : null,
     bankIdNumber: firstString(record, ['bankIdNumber', 'bank_id_number']),
     transitNumber: firstString(record, ['transitNumber', 'transit_number']),
     routingNumber: firstString(record, ['routingNumber', 'routing_number']),
@@ -673,7 +730,7 @@ function decodePADAgreement(raw: unknown): HelcimPADAgreement {
   const merchantAuthorizedNum = firstNumber(record, ['merchantAuthorized', 'merchant_authorized']);
   return {
     id: firstNumber(record, ['id', 'Id']) ?? 0,
-    accepted: acceptedNum === 1,
+    accepted: acceptedNum === HELCIM_BOOLEAN_TRUE,
     bankAccountId: firstNumber(record, ['bankAccountId', 'bank_account_id']),
     customerId: firstNumber(record, ['customerId', 'customer_id']),
     dateAccepted: firstString(record, ['dateAccepted', 'date_accepted']),
@@ -682,7 +739,7 @@ function decodePADAgreement(raw: unknown): HelcimPADAgreement {
     dateRevoked: firstString(record, ['dateRevoked', 'date_revoked']),
     dateUpdated: firstString(record, ['dateUpdated', 'date_updated']),
     ipAddress: firstString(record, ['ipAddress', 'ip_address']),
-    merchantAuthorized: merchantAuthorizedNum === 1,
+    merchantAuthorized: merchantAuthorizedNum === HELCIM_BOOLEAN_TRUE,
     type: firstNumber(record, ['type', 'Type']),
     status: firstNumber(record, ['status', 'Status']),
     raw: record,
@@ -708,7 +765,7 @@ function decodeACHTransaction(raw: unknown): HelcimACHTransaction {
     amount: firstNumber(record, ['amount', 'Amount']),
     currency: firstNumber(record, ['currency', 'Currency']),
     approvalCode: firstString(record, ['approvalCode', 'approval_code']),
-    test: testNum !== null ? testNum === 1 : null,
+    test: testNum !== null ? testNum === HELCIM_BOOLEAN_TRUE : null,
     acquirerTransactionId: firstString(record, ['acquirerTransactionId', 'acquirer_transaction_id']),
     responseMessage: firstString(record, ['responseMessage', 'response_message']),
     statusBatch: firstNumber(record, ['statusBatch', 'status_batch']),
@@ -960,7 +1017,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
     if (input.language) body.language = input.language;
     if (input.setAsDefaultPaymentMethod !== undefined) {
-      body.setAsDefaultPaymentMethod = input.setAsDefaultPaymentMethod ? 1 : 0;
+      body.setAsDefaultPaymentMethod = numericBoolean(input.setAsDefaultPaymentMethod);
     }
     if (input.customerRequest) {
       assertNonEmptyString(input.customerRequest.contactName, 'customerRequest contactName');
@@ -1276,7 +1333,7 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     assertPositiveInteger(customerId, 'updatePAD', 'customerId');
     assertPositiveInteger(padId, 'updatePAD', 'padId');
     const body: Record<string, unknown> = {};
-    if (updates.accepted !== undefined) body.accepted = updates.accepted ? 1 : 0;
+    if (updates.accepted !== undefined) body.accepted = numericBoolean(updates.accepted);
     body.status = updates.status;
     const raw = await request('PUT', `/customers/${customerId}/pads/${padId}`, { body });
     const data = (raw.data ?? raw) as Record<string, unknown>;
@@ -1292,7 +1349,10 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
     assertPositiveInteger(input.bankAccountId, 'processACHWithdraw', 'bankAccountId');
     assertPositiveInteger(input.customerId, 'processACHWithdraw', 'customerId');
     assertPositiveAmount(input.amount, 'processACHWithdraw amount');
-    if (input.currencyId !== 1 && input.currencyId !== 2) {
+    if (
+      input.currencyId !== HELCIM_ACH_CURRENCY.CAD &&
+      input.currencyId !== HELCIM_ACH_CURRENCY.USD
+    ) {
       throw new Error('Helcim processACHWithdraw currencyId must be 1 (CAD) or 2 (USD)');
     }
     const body: Record<string, unknown> = {
