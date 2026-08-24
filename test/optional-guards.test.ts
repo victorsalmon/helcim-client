@@ -255,6 +255,17 @@ describe('optional field guards reject empty-string and null values', () => {
     expect('addOnIds' in b.paymentPlans[0]).toBe(true);
   });
 
+  it('createPaymentPlan omits empty-string addOnIds', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: { data: [{ id: 1 }] } });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await c.createPaymentPlan({
+      name: 'X', type: 'subscription', currency: 'CAD', recurringAmount: 1,
+      billingPeriod: 'monthly', dateBilling: 'S', termType: 'forever', addOnIds: '' as any,
+    });
+    const b = bodyOf(calls[0]);
+    expect('addOnIds' in b.paymentPlans[0]).toBe(false);
+  });
+
   // ─── createSubscription ────────────────────────────────────────────────────
 
   it('createSubscription omits empty-string dateActivated', async () => {
@@ -280,6 +291,14 @@ describe('optional field guards reject empty-string and null values', () => {
     const b = bodyOf(calls[0]);
     // Empty arrays are truthy, so the guard includes them
     expect('addOns' in b.subscriptions[0]).toBe(true);
+  });
+
+  it('createSubscription omits empty-string addOns', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: { data: [{ id: 10 }] } });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await c.createSubscription({ paymentPlanId: 5, customerCode: 'C', addOns: '' as any });
+    const b = bodyOf(calls[0]);
+    expect('addOns' in b.subscriptions[0]).toBe(false);
   });
 
   // ─── createBankAccount ─────────────────────────────────────────────────────

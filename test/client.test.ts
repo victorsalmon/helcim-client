@@ -413,6 +413,17 @@ describe('client — error handling', () => {
     ).rejects.toThrow(/^Unauthorized$/);
   });
 
+  it('falls back to HTTP message when provider error string is whitespace-only', async () => {
+    const { fetchImpl } = mockFetch({
+      status: 400,
+      body: { errors: '   ' },
+    });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(
+      client.createCustomer({ contactName: 'X' })
+    ).rejects.toThrow(/Helcim POST \/customers failed with HTTP 400/);
+  });
+
   it('throws with the first error message on a non-2xx response', async () => {
     const { fetchImpl } = mockFetch({
       status: 400,

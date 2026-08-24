@@ -82,6 +82,42 @@ describe('validateHelcimPayHash', () => {
     expect(validateHelcimPayHash(data, hash, '')).toBe(false);
   });
 
+  it('rejects when data is undefined', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    expect(validateHelcimPayHash(undefined as any, hash, secret)).toBe(false);
+  });
+
+  it('rejects when data is null', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    expect(validateHelcimPayHash(null as any, hash, secret)).toBe(false);
+  });
+
+  it('rejects when hash is undefined', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    expect(validateHelcimPayHash(data, undefined as any, secret)).toBe(false);
+  });
+
+  it('rejects when secretToken is undefined', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    expect(validateHelcimPayHash(data, hash, undefined as any)).toBe(false);
+  });
+
+  it('rejects when hash and secret are both empty but the computed match is for empty secret', () => {
+    // If the guard is removed, the function will compute the hash using an empty
+    // secret and match the provided hash, incorrectly returning true.
+    const data = { a: 1 };
+    const emptySecretHash = computeHash(data, '');
+    expect(validateHelcimPayHash(data, emptySecretHash, '')).toBe(false);
+  });
+
   it('handles unicode characters using Helcim escaped-unicode hashing', () => {
     const data = { name: 'José — café' };
     const secret = 's';
@@ -131,6 +167,13 @@ describe('parseHelcimPayEventMessage', () => {
   it('returns nulls when parsed JSON is a primitive (number)', () => {
     const result = parseHelcimPayEventMessage('42');
     expect(result.status).toBeNull();
+    expect(result.data).toBeNull();
+    expect(result.hash).toBeNull();
+  });
+
+  it('returns null data when parsed object wraps a primitive inner data value', () => {
+    const result = parseHelcimPayEventMessage(JSON.stringify({ status: 1, data: 42 }));
+    expect(result.status).toBe(1);
     expect(result.data).toBeNull();
     expect(result.hash).toBeNull();
   });
