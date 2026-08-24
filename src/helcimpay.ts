@@ -59,9 +59,9 @@ export function parseHelcimPayEventMessage(
   try {
     parsed = JSON.parse(eventMessage);
   } catch {
-    return { status: null, data: null, hash: null };
+    // Fall through to the guard below; it returns the same null shape.
   }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+  if (!parsed || Array.isArray(parsed)) {
     return { status: null, data: null, hash: null };
   }
   const outer = parsed as Record<string, unknown>;
@@ -73,7 +73,7 @@ export function parseHelcimPayEventMessage(
         : null;
   const dataWrapper = outer.data as Record<string, unknown> | undefined;
   const innerData =
-    typeof dataWrapper?.data === 'object' && dataWrapper.data !== null && !Array.isArray(dataWrapper.data)
+    typeof dataWrapper?.data === 'object' && !Array.isArray(dataWrapper.data)
       ? (dataWrapper.data as Record<string, unknown>)
       : null;
   const hash =
