@@ -67,6 +67,7 @@ export {
 
 export {
   verifyHelcimWebhook,
+  isWebhookTimestampFresh,
   parseHelcimWebhookBody,
   type HelcimWebhookEvent,
 } from './webhook.js';

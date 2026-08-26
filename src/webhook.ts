@@ -65,6 +65,32 @@ export function verifyHelcimWebhook(
 }
 
 /**
+ * Check whether a webhook's `webhook-timestamp` header value is within
+ * `toleranceSeconds` of now.
+ *
+ * Signature verification alone does not stop replay: a captured, signed
+ * payload verifies forever. Callers processing money-moving events should
+ * combine `verifyHelcimWebhook` with this freshness check and reject stale
+ * deliveries (Helcim retries webhooks; a tolerance of ~300s absorbs normal
+ * retry latency while bounding the replay window).
+ *
+ * @param webhookTimestamp - the `webhook-timestamp` header value (unix seconds)
+ * @param toleranceSeconds - maximum age in seconds (default 300)
+ * @param nowMs - current time in ms (injectable for tests)
+ */
+export function isWebhookTimestampFresh(
+  webhookTimestamp: string,
+  toleranceSeconds = 300,
+  nowMs: number = Date.now()
+): boolean {
+  if (!webhookTimestamp) return false;
+  const seconds = Number(webhookTimestamp);
+  if (!Number.isFinite(seconds)) return false;
+  const ageMs = nowMs - seconds * 1000;
+  return Math.abs(ageMs) <= toleranceSeconds * 1000;
+}
+
+/**
  * Parse the Helcim webhook body to extract the event type and transaction id.
  * Helcim webhook bodies are `{ id, type }` for card transactions, or
  * `{ data: { ... }, type }` for terminal cancels. This helper normalizes both

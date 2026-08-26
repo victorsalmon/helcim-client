@@ -17,6 +17,17 @@ export interface HelcimConfig {
   apiToken: string;
   /** Webhook verifier token (base64) for signature verification. Optional. */
   webhookVerifierToken?: string;
+  /**
+   * Per-request timeout in milliseconds, enforced with `AbortSignal.timeout`.
+   * Default: 20_000. Version-independent knob — products tune this without
+   * touching client internals.
+   */
+  timeoutMs?: number;
+  /**
+   * Bounded retry count for repeat-safe calls (GETs and idempotency-keyed
+   * writes) on network errors, HTTP 429, and 5xx. Default: 0 (disabled).
+   */
+  maxRetries?: number;
 }
 
 /** Production Helcim Payment / Recurring API base URL. */
@@ -57,5 +68,20 @@ export function createHelcimConfigFromEnv(
   const baseUrl = resolveBaseUrl(env);
   const webhookVerifierToken = env.HELCIM_WEBHOOK_VERIFIER_TOKEN?.trim() || undefined;
 
-  return { baseUrl, apiToken, webhookVerifierToken };
+  const timeoutRaw = env.HELCIM_TIMEOUT_MS?.trim();
+  const retriesRaw = env.HELCIM_MAX_RETRIES?.trim();
+  const timeoutMs = timeoutRaw ? Number(timeoutRaw) : undefined;
+  const maxRetries = retriesRaw ? Number(retriesRaw) : undefined;
+
+  return {
+    baseUrl,
+    apiToken,
+    webhookVerifierToken,
+    ...(timeoutMs !== undefined && Number.isFinite(timeoutMs) && timeoutMs > 0
+      ? { timeoutMs }
+      : {}),
+    ...(maxRetries !== undefined && Number.isInteger(maxRetries) && maxRetries >= 0
+      ? { maxRetries }
+      : {}),
+  };
 }

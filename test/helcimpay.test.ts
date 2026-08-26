@@ -310,7 +310,8 @@ fcTest.prop([
 });
 
 fcTest.prop([
-  fc.stringOf(fc.constantFrom('é', '—', '中', '😀', 'a', 'Z', ' '), { minLength: 1, maxLength: 40 })
+  fc.array(fc.constantFrom('é', '—', '中', '😀', 'a', 'Z', ' '), { minLength: 1, maxLength: 40 })
+    .map((chars) => chars.join(''))
     .filter((value) => /[^\x00-\x7f]/.test(value)),
   fc.string({ minLength: 1, maxLength: 40 }),
 ])('validates every Helcim escaped-Unicode string payload', (name, secret) => {
