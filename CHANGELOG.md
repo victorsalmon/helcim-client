@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-09-04
+
+### Changed
+
+- Stable release: the API surface documented in 0.1.0 is now the 1.0 contract.
+  No breaking changes since 0.1.0.
+- Trimmed the Helcim-vs-Stripe pricing essay in `README.md` to a neutral
+  positioning paragraph; the full dated comparison lives in `docs/PRICING.md`.
+
 ## [0.1.0] - 2026-08-23
 
 ### Added
@@ -20,4 +29,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Property-based contract tests with Vitest and `@fast-check/vitest`.
 - Mutation-tested source with Stryker; current score **96.58 %**.
 
+[1.0.0]: https://github.com/victorsalmon/helcim-client/releases/tag/v1.0.0
 [0.1.0]: https://github.com/victorsalmon/helcim-client/releases/tag/v0.1.0

@@ -6,54 +6,9 @@ The client wraps the **Helcim Payment API**, **Recurring API** (payment plans & 
 
 ---
 
-## Why Helcim — especially in Canada
+## Why Helcim
 
-Helcim is a Calgary-based payment processor. For Canadian businesses it offers three advantages over the default choice of Stripe that are hard to ignore: **lower effective cost on every transaction**, **first-class Interac/EFT support**, and **a Canadian-operated stack**.
-
-### Lower effective rates
-
-Stripe's published Canadian online card rate is **2.9 % + CA$0.30** for every successful domestic transaction, and it does not fall automatically as your volume grows. Manually keyed and international transactions are even more expensive, and you may also pay a currency-conversion fee. [Stripe pricing page](https://stripe.com/en-ca/pricing) — [Stripe privacy / Canadian data transfer notice](https://stripe.com/en-ca/privacy).
-
-Helcim uses **interchange-plus** pricing: the actual card-network cost plus a transparent, published margin. Because interchange is the wholesale rate, you are not subsidizing premium cards with a blended flat rate, and Helcim's margin **shrinks automatically as your volume grows**.
-
-| Monthly volume | In-person rate | Keyed & online rate |
-|---|---|---|
-| $0 – $50K | Interchange + **0.40 % + 8¢** | Interchange + **0.50 % + 25¢** |
-| $50K – $100K | Interchange + **0.35 % + 7¢** | Interchange + **0.45 % + 20¢** |
-| $100K – $500K | Interchange + **0.25 % + 7¢** | Interchange + **0.35 % + 20¢** |
-| $500K – $1M | Interchange + **0.20 % + 6¢** | Interchange + **0.25 % + 15¢** |
-| $1M – $5M | Interchange + **0.15 % + 6¢** | Interchange + **0.15 % + 15¢** |
-
-Helcim's typical effective rates land **near or below 2 % in-person and below 2.5 % online**. For a $100 online consumer-card transaction, the processor's margin is only **$0.50 + $0.25**; on Stripe the markup is **$2.90 + $0.30**.
-
-Helcim also publishes its full margin table — there are no back-room negotiations or "contact sales for rates." [Helcim pricing / interchange-plus page](https://www.helcim.com/interchange-plus/).
-
-### ACH / EFT-PAD and Interac Debit
-
-* **ACH / EFT-PAD bank payments:** **0.5 % + $0.25**, capped at **$6** per transaction under $25,000 — far below any card rate. [Helcim ACH page](https://www.helcim.com/ach-payment-processing/)
-* **Interac Debit in-person/tap:** **9¢ per transaction** (12¢ for tap) — a flat, predictable cost for card-present Canadian debit.
-
-Stripe supports Canadian ACH through ACSS/PAD, but its standard published rate is **1 % + $0.40**, capped at $5 — roughly double Helcim's rate, and Helcim's PAD agreement flow is built natively into the same customer object this client uses.
-
-### Data sovereignty and operator residency
-
-Helcim is headquartered in **Calgary, Alberta**, and is **PCI Level 1 Service Provider** certified. Its terms of service for Canadian merchants are governed by **Alberta law** and disputes are handled in **Alberta courts**.
-
-By contrast, [Stripe's Canadian privacy policy states](https://stripe.com/en-ca/privacy) that when a Canadian resident's personal data is collected, it is transferred to **data centers in the United States**.
-
-Both processors use SCCs and other transfer safeguards, but the practical difference matters for Canadian businesses: with Helcim your primary payment contracting party, support, fraud/ops tooling, and core settlement rails are domestic. With Stripe, standard data processing defaults to the U.S. before being subject to Canadian privacy frameworks.
-
-| | Helcim | Stripe |
-|---|---|---|
-| Headquarters | Calgary, Alberta, Canada | San Francisco, California, U.S. |
-| Canadian card rate | IC+ margin; effective rate often below 2 % online | 2.9 % + $0.30 (online domestic) |
-| Volume discounts | Automatic tiered margin | Custom pricing only by negotiation |
-| ACH / EFT-PAD | 0.5 % + $0.25, capped at $6 | 1 % + $0.40, capped at $5 |
-| Interac debit | 9¢ (12¢ tap) | Not a native first-class rail |
-| Primary data residence | Canada + U.S. (with SCCs) | U.S. |
-| Canadian governing law | Alberta | U.S. / varies by product |
-
-> **Sources (retrieved 2026-08-23):** [Helcim pricing](https://www.helcim.com/pricing/), [Helcim interchange-plus](https://www.helcim.com/interchange-plus/), [Helcim ACH fees](https://www.helcim.com/ach-payment-processing/), [Stripe Canada pricing](https://stripe.com/en-ca/pricing), [Stripe Canadian privacy](https://stripe.com/en-ca/privacy), [Helcim privacy / subprocessor list](https://legal.helcim.com/ca/privacy-policy/subprocessors/).
+Helcim is a Calgary-based payment processor offering interchange-plus pricing with automatic volume-tiered margins, first-class Canadian rails (Interac Debit, ACH/EFT-PAD), and a Canadian-operated stack. See [Helcim pricing](https://www.helcim.com/pricing/) for current rates, and [`docs/PRICING.md`](./docs/PRICING.md) for a dated cost comparison against alternatives.
 
 ---
 
