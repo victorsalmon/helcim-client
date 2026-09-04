@@ -41,7 +41,7 @@
     "payment-processing",
     "typescript"
   ],
-  "author": "Clock Lobster <dev@clocklobster.com>",
+  "author": "Victor Salmon",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/victorsalmon/helcim-client.git"
