@@ -51,12 +51,13 @@
   },
   "homepage": "https://github.com/victorsalmon/helcim-client#readme",
   "devDependencies": {
-    "@fast-check/vitest": "^0.2.0",
+    "@fast-check/vitest": "^0.4.1",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/vitest-runner": "^10.0.0",
-    "@types/node": "^22.10.2",
-    "fast-check": "^3.23.0",
-    "typescript": "^5.7.2",
-    "vitest": "^3.2.7"
+    "@types/node": "^26.4.1",
+    "fast-check": "^4.9.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   }
 }
