@@ -19,6 +19,10 @@ describe('util — sha256', () => {
   it('matches known SHA-256 vector', () => {
     // SHA-256("") = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     expect(sha256('')).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+    expect(sha256('The quick brown fox jumps over the lazy dog')).toBe(
+      'd7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592'
+    );
+    expect(sha256('café')).toBe('850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e');
   });
 
   it('is deterministic for the same input', () => {
@@ -55,6 +59,11 @@ describe('util — generateIdempotencyKey', () => {
 });
 
 describe('util — firstString', () => {
+  it('trims only leading whitespace if trailing is added by mutant', () => {
+    expect(firstString({ a: '  hi' }, ['a'])).toBe('hi');
+    expect(firstString({ a: 'hi  ' }, ['a'])).toBe('hi');
+  });
+
   it('returns the first non-empty string value for the given keys', () => {
     expect(firstString({ a: '', b: 'x' }, ['a', 'b'])).toBe('x');
     expect(firstString({ a: 'y', b: 'x' }, ['a', 'b'])).toBe('y');
@@ -96,6 +105,12 @@ describe('util — firstString', () => {
 });
 
 describe('util — firstNumber', () => {
+  it('skips Infinity directly and falls back', () => {
+    expect(firstNumber({ a: Infinity, b: 5 }, ['a'])).toBeNull();
+    expect(firstNumber({ a: -Infinity, b: 5 }, ['a'])).toBeNull();
+    expect(firstNumber({ a: Infinity }, ['a'])).toBeNull();
+  });
+
   it('returns a numeric value directly', () => {
     expect(firstNumber({ a: 5 }, ['a'])).toBe(5);
   });
@@ -192,6 +207,42 @@ describe('util — firstArray', () => {
 
   it('returns null for non-arrays', () => {
     expect(firstArray({ a: 'x' }, ['a'])).toBeNull();
+  });
+});
+
+describe('util — isProviderErrorStatus', () => {
+  it('returns false for non-object, null, array, and undefined inputs', () => {
+    expect(isProviderErrorStatus(null)).toBe(false);
+    expect(isProviderErrorStatus(undefined)).toBe(false);
+    expect(isProviderErrorStatus('string')).toBe(false);
+    expect(isProviderErrorStatus(42)).toBe(false);
+    expect(isProviderErrorStatus([1, 2])).toBe(false);
+    expect(isProviderErrorStatus(true)).toBe(false);
+  });
+
+  it('returns false when no status is present', () => {
+    expect(isProviderErrorStatus({})).toBe(false);
+    expect(isProviderErrorStatus({ id: 1 })).toBe(false);
+  });
+
+  it('returns true for declined, failed, and error (case-insensitive)', () => {
+    expect(isProviderErrorStatus({ status: 'DECLINED' })).toBe(true);
+    expect(isProviderErrorStatus({ status: 'Failed' })).toBe(true);
+    expect(isProviderErrorStatus({ status: 'error' })).toBe(true);
+    expect(isProviderErrorStatus({ Status: 'DECLINED' })).toBe(true);
+    expect(isProviderErrorStatus({ Status: 'Failed' })).toBe(true);
+    expect(isProviderErrorStatus({ Status: 'error' })).toBe(true);
+  });
+
+  it('returns false for non-error statuses', () => {
+    expect(isProviderErrorStatus({ status: 'APPROVED' })).toBe(false);
+    expect(isProviderErrorStatus({ status: 'success' })).toBe(false);
+    expect(isProviderErrorStatus({ status: '' })).toBe(false);
+  });
+
+  it('matches substrings as whole words only', () => {
+    expect(isProviderErrorStatus({ status: 'declinedx' })).toBe(false);
+    expect(isProviderErrorStatus({ status: 'xdeclined' })).toBe(false);
   });
 });
 

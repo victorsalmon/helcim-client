@@ -138,8 +138,10 @@ describe('verifyHelcimWebhook', () => {
     const ts = '1700000000';
     const body = '{"type":"cardTransaction","id":42}';
     const sig = sign(VERIFIER, id, ts, body);
-    // Empty string base64-decodes to zero bytes
+    // Empty string base64-decodes to zero bytes, but is caught by the empty-string guard
     expect(verifyHelcimWebhook(id, ts, body, `v1,${sig}`, '')).toBe(false);
+    // Non-empty padding-only token decodes to zero bytes and reaches the length check
+    expect(verifyHelcimWebhook(id, ts, body, `v1,${sig}`, '=')).toBe(false);
   });
 
   it('handles signatures with extra whitespace between entries', () => {

@@ -495,6 +495,53 @@ describe('client — request helper branches', () => {
     expect(result.id).toBe(0);
     expect(result.customerCode).toBe('');
   });
+
+  it('sends no body when opts.body is undefined', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: {} });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await client.connectionTest();
+    expect(calls[0].body).toBeUndefined();
+  });
+
+  it('includes an idempotency-key header when provided', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: {} });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await client.processSubscriptionPayment(1, 1, 'abc');
+    expect(calls[0].headers['idempotency-key']).toBe('abc');
+  });
+
+  it('includes numeric 0 query params on the URL (falsy but valid)', async () => {
+    const { fetchImpl, calls } = mockFetch({ body: { data: [] } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await client.getCustomers({ page: 0, customerCode: '' });
+    const url = new URL(calls[0].url);
+    expect(url.searchParams.get('page')).toBe('0');
+    expect(url.searchParams.has('customerCode')).toBe(false);
+  });
+
+  it('throws with a string errors field', async () => {
+    const { fetchImpl } = mockFetch({ status: 400, body: { errors: 'Bad request' } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(client.getCustomer(1)).rejects.toThrow('Bad request');
+  });
+
+  it('throws with the first element of an array errors field', async () => {
+    const { fetchImpl } = mockFetch({ status: 400, body: { errors: ['First error', 'Second'] } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(client.getCustomer(1)).rejects.toThrow('First error');
+  });
+
+  it('throws with the HTTP status message when errors is not a string or string array', async () => {
+    const { fetchImpl } = mockFetch({ status: 400, body: { errors: [{ message: 'nope' }] } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(client.getCustomer(1)).rejects.toThrow(/Helcim GET .* failed with HTTP 400/);
+  });
+
+  it('throws with the HTTP status message when the response body is not JSON', async () => {
+    const { fetchImpl } = mockFetch({ status: 500, text: 'Internal Server Error' });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(client.getCustomer(1)).rejects.toThrow(/Helcim GET .* failed with HTTP 500/);
+  });
 });
 
 // ─── Bank accounts ──────────────────────────────────────────────────────────

@@ -64,8 +64,17 @@ describe('validateHelcimPayHash', () => {
     expect(validateHelcimPayHash({ a: 1 }, 'hash', '')).toBe(false);
   });
 
-  it('rejects when only data is empty (falsy)', () => {
-    expect(validateHelcimPayHash({} as any, 'hash', 'secret')).toBe(false);
+  it('rejects null data even when the hash would match', () => {
+    const data = null as any;
+    const secret = 's';
+    const hash = computeHash(data, secret); // sha256('null' + secret)
+    expect(validateHelcimPayHash(data, hash, secret)).toBe(false);
+  });
+
+  it('rejects null hash without hashing', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    expect(validateHelcimPayHash(data, null as any, secret)).toBe(false);
   });
 
   it('rejects when only hash is empty', () => {
@@ -73,6 +82,12 @@ describe('validateHelcimPayHash', () => {
     const secret = 's';
     const hash = computeHash(data, secret);
     expect(validateHelcimPayHash(data, '', secret)).toBe(false);
+  });
+
+  it('rejects null secretToken even when the hash would match', () => {
+    const data = { a: 1 };
+    const hash = computeHash(data, 'null'); // matches sha256(jsonEncoded + 'null')
+    expect(validateHelcimPayHash(data, hash, null as any)).toBe(false);
   });
 
   it('rejects when only secretToken is empty', () => {
