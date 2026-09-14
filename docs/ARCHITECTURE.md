@@ -155,7 +155,7 @@ This lets the client absorb Helcim's inconsistent casing without requiring upstr
 
 ## Configuration
 
-`buildHelcimConfig` (from `src/config.ts` and re-exported by `src/index.ts`) resolves the base URL and API token from environment variables or explicit values:
+`createHelcimConfigFromEnv` (from `src/config.ts` and re-exported by `src/index.ts`) resolves the base URL and API token from environment variables or explicit values:
 
 ```mermaid
 flowchart TD

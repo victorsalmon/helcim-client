@@ -60,15 +60,7 @@ Run with Stryker 10.x and the Vitest runner. The package is configured to mutate
 | **Total mutation score** | **99.88 %** |
 | **Covered mutation score** | **100.00 %** |
 
-### Per-file breakdown
-
-| File | Total mutants | Killed | Ignored | Covered score |
-|---|---|---|---|---|
-| `src/client.ts` | 1,465 | 1,465 | 0 | 100.00 % |
-| `src/config.ts` | 34 | 32 | 2 | 100.00 % |
-| `src/helcimpay.ts` | 54 | 54 | 0 | 100.00 % |
-| `src/util.ts` | 87 | 87 | 0 | 100.00 % |
-| `src/webhook.ts` | 95 | 95 | 0 | 100.00 % |
+Mutation results and per-file detail: see [`docs/mutation-evidence.md`](./mutation-evidence.md).
 
 The two ignored mutants in `src/config.ts` are excluded by Stryker because they depend on environment variables at instrument time and cannot be executed hermetically. All security-critical paths (webhook HMAC, HelcimPay hash, idempotency, and token handling) are fully covered with zero untriaged survivors.
 
@@ -108,7 +100,7 @@ The report verifier additionally rejects:
 
 * Any runtime/compile error mutant.
 * Any timeout.
-* A total score below **90 %**.
+* A covered mutation score below **90 %**.
 
 ### View the report
 
@@ -128,7 +120,7 @@ npm run test:compliance
 npm run test:mutation
 ```
 
-All four gates must pass before the change is considered safe to merge.
+All five gates must pass before the change is considered safe to merge.
 
 ### Re-testing only the surviving mutants
 

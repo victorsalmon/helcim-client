@@ -59,7 +59,6 @@ pnpm add @clocklobster/helcim-client
 
 ```typescript
 import { createHelcimClient, createHelcimConfigFromEnv } from '@clocklobster/helcim-client';
-import { fetch } from 'undici'; // or global fetch if Node >= 18
 
 // Configuration is read from the consuming application's environment.
 // Required: HELCIM_API_TOKEN. Optional: HELCIM_ENV / HELCIM_BASE_URL / HELCIM_WEBHOOK_VERIFIER_TOKEN.
@@ -123,16 +122,7 @@ This package is built with a **property-based + mutation-validated** QA pipeline
 | Compliance contracts | `npm run test:compliance` | Idempotency, field presence, and endpoint-shape invariants |
 | Mutation testing | `npm run test:mutation` | Stryker + Vitest; current **covered score 100.00 %** |
 
-Latest Stryker run:
-
-| File | Total mutants | Killed | Ignored | Covered score |
-|---|---|---|---|---|
-| `src/client.ts` | 1,465 | 1,465 | 0 | 100.00 % |
-| `src/config.ts` | 34 | 32 | 2 | 100.00 % |
-| `src/helcimpay.ts` | 54 | 54 | 0 | 100.00 % |
-| `src/util.ts` | 87 | 87 | 0 | 100.00 % |
-| `src/webhook.ts` | 95 | 95 | 0 | 100.00 % |
-| **Total** | **1,735** | **1,733** | **2** | **100.00 %** |
+Mutation results and per-file detail: see [docs/mutation-evidence.md](docs/mutation-evidence.md).
 
 The two ignored mutants in `src/config.ts` depend on environment variables at instrument time and cannot be executed hermetically; they are neither survivors nor no-coverage. All security-critical paths (credential handling, webhook HMAC, HelcimPay hash, and idempotency) are fully triaged with zero untriaged survivors.
 

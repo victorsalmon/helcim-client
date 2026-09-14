@@ -24,7 +24,7 @@ This is the most common comparison for SaaS, e-commerce, and invoice businesses.
 | Provider | Model | Rate on a $100 domestic consumer-card transaction | Rate on a $100 premium/reward card transaction |
 |---|---|---|---|
 | **Stripe** | Flat rate | **2.9 % + $0.30** = $3.20 | **2.9 % + $0.30** = $3.20 (same) |
-| **Helcim** | Interchange-plus | ~IC 1.5 % + $0.50 + $0.25 = ~$2.25 | ~IC 1.8 % + $0.50 + $0.25 = ~$2.55 |
+| **Helcim** | Interchange-plus | ~IC 1.5 % + 0.50 % + $0.25 = ~$2.25 | ~IC 1.8 % + 0.50 % + $0.25 = ~$2.55 |
 
 At a typical Canadian consumer credit-card interchange of **1.5 %**, Helcim's $100 online transaction costs **~$2.25** versus Stripe's **$3.20** — a **30 % reduction** in processing cost. For a business doing **$50,000/month** in online card volume, that difference is roughly **$475/month** or **$5,700/year**.
 

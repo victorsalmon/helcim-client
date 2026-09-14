@@ -10,7 +10,7 @@ What the library *does* provide is a secure baseline that makes downstream compl
 
 | Control | Implementation |
 |---|---|
-| No bundled credentials | API tokens and webhook verifier tokens are supplied at runtime through `buildHelcimConfig`. Nothing in this package contains real credentials. |
+| No bundled credentials | API tokens and webhook verifier tokens are supplied at runtime through `createHelcimConfigFromEnv`. Nothing in this package contains real credentials. |
 | Safe endpoint defaults | Test endpoint is the default. Production is selected explicitly via `env: 'production'` or `HELCIM_ENV=production`. |
 | Webhook integrity | HMAC-SHA256 with constant-time `crypto.timingSafeEqual` comparison; supports multi-signature headers. |
 | HelcimPay integrity | SHA-256 hash verification of the response object, with Unicode-escape matching to Helcim's PHP behavior. |
