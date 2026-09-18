@@ -16,7 +16,11 @@ flowchart TD
     subgraph Core
         B[config.ts]
         C[client.ts]
-        D[util.ts]
+        T[transport.ts]
+        R[resources/*.ts]
+        D[decode.ts]
+        U[types.ts]
+        V[util.ts]
     end
 
     subgraph Verification
@@ -27,10 +31,17 @@ flowchart TD
     A --> B
     A --> C
     A --> D
+    A --> U
     A --> E
     A --> F
     S --> B
     S --> C
+    C --> T
+    C --> R
+    R --> T
+    R --> D
+    R --> V
+    D --> V
 ```
 
 | File | Responsibility |
@@ -38,8 +49,12 @@ flowchart TD
 | `src/index.ts` | Public exports for the main package. |
 | `src/sandbox.ts` | Convenience factory for test-mode clients. |
 | `src/config.ts` | Parse environment / explicit config; resolve base URL and API token. |
-| `src/client.ts` | Helcim API operations: customers, cards, bank accounts, plans, subscriptions, invoices, ACH, transactions, refunds, HelcimPay. |
-| `src/util.ts` | Helper decoders (`firstString`, `firstNumber`, `firstArray`), `sha256`, `isProviderErrorStatus`, and idempotency-key generation. |
+| `src/client.ts` | Composition root: wires the transport and resource factories into the public client and re-exports shared types/decoders. |
+| `src/transport.ts` | Single HTTP entry point: headers, per-request timeout, bounded retry policy, and the `Idempotency-Key` header. |
+| `src/resources/*.ts` | Endpoint groups (customers, cards, bank/ACH, plans, subscriptions, invoices, transactions, refunds, HelcimPay), each a factory over `{ request }`. |
+| `src/decode.ts` | Response decoders plus validation/unwrapping helpers. |
+| `src/types.ts` | Shared entity and input types. |
+| `src/util.ts` | Provider-shape helpers (`firstString`, `firstNumber`, `firstArray`), `sha256`, `isProviderErrorStatus`, and idempotency-key generation. |
 | `src/webhook.ts` | `verifyHelcimWebhook` — HMAC-SHA256 signature verification with constant-time comparison. |
 | `src/helcimpay.ts` | `validateHelcimPayHash` and `parseHelcimPayEventMessage` for HelcimPay.js checkout responses. |
 
@@ -65,7 +80,7 @@ sequenceDiagram
     C-->>App: HelcimCustomer
 ```
 
-Every mutating call includes an **idempotency key** (`Idempotency-Key`) by default. The same input produces the same key, so retries are safe.
+Write calls that support replay protection include an **idempotency key** (`Idempotency-Key`). The default key is random per call, so pass an explicit `idempotencyKey` when a retry must be replay-safe.
 
 ---
 
@@ -175,4 +190,4 @@ The default is the **test endpoint**, so a missing `HELCIM_ENV` cannot accidenta
 
 ## Idempotency
 
-Every mutating API call (`POST`, `PUT`, `DELETE`) automatically generates an idempotency key from the request body using `crypto.randomUUID`. This is sent as the `Idempotency-Key` header. Callers can also pass their own key for cross-request replay safety.
+Mutating write calls that support replay protection generate a random idempotency key using `crypto.randomUUID` and send it as the `Idempotency-Key` header. Callers can pass their own key for cross-request replay safety.

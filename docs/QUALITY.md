@@ -110,7 +110,7 @@ After a run, open `reports/mutation/mutation.html` in a browser, or inspect `str
 
 ## How to re-test after a change
 
-If you fork this package and want to re-proof the pipeline, run the exact same sequence used in CI:
+If you fork this package and want to re-proof the pipeline, run the full local gate sequence:
 
 ```bash
 npm run typecheck

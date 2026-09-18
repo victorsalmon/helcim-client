@@ -61,7 +61,7 @@ pnpm add @clocklobster/helcim-client
 import { createHelcimClient, createHelcimConfigFromEnv } from '@clocklobster/helcim-client';
 
 // Configuration is read from the consuming application's environment.
-// Required: HELCIM_API_TOKEN. Optional: HELCIM_ENV / HELCIM_BASE_URL / HELCIM_WEBHOOK_VERIFIER_TOKEN.
+// Required: HELCIM_API_TOKEN. Optional: HELCIM_ENV / HELCIM_BASE_URL / HELCIM_WEBHOOK_VERIFIER_TOKEN / HELCIM_TIMEOUT_MS / HELCIM_MAX_RETRIES.
 const config = createHelcimConfigFromEnv();
 if (!config) throw new Error('Helcim is not configured — set HELCIM_API_TOKEN');
 
@@ -109,6 +109,8 @@ const valid = validateHelcimPayHash(
   secretToken,   // the secret token from HelcimPay configuration
 );
 ```
+
+Runnable example: [`examples/verify-webhook.mjs`](./examples/verify-webhook.mjs) — run with `npm run build && node examples/verify-webhook.mjs`.
 
 ---
 
