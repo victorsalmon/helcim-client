@@ -139,6 +139,20 @@ describe('validateHelcimPayHash', () => {
     const hash = computeHelcimHash(data, secret);
     expect(validateHelcimPayHash(data, hash, secret)).toBe(true);
   });
+
+  it('rejects a wrong-length hash without throwing', () => {
+    const data = { a: 1 };
+    expect(validateHelcimPayHash(data, 'short', 's')).toBe(false);
+    expect(validateHelcimPayHash(data, `${computeHash(data, 's')}00`, 's')).toBe(false);
+  });
+
+  it('rejects a hash that differs from the computed digest by one character', () => {
+    const data = { a: 1 };
+    const secret = 's';
+    const hash = computeHash(data, secret);
+    const mutated = `${hash.slice(0, -1)}${hash.at(-1) === '0' ? '1' : '0'}`;
+    expect(validateHelcimPayHash(data, mutated, secret)).toBe(false);
+  });
 });
 
 describe('parseHelcimPayEventMessage', () => {
@@ -343,3 +357,11 @@ fcTest.prop([fc.string()])(
     expect(() => parseHelcimPayEventMessage(msg)).not.toThrow();
   }
 );
+
+fcTest.prop([
+  fc.record({ transactionId: fc.integer(), status: fc.string() }),
+  fc.string(),
+  fc.string({ minLength: 1, maxLength: 40 }),
+])('validateHelcimPayHash never throws for arbitrary hash strings', (data, hash, secret) => {
+  expect(() => validateHelcimPayHash(data, hash, secret)).not.toThrow();
+});

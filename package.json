@@ -53,6 +53,9 @@
     "url": "https://github.com/victorsalmon/helcim-client/issues"
   },
   "homepage": "https://github.com/victorsalmon/helcim-client#readme",
+  "overrides": {
+    "qs": "^6.16.0"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@fast-check/vitest": "^0.5.0",

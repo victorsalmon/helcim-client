@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Transport retries now allocate a fresh `AbortSignal.timeout` per attempt. The
+  timeout signal was previously created once before the retry loop, so after a
+  first-attempt timeout every retry was handed an already-aborted signal and
+  failed instantly instead of using its own timeout budget.
+- `validateHelcimPayHash` now compares the computed and reported digests in
+  constant time (`crypto.timingSafeEqual`) instead of a short-circuiting string
+  comparison.
+
+### Security
+
+- `createHelcimConfigFromEnv` and `createTransport` reject a base URL that is
+  not HTTPS (loopback hosts are tolerated for local test servers), so the
+  `api-token` header can never be sent over plaintext HTTP.
+- Override the dev-only transitive `qs` dependency to `^6.16.0`, clearing the
+  `npm audit` findings inherited through Stryker's `typed-rest-client`.
+
 ## 0.5.0 - 2026-09-12 (tag later removed)
 
 ### Changed

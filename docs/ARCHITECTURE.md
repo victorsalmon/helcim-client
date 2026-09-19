@@ -50,7 +50,7 @@ flowchart TD
 | `src/sandbox.ts` | Convenience factory for test-mode clients. |
 | `src/config.ts` | Parse environment / explicit config; resolve base URL and API token. |
 | `src/client.ts` | Composition root: wires the transport and resource factories into the public client and re-exports shared types/decoders. |
-| `src/transport.ts` | Single HTTP entry point: headers, per-request timeout, bounded retry policy, and the `Idempotency-Key` header. |
+| `src/transport.ts` | Single HTTP entry point: headers, a fresh per-attempt timeout signal, bounded retry policy, and the `Idempotency-Key` header. Rejects a non-HTTPS base URL at construction. |
 | `src/resources/*.ts` | Endpoint groups (customers, cards, bank/ACH, plans, subscriptions, invoices, transactions, refunds, HelcimPay), each a factory over `{ request }`. |
 | `src/decode.ts` | Response decoders plus validation/unwrapping helpers. |
 | `src/types.ts` | Shared entity and input types. |
@@ -141,7 +141,7 @@ sequenceDiagram
     V-->>App: true / false
 ```
 
-The hash is computed on the **compact, escaped JSON** of `data` plus the `secretToken`, exactly matching Helcim's PHP `json_encode` behavior for special Unicode characters. The comparison is case-insensitive and trims surrounding whitespace.
+The hash is computed on the **compact, escaped JSON** of `data` plus the `secretToken`, exactly matching Helcim's PHP `json_encode` behavior for special Unicode characters. The comparison is case-insensitive, trims surrounding whitespace, and is **constant-time** (`crypto.timingSafeEqual`) so the digest comparison cannot leak a matching prefix.
 
 ---
 
@@ -184,7 +184,7 @@ flowchart TD
     G -->|empty| I[null config]
 ```
 
-The default is the **test endpoint**, so a missing `HELCIM_ENV` cannot accidentally send requests to production.
+The default is the **test endpoint**, so a missing `HELCIM_ENV` cannot accidentally send requests to production. `HELCIM_BASE_URL` must resolve to an HTTPS URL (loopback `http://localhost`/`http://127.0.0.1`/`http://[::1]` is tolerated for local test servers); any other scheme fails closed at config resolution and again in `createTransport`, because every request carries the `api-token` header.
 
 ---
 

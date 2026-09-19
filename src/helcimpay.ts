@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { sha256 } from './util.js';
 
 /**
@@ -6,6 +7,19 @@ import { sha256 } from './util.js';
  * Initialize a checkout session and validate the response hash so callers can
  * trust the returned card transaction id.
  */
+
+/**
+ * Compare two hex digests without leaking their common prefix through
+ * comparison timing. The digest length is not secret (both sides are a SHA-256
+ * hex digest), so an early length mismatch is safe; the byte comparison itself
+ * must not short-circuit.
+ */
+function constantTimeEqualHex(left: string, right: string): boolean {
+  const leftBytes = Buffer.from(left);
+  const rightBytes = Buffer.from(right);
+  if (leftBytes.length !== rightBytes.length) return false;
+  return timingSafeEqual(leftBytes, rightBytes);
+}
 
 /**
  * Validate a HelcimPay.js transaction response hash.
@@ -42,8 +56,9 @@ export function validateHelcimPayHash(
     (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
   );
   const computed = sha256(jsonEncoded + secretToken);
-  // Case-insensitive comparison — both are hex digests.
-  return computed.toLowerCase() === hash.trim().toLowerCase();
+  // Case-insensitive comparison — both are hex digests. Compare in constant
+  // time: this check is the integrity primitive for a money-moving response.
+  return constantTimeEqualHex(computed, hash.trim().toLowerCase());
 }
 
 /**
