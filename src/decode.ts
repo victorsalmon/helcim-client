@@ -1,5 +1,17 @@
 import { HELCIM_BOOLEAN_TRUE } from './types.js';
-import type { HelcimAddress, HelcimCustomer, HelcimCard, HelcimCardTransaction, HelcimPaymentPlan, HelcimSubscriptionPayment, HelcimSubscription, HelcimBankAccount, HelcimPADAgreement, HelcimACHTransaction, HelcimInvoice } from './types.js';
+import type {
+  HelcimAddress,
+  HelcimCustomer,
+  HelcimCard,
+  HelcimCardTransaction,
+  HelcimPaymentPlan,
+  HelcimSubscriptionPayment,
+  HelcimSubscription,
+  HelcimBankAccount,
+  HelcimPADAgreement,
+  HelcimACHTransaction,
+  HelcimInvoice,
+} from './types.js';
 import { firstString, firstNumber, firstArray, optionalString } from './util.js';
 
 // ─── Response decoders ──────────────────────────────────────────────────────
@@ -22,9 +34,12 @@ export function decodeAddress(raw: unknown): HelcimAddress | null {
   return {
     name,
     street1,
-    street2: optionalString(firstString(record, ['street2', 'Street2', 'street_2']) ?? undefined) ?? undefined,
+    street2:
+      optionalString(firstString(record, ['street2', 'Street2', 'street_2']) ?? undefined) ??
+      undefined,
     city: optionalString(firstString(record, ['city', 'City']) ?? undefined) ?? undefined,
-    province: optionalString(firstString(record, ['province', 'Province']) ?? undefined) ?? undefined,
+    province:
+      optionalString(firstString(record, ['province', 'Province']) ?? undefined) ?? undefined,
     country: optionalString(firstString(record, ['country', 'Country']) ?? undefined) ?? undefined,
     postalCode,
     phone: optionalString(firstString(record, ['phone', 'Phone']) ?? undefined) ?? undefined,
@@ -102,10 +117,16 @@ export function decodePaymentPlan(raw: unknown): HelcimPaymentPlan {
   const record = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
   const type = firstString(record, ['type', 'Type']) as HelcimPaymentPlan['type'];
   const status = firstString(record, ['status', 'Status']) as HelcimPaymentPlan['status'];
-  const billingPeriod = firstString(record, ['billingPeriod', 'billing_period']) as HelcimPaymentPlan['billingPeriod'];
+  const billingPeriod = firstString(record, [
+    'billingPeriod',
+    'billing_period',
+  ]) as HelcimPaymentPlan['billingPeriod'];
   const termType = firstString(record, ['termType', 'term_type']) as HelcimPaymentPlan['termType'];
   const taxType = firstString(record, ['taxType', 'tax_type']) as HelcimPaymentPlan['taxType'];
-  const paymentMethod = firstString(record, ['paymentMethod', 'payment_method']) as HelcimPaymentPlan['paymentMethod'];
+  const paymentMethod = firstString(record, [
+    'paymentMethod',
+    'payment_method',
+  ]) as HelcimPaymentPlan['paymentMethod'];
   return {
     id: firstNumber(record, ['id', 'Id']) ?? 0,
     dateCreated: firstString(record, ['dateCreated', 'date_created']),
@@ -120,7 +141,10 @@ export function decodePaymentPlan(raw: unknown): HelcimPaymentPlan {
     recurringAmount: firstNumber(record, ['recurringAmount', 'recurring_amount']),
     billSetupImmediately: firstString(record, ['billSetupImmediately', 'bill_setup_immediately']),
     billingPeriod: billingPeriod ?? null,
-    billingPeriodIncrements: firstNumber(record, ['billingPeriodIncrements', 'billing_period_increments']),
+    billingPeriodIncrements: firstNumber(record, [
+      'billingPeriodIncrements',
+      'billing_period_increments',
+    ]),
     dateBilling: firstString(record, ['dateBilling', 'date_billing']),
     termType: termType ?? null,
     freeTrialPeriod: firstNumber(record, ['freeTrialPeriod', 'free_trial_period']),
@@ -211,7 +235,11 @@ export function decodeBankAccount(raw: unknown): HelcimBankAccount {
     bankIdNumber: firstString(record, ['bankIdNumber', 'bank_id_number']),
     transitNumber: firstString(record, ['transitNumber', 'transit_number']),
     routingNumber: firstString(record, ['routingNumber', 'routing_number']),
-    bankAccountNumberL4: firstString(record, ['bankAccountNumberL4', 'bankAccountNumberL4l4', 'bank_account_number_l4']),
+    bankAccountNumberL4: firstString(record, [
+      'bankAccountNumberL4',
+      'bankAccountNumberL4l4',
+      'bank_account_number_l4',
+    ]),
     address: decodeAddress(record.address ?? record.Address),
     raw: record,
   };
@@ -262,7 +290,10 @@ export function decodeACHTransaction(raw: unknown): HelcimACHTransaction {
     currency: firstNumber(record, ['currency', 'Currency']),
     approvalCode: firstString(record, ['approvalCode', 'approval_code']),
     test: testNum !== null ? testNum === HELCIM_BOOLEAN_TRUE : null,
-    acquirerTransactionId: firstString(record, ['acquirerTransactionId', 'acquirer_transaction_id']),
+    acquirerTransactionId: firstString(record, [
+      'acquirerTransactionId',
+      'acquirer_transaction_id',
+    ]),
     responseMessage: firstString(record, ['responseMessage', 'response_message']),
     statusBatch: firstNumber(record, ['statusBatch', 'status_batch']),
     dateClosed: firstString(record, ['dateClosed', 'date_closed']),
@@ -334,7 +365,10 @@ export function assertPositiveInteger(value: number, message: string): void {
  * endpoints return the object directly. This helper picks the first object
  * found in the precedence order, falling back to the raw record itself.
  */
-export function unwrapRecord(raw: Record<string, unknown>, keys: string[]): Record<string, unknown> {
+export function unwrapRecord(
+  raw: Record<string, unknown>,
+  keys: string[]
+): Record<string, unknown> {
   for (const key of keys) {
     const value = raw[key];
     if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -375,5 +409,3 @@ export function addressToPayload(addr: HelcimAddress): Record<string, string | u
     email: optionalString(addr.email),
   };
 }
-
-

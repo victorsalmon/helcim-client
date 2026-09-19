@@ -1,8 +1,23 @@
 import type { TransportRequest } from '../transport.js';
 import { HELCIM_ACH_CURRENCY, numericBoolean } from '../types.js';
-import type { HelcimBankAccount, HelcimPADAgreement, HelcimACHTransaction, CreateBankAccountInput, ProcessACHWithdrawInput } from '../types.js';
+import type {
+  HelcimBankAccount,
+  HelcimPADAgreement,
+  HelcimACHTransaction,
+  CreateBankAccountInput,
+  ProcessACHWithdrawInput,
+} from '../types.js';
 import { generateIdempotencyKey, firstString, firstNumber, firstArray } from '../util.js';
-import { decodeBankAccount, decodePADAgreement, decodeACHTransaction, assertPositiveAmount, assertNonEmptyString, assertPositiveInteger, unwrapRecord, unwrapDataObject } from '../decode.js';
+import {
+  decodeBankAccount,
+  decodePADAgreement,
+  decodeACHTransaction,
+  assertPositiveAmount,
+  assertNonEmptyString,
+  assertPositiveInteger,
+  unwrapRecord,
+  unwrapDataObject,
+} from '../decode.js';
 
 export interface bankAndAchContext {
   request: TransportRequest;
@@ -16,7 +31,10 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
     customerId: number,
     input: CreateBankAccountInput
   ): Promise<{ id: number; message: string }> {
-    assertPositiveInteger(customerId, 'Helcim createBankAccount requires a positive integer customerId');
+    assertPositiveInteger(
+      customerId,
+      'Helcim createBankAccount requires a positive integer customerId'
+    );
     assertNonEmptyString(input.bankAccountNumber, 'createBankAccount bankAccountNumber');
     assertNonEmptyString(input.countryAlpha2, 'createBankAccount countryAlpha2');
     assertNonEmptyString(input.provinceAlpha2, 'createBankAccount provinceAlpha2');
@@ -48,31 +66,57 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
 
   /** List a customer's bank accounts. */
   async function getCustomerBankAccounts(customerId: number): Promise<HelcimBankAccount[]> {
-    assertPositiveInteger(customerId, 'Helcim getCustomerBankAccounts requires a positive integer customerId');
+    assertPositiveInteger(
+      customerId,
+      'Helcim getCustomerBankAccounts requires a positive integer customerId'
+    );
     const raw = await request('GET', `/customers/${customerId}/bank-accounts`);
-    const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data', 'bankAccounts', 'bank_accounts']) ?? []);
+    const arr = Array.isArray(raw)
+      ? raw
+      : (firstArray(raw, ['data', 'bankAccounts', 'bank_accounts']) ?? []);
     return arr.map(decodeBankAccount);
   }
 
   /** Retrieve a single bank account for a customer. */
-  async function getBankAccount(customerId: number, bankAccountId: number): Promise<HelcimBankAccount> {
-    assertPositiveInteger(customerId, 'Helcim getBankAccount requires a positive integer customerId');
-    assertPositiveInteger(bankAccountId, 'Helcim getBankAccount requires a positive integer bankAccountId');
+  async function getBankAccount(
+    customerId: number,
+    bankAccountId: number
+  ): Promise<HelcimBankAccount> {
+    assertPositiveInteger(
+      customerId,
+      'Helcim getBankAccount requires a positive integer customerId'
+    );
+    assertPositiveInteger(
+      bankAccountId,
+      'Helcim getBankAccount requires a positive integer bankAccountId'
+    );
     const raw = await request('GET', `/customers/${customerId}/bank-accounts/${bankAccountId}`);
     return decodeBankAccount(unwrapDataObject(raw));
   }
 
   /** Set a customer's default bank account. */
-  async function setBankAccountDefault(customerId: number, bankAccountId: number): Promise<boolean> {
-    assertPositiveInteger(customerId, 'Helcim setBankAccountDefault requires a positive integer customerId');
-    assertPositiveInteger(bankAccountId, 'Helcim setBankAccountDefault requires a positive integer bankAccountId');
+  async function setBankAccountDefault(
+    customerId: number,
+    bankAccountId: number
+  ): Promise<boolean> {
+    assertPositiveInteger(
+      customerId,
+      'Helcim setBankAccountDefault requires a positive integer customerId'
+    );
+    assertPositiveInteger(
+      bankAccountId,
+      'Helcim setBankAccountDefault requires a positive integer bankAccountId'
+    );
     await request('PATCH', `/customers/${customerId}/bank-accounts/${bankAccountId}/default`);
     return true;
   }
 
   /** Request that a customer add a new bank account via Helcim's hosted flow. */
   async function requestNewBankAccount(customerId: number): Promise<{ message: string }> {
-    assertPositiveInteger(customerId, 'Helcim requestNewBankAccount requires a positive integer customerId');
+    assertPositiveInteger(
+      customerId,
+      'Helcim requestNewBankAccount requires a positive integer customerId'
+    );
     const raw = await request('POST', `/customers/${customerId}/bank-accounts/request`);
     const message = firstString(raw, ['message', 'Message']) ?? '';
     return { message };
@@ -116,8 +160,14 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
     input: ProcessACHWithdrawInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    assertPositiveInteger(input.bankAccountId, 'Helcim processACHWithdraw requires a positive integer bankAccountId');
-    assertPositiveInteger(input.customerId, 'Helcim processACHWithdraw requires a positive integer customerId');
+    assertPositiveInteger(
+      input.bankAccountId,
+      'Helcim processACHWithdraw requires a positive integer bankAccountId'
+    );
+    assertPositiveInteger(
+      input.customerId,
+      'Helcim processACHWithdraw requires a positive integer customerId'
+    );
     assertPositiveAmount(input.amount, 'processACHWithdraw amount');
     if (
       input.currencyId !== HELCIM_ACH_CURRENCY.CAD &&
@@ -138,17 +188,22 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
 
   /** Retrieve a single ACH transaction by id. */
   async function getACHTransaction(transactionId: number): Promise<HelcimACHTransaction> {
-    assertPositiveInteger(transactionId, 'Helcim getACHTransaction requires a positive integer transactionId');
+    assertPositiveInteger(
+      transactionId,
+      'Helcim getACHTransaction requires a positive integer transactionId'
+    );
     const raw = await request('GET', `/ach/transactions/${transactionId}`);
     return decodeACHTransaction(unwrapRecord(raw, ['transaction', 'data']));
   }
 
   /** List ACH transactions, optionally filtered by customer. */
-  async function getACHTransactions(params: {
-    customerId?: number;
-    page?: number;
-    limit?: number;
-  } = {}): Promise<HelcimACHTransaction[]> {
+  async function getACHTransactions(
+    params: {
+      customerId?: number;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<HelcimACHTransaction[]> {
     const raw = await request('GET', '/ach/transactions', {
       query: {
         customerId: params.customerId,
@@ -166,7 +221,10 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
     amount: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    assertPositiveInteger(transactionId, 'Helcim refundACH requires a positive integer transactionId');
+    assertPositiveInteger(
+      transactionId,
+      'Helcim refundACH requires a positive integer transactionId'
+    );
     assertPositiveAmount(amount, 'refundACH amount');
     const raw = await request('POST', `/ach/refund/${transactionId}`, {
       body: { amount },
@@ -180,7 +238,10 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
     transactionId: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    assertPositiveInteger(transactionId, 'Helcim voidACH requires a positive integer transactionId');
+    assertPositiveInteger(
+      transactionId,
+      'Helcim voidACH requires a positive integer transactionId'
+    );
     const raw = await request('POST', `/ach/void/${transactionId}`, { idempotencyKey });
     return decodeACHTransaction(unwrapRecord(raw, ['transaction']));
   }
@@ -190,7 +251,10 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
     transactionId: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimACHTransaction> {
-    assertPositiveInteger(transactionId, 'Helcim cancelACH requires a positive integer transactionId');
+    assertPositiveInteger(
+      transactionId,
+      'Helcim cancelACH requires a positive integer transactionId'
+    );
     const raw = await request('POST', `/ach/cancel/${transactionId}`, { idempotencyKey });
     return decodeACHTransaction(unwrapRecord(raw, ['transaction']));
   }
@@ -212,4 +276,3 @@ export function createBankAndAchApi({ request }: bankAndAchContext) {
     cancelACH,
   };
 }
-

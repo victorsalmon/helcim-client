@@ -1,7 +1,19 @@
 import type { TransportRequest } from '../transport.js';
-import type { HelcimPaymentPlan, HelcimSubscription, CreatePaymentPlanInput, CreateSubscriptionInput } from '../types.js';
+import type {
+  HelcimPaymentPlan,
+  HelcimSubscription,
+  CreatePaymentPlanInput,
+  CreateSubscriptionInput,
+} from '../types.js';
 import { generateIdempotencyKey, firstArray } from '../util.js';
-import { decodePaymentPlan, decodeSubscription, assertPositiveAmount, assertNonEmptyString, assertPositiveInteger, decodeFirstInData } from '../decode.js';
+import {
+  decodePaymentPlan,
+  decodeSubscription,
+  assertPositiveAmount,
+  assertNonEmptyString,
+  assertPositiveInteger,
+  decodeFirstInData,
+} from '../decode.js';
 
 export interface RecurringContext {
   request: TransportRequest;
@@ -11,9 +23,7 @@ export interface RecurringContext {
 export function createRecurringApi({ request }: RecurringContext) {
   // ─── Payment plans ─────────────────────────────────────────────────────
   /** Create a payment plan (subscription or cycle schedule). */
-  async function createPaymentPlan(
-    input: CreatePaymentPlanInput
-  ): Promise<HelcimPaymentPlan> {
+  async function createPaymentPlan(input: CreatePaymentPlanInput): Promise<HelcimPaymentPlan> {
     assertNonEmptyString(input.name, 'createPaymentPlan name');
     assertNonEmptyString(input.currency, 'createPaymentPlan currency');
     assertNonEmptyString(input.type, 'createPaymentPlan type');
@@ -57,11 +67,13 @@ export function createRecurringApi({ request }: RecurringContext) {
   }
 
   /** List payment plans, optionally filtered by status or paginated. */
-  async function getPaymentPlans(params: {
-    page?: number;
-    limit?: number;
-    status?: 'active' | 'inactive';
-  } = {}): Promise<HelcimPaymentPlan[]> {
+  async function getPaymentPlans(
+    params: {
+      page?: number;
+      limit?: number;
+      status?: 'active' | 'inactive';
+    } = {}
+  ): Promise<HelcimPaymentPlan[]> {
     const raw = await request('GET', '/payment-plans', {
       query: { page: params.page, limit: params.limit, status: params.status },
     });
@@ -82,7 +94,10 @@ export function createRecurringApi({ request }: RecurringContext) {
     input: CreateSubscriptionInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimSubscription> {
-    assertPositiveInteger(input.paymentPlanId, 'Helcim createSubscription requires a positive integer paymentPlanId');
+    assertPositiveInteger(
+      input.paymentPlanId,
+      'Helcim createSubscription requires a positive integer paymentPlanId'
+    );
     assertNonEmptyString(input.customerCode, 'createSubscription customerCode');
     const sub: Record<string, unknown> = {
       paymentPlanId: input.paymentPlanId,
@@ -114,7 +129,10 @@ export function createRecurringApi({ request }: RecurringContext) {
     subscriptionId: number,
     includeSubObjects = false
   ): Promise<HelcimSubscription> {
-    assertPositiveInteger(subscriptionId, 'Helcim getSubscription requires a positive integer subscriptionId');
+    assertPositiveInteger(
+      subscriptionId,
+      'Helcim getSubscription requires a positive integer subscriptionId'
+    );
     const raw = await request('GET', `/subscriptions/${subscriptionId}`, {
       query: includeSubObjects ? { includeSubObjects: true } : {},
     });
@@ -122,13 +140,15 @@ export function createRecurringApi({ request }: RecurringContext) {
   }
 
   /** List subscriptions, optionally filtered by customer or payment plan. */
-  async function getSubscriptions(params: {
-    customerCode?: string;
-    paymentPlanId?: number;
-    status?: string;
-    page?: number;
-    limit?: number;
-  } = {}): Promise<HelcimSubscription[]> {
+  async function getSubscriptions(
+    params: {
+      customerCode?: string;
+      paymentPlanId?: number;
+      status?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<HelcimSubscription[]> {
     const raw = await request('GET', '/subscriptions', {
       query: {
         customerCode: params.customerCode,
@@ -144,7 +164,10 @@ export function createRecurringApi({ request }: RecurringContext) {
 
   /** Delete a subscription by id. */
   async function deleteSubscription(subscriptionId: number): Promise<boolean> {
-    assertPositiveInteger(subscriptionId, 'Helcim deleteSubscription requires a positive integer subscriptionId');
+    assertPositiveInteger(
+      subscriptionId,
+      'Helcim deleteSubscription requires a positive integer subscriptionId'
+    );
     await request('DELETE', `/subscriptions/${subscriptionId}`);
     return true;
   }
@@ -156,8 +179,14 @@ export function createRecurringApi({ request }: RecurringContext) {
     paymentNumber: number,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimSubscription> {
-    assertPositiveInteger(subscriptionId, 'Helcim processSubscriptionPayment requires a positive integer subscriptionId');
-    assertPositiveInteger(paymentNumber, 'Helcim processSubscriptionPayment requires a positive integer paymentNumber');
+    assertPositiveInteger(
+      subscriptionId,
+      'Helcim processSubscriptionPayment requires a positive integer subscriptionId'
+    );
+    assertPositiveInteger(
+      paymentNumber,
+      'Helcim processSubscriptionPayment requires a positive integer paymentNumber'
+    );
     const raw = await request('POST', '/procedures/process-payment', {
       body: { subscriptionId, paymentNumber },
       idempotencyKey,
@@ -178,4 +207,3 @@ export function createRecurringApi({ request }: RecurringContext) {
     processSubscriptionPayment,
   };
 }
-

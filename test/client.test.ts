@@ -19,11 +19,10 @@ type FetchCall = {
   body: string | undefined;
 };
 
-function mockFetch(response: {
-  status?: number;
-  body?: unknown;
-  text?: string;
-}): { fetchImpl: typeof fetch; calls: FetchCall[] } {
+function mockFetch(response: { status?: number; body?: unknown; text?: string }): {
+  fetchImpl: typeof fetch;
+  calls: FetchCall[];
+} {
   const calls: FetchCall[] = [];
   const fetchImpl = vi.fn(async (url: string, init: any) => {
     calls.push({
@@ -34,8 +33,7 @@ function mockFetch(response: {
     });
     const status = response.status ?? 200;
     const text =
-      response.text ??
-      (response.body !== undefined ? JSON.stringify(response.body) : '');
+      response.text ?? (response.body !== undefined ? JSON.stringify(response.body) : '');
     return {
       ok: status >= 200 && status < 300,
       status,
@@ -199,17 +197,17 @@ describe('client — initializeHelcimPay', () => {
   it('throws if paymentType is missing', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.initializeHelcimPay({ paymentType: '' as any })
-    ).rejects.toThrow(/paymentType/);
+    await expect(client.initializeHelcimPay({ paymentType: '' as any })).rejects.toThrow(
+      /paymentType/
+    );
   });
 
   it('throws if the response is missing tokens', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.initializeHelcimPay({ paymentType: 'verify' })
-    ).rejects.toThrow(/checkoutToken and secretToken/);
+    await expect(client.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(
+      /checkoutToken and secretToken/
+    );
   });
 
   it('rejects a non-positive amount', async () => {
@@ -345,9 +343,9 @@ describe('client — createSubscription', () => {
   it('throws on empty customerCode', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.createSubscription({ paymentPlanId: 5, customerCode: '' })
-    ).rejects.toThrow(/customerCode/);
+    await expect(client.createSubscription({ paymentPlanId: 5, customerCode: '' })).rejects.toThrow(
+      /customerCode/
+    );
   });
 });
 
@@ -408,9 +406,7 @@ describe('client — error handling', () => {
       body: { errors: 'Unauthorized' },
     });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.createCustomer({ contactName: 'X' })
-    ).rejects.toThrow(/^Unauthorized$/);
+    await expect(client.createCustomer({ contactName: 'X' })).rejects.toThrow(/^Unauthorized$/);
   });
 
   it('falls back to HTTP message when provider error string is whitespace-only', async () => {
@@ -419,9 +415,9 @@ describe('client — error handling', () => {
       body: { errors: '   ' },
     });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.createCustomer({ contactName: 'X' })
-    ).rejects.toThrow(/Helcim POST \/customers failed with HTTP 400/);
+    await expect(client.createCustomer({ contactName: 'X' })).rejects.toThrow(
+      /Helcim POST \/customers failed with HTTP 400/
+    );
   });
 
   it('throws with the first error message on a non-2xx response', async () => {
@@ -430,33 +426,25 @@ describe('client — error handling', () => {
       body: { errors: ['Amount is required'] },
     });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.createCustomer({ contactName: 'X' })
-    ).rejects.toThrow(/Amount is required/);
+    await expect(client.createCustomer({ contactName: 'X' })).rejects.toThrow(/Amount is required/);
   });
 
   it('falls back to a status-code message when errors array is empty', async () => {
     const { fetchImpl } = mockFetch({ status: 500, body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.createCustomer({ contactName: 'X' })
-    ).rejects.toThrow(/HTTP 500/);
+    await expect(client.createCustomer({ contactName: 'X' })).rejects.toThrow(/HTTP 500/);
   });
 
   it('does not throw on a non-JSON error body', async () => {
     const { fetchImpl } = mockFetch({ status: 502, text: '<html>Bad Gateway</html>' });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.createCustomer({ contactName: 'X' })
-    ).rejects.toThrow(/HTTP 502/);
+    await expect(client.createCustomer({ contactName: 'X' })).rejects.toThrow(/HTTP 502/);
   });
 
   it('falls back to a status-code message when errors[0] is not a string', async () => {
     const { fetchImpl } = mockFetch({ status: 400, body: { errors: [{ code: 'X' }] } });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(
-      client.createCustomer({ contactName: 'X' })
-    ).rejects.toThrow(/HTTP 400/);
+    await expect(client.createCustomer({ contactName: 'X' })).rejects.toThrow(/HTTP 400/);
   });
 });
 
@@ -602,11 +590,18 @@ describe('client — bank accounts', () => {
   it('createBankAccount rejects invalid customerId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(client.createBankAccount(0, {
-      accountCorporate: 1, accountType: 1, bankAccountNumber: '123',
-      city: 'C', countryAlpha2: 'CA', provinceAlpha2: 'AB',
-      postalCode: 'H0H0H0', streetAddress: '1 St',
-    })).rejects.toThrow();
+    await expect(
+      client.createBankAccount(0, {
+        accountCorporate: 1,
+        accountType: 1,
+        bankAccountNumber: '123',
+        city: 'C',
+        countryAlpha2: 'CA',
+        provinceAlpha2: 'AB',
+        postalCode: 'H0H0H0',
+        streetAddress: '1 St',
+      })
+    ).rejects.toThrow();
   });
 
   it('getCustomerBankAccounts returns decoded bank accounts', async () => {
@@ -717,9 +712,14 @@ describe('client — ACH transactions', () => {
   it('processACHWithdraw rejects invalid currencyId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(client.processACHWithdraw({
-      bankAccountId: 1, customerId: 1, amount: 10, currencyId: 3 as any,
-    })).rejects.toThrow();
+    await expect(
+      client.processACHWithdraw({
+        bankAccountId: 1,
+        customerId: 1,
+        amount: 10,
+        currencyId: 3 as any,
+      })
+    ).rejects.toThrow();
   });
 
   it('getACHTransaction returns decoded transaction', async () => {
@@ -807,7 +807,12 @@ describe('client — Payment API', () => {
       amount: 50,
       currency: 'CAD',
       ipAddress: '10.0.0.1',
-      cardData: { cardNumber: '0000000000000000', cardExpiry: '1257', cardCVV: '123', cardHolderName: 'Example' },
+      cardData: {
+        cardNumber: '0000000000000000',
+        cardExpiry: '1257',
+        cardCVV: '123',
+        cardHolderName: 'Example',
+      },
     });
     const body = JSON.parse(calls[0].body!);
     expect(body.cardData.cardNumber).toBe('0000000000000000');
@@ -816,9 +821,14 @@ describe('client — Payment API', () => {
   it('processPurchase rejects non-positive amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(client.processPurchase({
-      amount: 0, currency: 'CAD', ipAddress: '1.1.1.1', cardData: { cardToken: 't' },
-    })).rejects.toThrow();
+    await expect(
+      client.processPurchase({
+        amount: 0,
+        currency: 'CAD',
+        ipAddress: '1.1.1.1',
+        cardData: { cardToken: 't' },
+      })
+    ).rejects.toThrow();
   });
 
   it('processPreauth sends POST', async () => {
@@ -827,7 +837,10 @@ describe('client — Payment API', () => {
     });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     await client.processPreauth({
-      amount: 100, currency: 'CAD', ipAddress: '1.1.1.1', cardData: { cardToken: 't' },
+      amount: 100,
+      currency: 'CAD',
+      ipAddress: '1.1.1.1',
+      cardData: { cardToken: 't' },
     });
     expect(calls[0].url).toBe('https://api.helcim.test/v2/payment/preauth');
   });
@@ -837,7 +850,12 @@ describe('client — Payment API', () => {
       body: { transaction: { transactionId: 2, status: 'APPROVED' } },
     });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await client.capturePreauth({ cardTransactionId: 1, amount: 50, currency: 'CAD', ipAddress: '1.1.1.1' });
+    await client.capturePreauth({
+      cardTransactionId: 1,
+      amount: 50,
+      currency: 'CAD',
+      ipAddress: '1.1.1.1',
+    });
     expect(calls[0].url).toBe('https://api.helcim.test/v2/payment/capture');
     const body = JSON.parse(calls[0].body!);
     expect(body.cardTransactionId).toBe(1);
@@ -963,20 +981,20 @@ fcTest.prop([fc.integer({ min: 1, max: 999999 })])(
   }
 );
 
-fcTest.prop([
-  fc.integer({ min: 1, max: 999999 }),
-  fc.integer({ min: 1, max: 999 }),
-])('processSubscriptionPayment always sends idempotency key and body', async (subId, payNum) => {
-  const { fetchImpl, calls } = mockFetch({ body: { data: [{ id: subId }] } });
-  const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-  await client.processSubscriptionPayment(subId, payNum);
-  const body = JSON.parse(calls[0].body!);
-  return (
-    calls[0].headers['idempotency-key'].length === 25 &&
-    body.subscriptionId === subId &&
-    body.paymentNumber === payNum
-  );
-});
+fcTest.prop([fc.integer({ min: 1, max: 999999 }), fc.integer({ min: 1, max: 999 })])(
+  'processSubscriptionPayment always sends idempotency key and body',
+  async (subId, payNum) => {
+    const { fetchImpl, calls } = mockFetch({ body: { data: [{ id: subId }] } });
+    const client = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await client.processSubscriptionPayment(subId, payNum);
+    const body = JSON.parse(calls[0].body!);
+    return (
+      calls[0].headers['idempotency-key'].length === 25 &&
+      body.subscriptionId === subId &&
+      body.paymentNumber === payNum
+    );
+  }
+);
 
 // Verify that the env-based config + client factory compose without throwing
 // for any non-empty token.

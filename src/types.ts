@@ -223,8 +223,7 @@ export const HELCIM_ACH_CURRENCY = {
   USD: 2,
 } as const;
 
-export type HelcimACHCurrency =
-  (typeof HELCIM_ACH_CURRENCY)[keyof typeof HELCIM_ACH_CURRENCY];
+export type HelcimACHCurrency = (typeof HELCIM_ACH_CURRENCY)[keyof typeof HELCIM_ACH_CURRENCY];
 
 /**
  * Helcim's numeric boolean convention.
@@ -235,8 +234,7 @@ export type HelcimACHCurrency =
 export const HELCIM_BOOLEAN_TRUE = 1 as const;
 export const HELCIM_BOOLEAN_FALSE = 0 as const;
 
-export type HelcimNumericBoolean =
-  typeof HELCIM_BOOLEAN_TRUE | typeof HELCIM_BOOLEAN_FALSE;
+export type HelcimNumericBoolean = typeof HELCIM_BOOLEAN_TRUE | typeof HELCIM_BOOLEAN_FALSE;
 
 /** Convert a boolean into Helcim's numeric convention (true = 1, false = 0). */
 export function numericBoolean(value: boolean): HelcimNumericBoolean {

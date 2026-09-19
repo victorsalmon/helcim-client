@@ -37,8 +37,9 @@ export function validateHelcimPayHash(
   // UTF-16 code unit to the `\\uXXXX` format Helcim hashes. Using code units
   // deliberately encodes astral characters as the same surrogate pairs PHP
   // json_encode produces.
-  const jsonEncoded = JSON.stringify(data).replace(/[\u007f-\uffff]/g, (character) =>
-    `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+  const jsonEncoded = JSON.stringify(data).replace(
+    /[\u007f-\uffff]/g,
+    (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
   );
   const computed = sha256(jsonEncoded + secretToken);
   // Case-insensitive comparison — both are hex digests.
@@ -59,9 +60,7 @@ export interface HelcimPayResponse {
   hash: string | null;
 }
 
-export function parseHelcimPayEventMessage(
-  eventMessage: string
-): HelcimPayResponse {
+export function parseHelcimPayEventMessage(eventMessage: string): HelcimPayResponse {
   let parsed: unknown;
   try {
     parsed = JSON.parse(eventMessage);
@@ -83,7 +82,6 @@ export function parseHelcimPayEventMessage(
     typeof dataWrapper?.data === 'object' && !Array.isArray(dataWrapper.data)
       ? (dataWrapper.data as Record<string, unknown>)
       : null;
-  const hash =
-    typeof dataWrapper?.hash === 'string' ? dataWrapper.hash : null;
+  const hash = typeof dataWrapper?.hash === 'string' ? dataWrapper.hash : null;
   return { status, data: innerData, hash };
 }

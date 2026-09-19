@@ -24,9 +24,7 @@ describe('createTransport timeout', () => {
         })
     );
     const transport = createTransport({ ...config, timeoutMs: 25 }, hangingFetch as typeof fetch);
-    await expect(transport.request('GET', '/customers')).rejects.toThrow(
-      /timed out after 25ms/
-    );
+    await expect(transport.request('GET', '/customers')).rejects.toThrow(/timed out after 25ms/);
   });
 });
 
@@ -56,9 +54,7 @@ describe('createTransport retry policy', () => {
   it('never retries a write without an idempotency key', async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(500));
     const transport = createTransport({ ...config, maxRetries: 3 }, fetchMock as typeof fetch);
-    await expect(transport.request('POST', '/purchase', { body: {} })).rejects.toThrow(
-      /HTTP 500/
-    );
+    await expect(transport.request('POST', '/purchase', { body: {} })).rejects.toThrow(/HTTP 500/);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

@@ -107,9 +107,7 @@ export interface HelcimWebhookEvent {
   raw: Record<string, unknown>;
 }
 
-export function parseHelcimWebhookBody(
-  rawBody: string
-): HelcimWebhookEvent {
+export function parseHelcimWebhookBody(rawBody: string): HelcimWebhookEvent {
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawBody);
@@ -120,15 +118,12 @@ export function parseHelcimWebhookBody(
     return { type: null, transactionId: null, subscriptionId: null, raw: {} };
   }
   const record = parsed as Record<string, unknown>;
-  const type =
-    typeof record.type === 'string' ? record.type : null;
+  const type = typeof record.type === 'string' ? record.type : null;
   // cardTransaction: { id, type }  → id is the transaction id
   // terminalCancel:  { data: { ... }, type }
   // subscriptionPayment: { subscriptionId, type } or { data: { subscriptionId }, type }
   const directId =
-    typeof record.id === 'string' || typeof record.id === 'number'
-      ? String(record.id)
-      : null;
+    typeof record.id === 'string' || typeof record.id === 'number' ? String(record.id) : null;
   const data = record.data as Record<string, unknown> | undefined;
   const nestedId =
     typeof data?.transactionId === 'string' || typeof data?.transactionId === 'number'

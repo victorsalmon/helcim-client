@@ -15,7 +15,9 @@ function computeHelcimHash(data: Record<string, unknown>, secret: string): strin
       .map((codePoint) => `\\u${codePoint.codePointAt(0)!.toString(16).padStart(4, '0')}`)
       .join('')
   );
-  return createHash('sha256').update(json + secret, 'utf8').digest('hex');
+  return createHash('sha256')
+    .update(json + secret, 'utf8')
+    .digest('hex');
 }
 
 describe('validateHelcimPayHash', () => {
@@ -323,7 +325,8 @@ fcTest.prop([
 });
 
 fcTest.prop([
-  fc.array(fc.constantFrom('é', '—', '中', '😀', 'a', 'Z', ' '), { minLength: 1, maxLength: 40 })
+  fc
+    .array(fc.constantFrom('é', '—', '中', '😀', 'a', 'Z', ' '), { minLength: 1, maxLength: 40 })
     .map((chars) => chars.join(''))
     // eslint-disable-next-line no-control-regex -- \x00 is intentional: filters for non-ASCII strings
     .filter((value) => /[^\x00-\x7f]/.test(value)),

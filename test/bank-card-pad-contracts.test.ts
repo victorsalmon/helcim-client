@@ -56,7 +56,13 @@ describe('getCardTransaction contract', () => {
 
   it('decodes response fields', async () => {
     const { fetchImpl } = mockFetch({
-      body: { transactionId: 42, status: 'APPROVED', amount: 100.5, currency: 'CAD', type: 'purchase' },
+      body: {
+        transactionId: 42,
+        status: 'APPROVED',
+        amount: 100.5,
+        currency: 'CAD',
+        type: 'purchase',
+      },
     });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     const r = await c.getCardTransaction(42);
@@ -74,7 +80,13 @@ describe('getCardTransactions contract', () => {
   it('GETs /card-transactions with all query params', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { data: [] } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.getCardTransactions({ customerCode: 'C1', dateFrom: '2024-01-01', dateTo: '2024-12-31', page: 1, limit: 10 });
+    await c.getCardTransactions({
+      customerCode: 'C1',
+      dateFrom: '2024-01-01',
+      dateTo: '2024-12-31',
+      page: 1,
+      limit: 10,
+    });
     assertMethod(calls[0], 'GET');
     assertPath(calls[0], '/card-transactions');
     assertQuery(calls[0], 'customerCode', 'C1');
@@ -216,25 +228,33 @@ describe('createBankAccount contract', () => {
   it('rejects empty bankAccountNumber', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createBankAccount(1, { ...baseInput, bankAccountNumber: '' })).rejects.toThrow(/bankAccountNumber/);
+    await expect(c.createBankAccount(1, { ...baseInput, bankAccountNumber: '' })).rejects.toThrow(
+      /bankAccountNumber/
+    );
   });
 
   it('rejects whitespace-only bankAccountNumber', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createBankAccount(1, { ...baseInput, bankAccountNumber: '  ' })).rejects.toThrow(/bankAccountNumber/);
+    await expect(c.createBankAccount(1, { ...baseInput, bankAccountNumber: '  ' })).rejects.toThrow(
+      /bankAccountNumber/
+    );
   });
 
   it('rejects empty countryAlpha2', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createBankAccount(1, { ...baseInput, countryAlpha2: '' })).rejects.toThrow(/countryAlpha2/);
+    await expect(c.createBankAccount(1, { ...baseInput, countryAlpha2: '' })).rejects.toThrow(
+      /countryAlpha2/
+    );
   });
 
   it('rejects empty provinceAlpha2', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createBankAccount(1, { ...baseInput, provinceAlpha2: '' })).rejects.toThrow(/provinceAlpha2/);
+    await expect(c.createBankAccount(1, { ...baseInput, provinceAlpha2: '' })).rejects.toThrow(
+      /provinceAlpha2/
+    );
   });
 
   it('rejects empty city', async () => {
@@ -246,13 +266,17 @@ describe('createBankAccount contract', () => {
   it('rejects empty postalCode', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createBankAccount(1, { ...baseInput, postalCode: '' })).rejects.toThrow(/postalCode/);
+    await expect(c.createBankAccount(1, { ...baseInput, postalCode: '' })).rejects.toThrow(
+      /postalCode/
+    );
   });
 
   it('rejects empty streetAddress', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createBankAccount(1, { ...baseInput, streetAddress: '' })).rejects.toThrow(/streetAddress/);
+    await expect(c.createBankAccount(1, { ...baseInput, streetAddress: '' })).rejects.toThrow(
+      /streetAddress/
+    );
   });
 
   it('unwraps data object from response', async () => {

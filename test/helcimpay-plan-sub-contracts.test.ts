@@ -161,7 +161,10 @@ describe('initializeHelcimPay contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
-      invoiceRequest: { contactName: 'Example Customer', lineItems: [{ description: 'x', quantity: 1, price: 5, total: 5 }] },
+      invoiceRequest: {
+        contactName: 'Example Customer',
+        lineItems: [{ description: 'x', quantity: 1, price: 5, total: 5 }],
+      },
     });
     assertBodyPath(calls[0], 'invoiceRequest.contactName', 'Example Customer');
   });
@@ -252,7 +255,9 @@ describe('initializeHelcimPay contract', () => {
   it('throws on whitespace-only paymentType', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: '  ' as any })).rejects.toThrow(/paymentType/);
+    await expect(c.initializeHelcimPay({ paymentType: '  ' as any })).rejects.toThrow(
+      /paymentType/
+    );
   });
 
   it('throws on non-string paymentType', async () => {
@@ -264,37 +269,49 @@ describe('initializeHelcimPay contract', () => {
   it('throws on amount=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: 0 })).rejects.toThrow(/positive finite/);
+    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: 0 })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('throws on negative amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: -5 })).rejects.toThrow(/positive finite/);
+    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: -5 })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('throws on NaN amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: NaN })).rejects.toThrow(/positive finite/);
+    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: NaN })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('throws on Infinity amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: Infinity })).rejects.toThrow(/positive finite/);
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'purchase', amount: Infinity })
+    ).rejects.toThrow(/positive finite/);
   });
 
   it('throws on missing checkoutToken in response', async () => {
     const { fetchImpl } = mockFetch({ body: { secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(/checkoutToken and secretToken/);
+    await expect(c.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(
+      /checkoutToken and secretToken/
+    );
   });
 
   it('throws on missing secretToken in response', async () => {
     const { fetchImpl } = mockFetch({ body: { checkoutToken: 'c' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(/checkoutToken and secretToken/);
+    await expect(c.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(
+      /checkoutToken and secretToken/
+    );
   });
 
   it('reads checkout_token (snake_case) from response', async () => {
@@ -308,13 +325,17 @@ describe('initializeHelcimPay contract', () => {
   it('throws on customerRequest missing contactName', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'verify', customerRequest: {} as any })).rejects.toThrow(/contactName/);
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', customerRequest: {} as any })
+    ).rejects.toThrow(/contactName/);
   });
 
   it('throws on whitespace-only customerRequest contactName', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'verify', customerRequest: { contactName: '  ' } })).rejects.toThrow(/contactName/);
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', customerRequest: { contactName: '  ' } })
+    ).rejects.toThrow(/contactName/);
   });
 });
 
@@ -428,43 +449,57 @@ describe('createPaymentPlan contract', () => {
   it('throws on empty billingPeriod', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createPaymentPlan({ ...baseInput, billingPeriod: '' as any })).rejects.toThrow(/billingPeriod/);
+    await expect(c.createPaymentPlan({ ...baseInput, billingPeriod: '' as any })).rejects.toThrow(
+      /billingPeriod/
+    );
   });
 
   it('throws on empty dateBilling', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createPaymentPlan({ ...baseInput, dateBilling: '' })).rejects.toThrow(/dateBilling/);
+    await expect(c.createPaymentPlan({ ...baseInput, dateBilling: '' })).rejects.toThrow(
+      /dateBilling/
+    );
   });
 
   it('throws on empty termType', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createPaymentPlan({ ...baseInput, termType: '' as any })).rejects.toThrow(/termType/);
+    await expect(c.createPaymentPlan({ ...baseInput, termType: '' as any })).rejects.toThrow(
+      /termType/
+    );
   });
 
   it('throws on recurringAmount=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: 0 })).rejects.toThrow(/recurringAmount/);
+    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: 0 })).rejects.toThrow(
+      /recurringAmount/
+    );
   });
 
   it('throws on negative recurringAmount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: -1 })).rejects.toThrow(/recurringAmount/);
+    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: -1 })).rejects.toThrow(
+      /recurringAmount/
+    );
   });
 
   it('throws on NaN recurringAmount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: NaN })).rejects.toThrow(/recurringAmount/);
+    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: NaN })).rejects.toThrow(
+      /recurringAmount/
+    );
   });
 
   it('throws on Infinity recurringAmount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: Infinity })).rejects.toThrow(/recurringAmount/);
+    await expect(c.createPaymentPlan({ ...baseInput, recurringAmount: Infinity })).rejects.toThrow(
+      /recurringAmount/
+    );
   });
 
   it('throws when response data array is empty', async () => {
@@ -661,43 +696,57 @@ describe('createSubscription contract', () => {
   it('rejects paymentPlanId=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createSubscription({ ...baseInput, paymentPlanId: 0 })).rejects.toThrow(/paymentPlanId/);
+    await expect(c.createSubscription({ ...baseInput, paymentPlanId: 0 })).rejects.toThrow(
+      /paymentPlanId/
+    );
   });
 
   it('rejects negative paymentPlanId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createSubscription({ ...baseInput, paymentPlanId: -1 })).rejects.toThrow(/paymentPlanId/);
+    await expect(c.createSubscription({ ...baseInput, paymentPlanId: -1 })).rejects.toThrow(
+      /paymentPlanId/
+    );
   });
 
   it('rejects non-integer paymentPlanId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createSubscription({ ...baseInput, paymentPlanId: 1.5 })).rejects.toThrow(/paymentPlanId/);
+    await expect(c.createSubscription({ ...baseInput, paymentPlanId: 1.5 })).rejects.toThrow(
+      /paymentPlanId/
+    );
   });
 
   it('rejects empty customerCode', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createSubscription({ ...baseInput, customerCode: '' })).rejects.toThrow(/customerCode/);
+    await expect(c.createSubscription({ ...baseInput, customerCode: '' })).rejects.toThrow(
+      /customerCode/
+    );
   });
 
   it('rejects whitespace-only customerCode', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createSubscription({ ...baseInput, customerCode: '  ' })).rejects.toThrow(/customerCode/);
+    await expect(c.createSubscription({ ...baseInput, customerCode: '  ' })).rejects.toThrow(
+      /customerCode/
+    );
   });
 
   it('rejects recurringAmount=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createSubscription({ ...baseInput, recurringAmount: 0 })).rejects.toThrow(/recurringAmount/);
+    await expect(c.createSubscription({ ...baseInput, recurringAmount: 0 })).rejects.toThrow(
+      /recurringAmount/
+    );
   });
 
   it('rejects negative recurringAmount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createSubscription({ ...baseInput, recurringAmount: -5 })).rejects.toThrow(/recurringAmount/);
+    await expect(c.createSubscription({ ...baseInput, recurringAmount: -5 })).rejects.toThrow(
+      /recurringAmount/
+    );
   });
 
   it('throws when response data array is empty', async () => {
@@ -784,7 +833,13 @@ describe('getSubscriptions contract', () => {
   it('GETs /subscriptions with all query params', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { data: [] } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.getSubscriptions({ customerCode: 'C1', paymentPlanId: 5, status: 'active', page: 1, limit: 10 });
+    await c.getSubscriptions({
+      customerCode: 'C1',
+      paymentPlanId: 5,
+      status: 'active',
+      page: 1,
+      limit: 10,
+    });
     assertMethod(calls[0], 'GET');
     assertPath(calls[0], '/subscriptions');
     assertQuery(calls[0], 'customerCode', 'C1');

@@ -177,7 +177,9 @@ describe('verifyHelcimWebhook', () => {
     const body = '{"type":"cardTransaction","id":42}';
     const wrongSig1 = sign(Buffer.from('wrong1').toString('base64'), id, ts, body);
     const wrongSig2 = sign(Buffer.from('wrong2').toString('base64'), id, ts, body);
-    expect(verifyHelcimWebhook(id, ts, body, `v1,${wrongSig1} v1,${wrongSig2}`, VERIFIER)).toBe(false);
+    expect(verifyHelcimWebhook(id, ts, body, `v1,${wrongSig1} v1,${wrongSig2}`, VERIFIER)).toBe(
+      false
+    );
   });
 
   it('rejects an invalid base64 verifier token', () => {
@@ -236,7 +238,9 @@ describe('parseHelcimWebhookBody', () => {
   });
 
   it('extracts a string direct subscriptionId', () => {
-    const result = parseHelcimWebhookBody('{"type":"subscriptionPayment","subscriptionId":"sub-abc"}');
+    const result = parseHelcimWebhookBody(
+      '{"type":"subscriptionPayment","subscriptionId":"sub-abc"}'
+    );
     expect(result.subscriptionId).toBe('sub-abc');
   });
 
@@ -318,8 +322,6 @@ fcTest.prop([
 fcTest.prop([fc.string({ minLength: 1 })])(
   'verifyHelcimWebhook never throws for any signature input',
   (sig) => {
-    expect(() =>
-      verifyHelcimWebhook('id', 'ts', 'body', sig, VERIFIER)
-    ).not.toThrow();
+    expect(() => verifyHelcimWebhook('id', 'ts', 'body', sig, VERIFIER)).not.toThrow();
   }
 );

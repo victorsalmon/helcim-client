@@ -34,10 +34,7 @@ export function generateIdempotencyKey(): string {
  * are skipped. Mirrors the vopay-client helper for response-field extraction
  * across provider payload shape variations.
  */
-export function firstString(
-  record: Record<string, unknown>,
-  keys: string[]
-): string | null {
+export function firstString(record: Record<string, unknown>, keys: string[]): string | null {
   for (const key of keys) {
     const value = record[key];
     if (typeof value === 'string' && value.trim()) return value.trim();
@@ -50,10 +47,7 @@ export function firstString(
  * Pick the first numeric value from a record. String-encoded numbers are
  * coerced; non-finite values are skipped.
  */
-export function firstNumber(
-  record: Record<string, unknown>,
-  keys: string[]
-): number | null {
+export function firstNumber(record: Record<string, unknown>, keys: string[]): number | null {
   for (const key of keys) {
     const value = record[key];
     if (Number.isFinite(value)) return Number(value);
@@ -69,10 +63,7 @@ export function firstNumber(
  * Pick the first boolean value from a record. String values "true"/"false"
  * (case-insensitive) and "1"/"0" are coerced.
  */
-export function firstBoolean(
-  record: Record<string, unknown>,
-  keys: string[]
-): boolean | null {
+export function firstBoolean(record: Record<string, unknown>, keys: string[]): boolean | null {
   for (const key of keys) {
     const value = record[key];
     if (typeof value === 'boolean') return value;
@@ -89,10 +80,7 @@ export function firstBoolean(
  * Pick the first array value from a record. Returns null if the value is not
  * an array.
  */
-export function firstArray(
-  record: Record<string, unknown>,
-  keys: string[]
-): unknown[] | null {
+export function firstArray(record: Record<string, unknown>, keys: string[]): unknown[] | null {
   for (const key of keys) {
     const value = record[key];
     if (Array.isArray(value)) return value;
@@ -108,7 +96,9 @@ export function firstArray(
 export function isProviderErrorStatus(raw: unknown): boolean {
   if (!raw) return false;
   const record = raw as Record<string, unknown>;
-  const status = String(record.status ?? record.Status).trim().toLowerCase();
+  const status = String(record.status ?? record.Status)
+    .trim()
+    .toLowerCase();
   return ['declined', 'failed', 'error'].includes(status);
 }
 

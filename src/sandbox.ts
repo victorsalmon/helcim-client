@@ -27,9 +27,7 @@ export function isSandboxEnabled(env: NodeJS.ProcessEnv = process.env): boolean 
  * missing. This is the single place both product tests and first-call scripts
  * should read Helcim sandbox configuration.
  */
-export function requireSandboxCredentials(
-  env: NodeJS.ProcessEnv = process.env
-): HelcimConfig {
+export function requireSandboxCredentials(env: NodeJS.ProcessEnv = process.env): HelcimConfig {
   if (!isSandboxEnabled(env)) {
     throw new Error('HELCIM_SANDBOX_INTEGRATION is not set');
   }
@@ -54,10 +52,7 @@ export function uniqueClientReference(prefix = 'helcim-sandbox'): string {
  * the API Access Configuration not whitelisted for the operation).
  * A business validation error is NOT an auth failure.
  */
-export function isAuthOrPermissionRejection(
-  response: Response,
-  bodyText: string
-): boolean {
+export function isAuthOrPermissionRejection(response: Response, bodyText: string): boolean {
   if (response.status === 401 || response.status === 403) return true;
   if (response.status >= 500) return false;
   return /auth|token|permission|unauthorized|forbidden|api access/i.test(bodyText);

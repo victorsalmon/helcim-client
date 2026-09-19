@@ -91,10 +91,16 @@ describe('decodeCustomer — first-key isolation', () => {
     expect(decodeCustomer({ cards: [{ id: 1 }] }).cards[0].id).toBe(1);
   });
   it('decodes billingAddress from "billingAddress" (first key only)', () => {
-    expect(decodeCustomer({ billingAddress: { name: 'J', street1: '1 St', postalCode: 'H0H' } }).billingAddress?.name).toBe('J');
+    expect(
+      decodeCustomer({ billingAddress: { name: 'J', street1: '1 St', postalCode: 'H0H' } })
+        .billingAddress?.name
+    ).toBe('J');
   });
   it('decodes shippingAddress from "shippingAddress" (first key only)', () => {
-    expect(decodeCustomer({ shippingAddress: { name: 'J', street1: '2 St', postalCode: 'H0H' } }).shippingAddress?.name).toBe('J');
+    expect(
+      decodeCustomer({ shippingAddress: { name: 'J', street1: '2 St', postalCode: 'H0H' } })
+        .shippingAddress?.name
+    ).toBe('J');
   });
 });
 
@@ -187,7 +193,9 @@ describe('decodePaymentPlan — first-key isolation', () => {
     expect(decodePaymentPlan({ recurringAmount: 10 }).recurringAmount).toBe(10);
   });
   it('decodes billSetupImmediately from "billSetupImmediately" (first key only)', () => {
-    expect(decodePaymentPlan({ billSetupImmediately: 'immediate' }).billSetupImmediately).toBe('immediate');
+    expect(decodePaymentPlan({ billSetupImmediately: 'immediate' }).billSetupImmediately).toBe(
+      'immediate'
+    );
   });
   it('decodes billingPeriod from "billingPeriod" (first key only)', () => {
     expect(decodePaymentPlan({ billingPeriod: 'monthly' }).billingPeriod).toBe('monthly');
@@ -208,7 +216,9 @@ describe('decodePaymentPlan — first-key isolation', () => {
     expect(decodePaymentPlan({ taxType: 'customer' }).taxType).toBe('customer');
   });
   it('decodes taxCalculation from "taxCalculation" (first key only)', () => {
-    expect(decodePaymentPlan({ taxCalculation: 'country_only' }).taxCalculation).toBe('country_only');
+    expect(decodePaymentPlan({ taxCalculation: 'country_only' }).taxCalculation).toBe(
+      'country_only'
+    );
   });
   it('decodes termLength from "termLength" (first key only)', () => {
     expect(decodePaymentPlan({ termLength: 365 }).termLength).toBe(365);
@@ -259,7 +269,9 @@ describe('decodeSubscriptionPayment — first-key isolation', () => {
     expect(decodeSubscriptionPayment({ dateDue: '2024-01-01' }).dateDue).toBe('2024-01-01');
   });
   it('decodes dateProcessed from "dateProcessed" (first key only)', () => {
-    expect(decodeSubscriptionPayment({ dateProcessed: '2024-01-02' }).dateProcessed).toBe('2024-01-02');
+    expect(decodeSubscriptionPayment({ dateProcessed: '2024-01-02' }).dateProcessed).toBe(
+      '2024-01-02'
+    );
   });
   it('decodes paymentNumber from "paymentNumber" (first key only)', () => {
     expect(decodeSubscriptionPayment({ paymentNumber: 3 }).paymentNumber).toBe(3);
@@ -375,7 +387,10 @@ describe('decodeBankAccount — first-key isolation', () => {
     expect(decodeBankAccount({ bankAccountNumberL4l4: '1234' }).bankAccountNumberL4).toBe('1234');
   });
   it('decodes address from "address" (first key only)', () => {
-    expect(decodeBankAccount({ address: { name: 'J', street1: '1 St', postalCode: 'H0H' } }).address?.name).toBe('J');
+    expect(
+      decodeBankAccount({ address: { name: 'J', street1: '1 St', postalCode: 'H0H' } }).address
+        ?.name
+    ).toBe('J');
   });
 });
 
@@ -400,7 +415,9 @@ describe('decodePADAgreement — first-key isolation', () => {
     expect(decodePADAgreement({ dateCreated: '2024-01-01' }).dateCreated).toBe('2024-01-01');
   });
   it('decodes dateEarliestDebit from "dateEarliestDebit" (first key only)', () => {
-    expect(decodePADAgreement({ dateEarliestDebit: '2024-01-02' }).dateEarliestDebit).toBe('2024-01-02');
+    expect(decodePADAgreement({ dateEarliestDebit: '2024-01-02' }).dateEarliestDebit).toBe(
+      '2024-01-02'
+    );
   });
   it('decodes dateRevoked from "dateRevoked" (first key only)', () => {
     expect(decodePADAgreement({ dateRevoked: '2024-01-03' }).dateRevoked).toBe('2024-01-03');
@@ -465,7 +482,9 @@ describe('decodeACHTransaction — first-key isolation', () => {
     expect(decodeACHTransaction({ test: 0 }).test).toBe(false);
   });
   it('decodes acquirerTransactionId from "acquirerTransactionId" (first key only)', () => {
-    expect(decodeACHTransaction({ acquirerTransactionId: 'abc' }).acquirerTransactionId).toBe('abc');
+    expect(decodeACHTransaction({ acquirerTransactionId: 'abc' }).acquirerTransactionId).toBe(
+      'abc'
+    );
   });
   it('decodes responseMessage from "responseMessage" (first key only)', () => {
     expect(decodeACHTransaction({ responseMessage: 'ok' }).responseMessage).toBe('ok');
@@ -522,10 +541,19 @@ describe('decodeInvoice — first-key isolation', () => {
     expect(decodeInvoice({ lineItems: [{ description: 'x' }] }).lineItems).toHaveLength(1);
   });
   it('decodes line item first keys', () => {
-    const inv = decodeInvoice({ lineItems: [{
-      sku: 'abc', description: 'desc', quantity: 2, price: 5, total: 10,
-      taxAmount: 1, discountAmount: 2,
-    }] });
+    const inv = decodeInvoice({
+      lineItems: [
+        {
+          sku: 'abc',
+          description: 'desc',
+          quantity: 2,
+          price: 5,
+          total: 10,
+          taxAmount: 1,
+          discountAmount: 2,
+        },
+      ],
+    });
     expect(inv.lineItems[0].sku).toBe('abc');
     expect(inv.lineItems[0].description).toBe('desc');
     expect(inv.lineItems[0].quantity).toBe(2);
@@ -545,15 +573,17 @@ describe('assertPositiveAmount error messages', () => {
   it('initializeHelcimPay amount=0 throws with field name', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: 0 }))
-      .rejects.toThrow(/initializeHelcimPay amount/);
+    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: 0 })).rejects.toThrow(
+      /initializeHelcimPay amount/
+    );
   });
 
   it('processACHWithdraw amount=0 throws with field name', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ bankAccountId: 1, customerId: 1, amount: 0, currencyId: 1 }))
-      .rejects.toThrow(/processACHWithdraw amount/);
+    await expect(
+      c.processACHWithdraw({ bankAccountId: 1, customerId: 1, amount: 0, currencyId: 1 })
+    ).rejects.toThrow(/processACHWithdraw amount/);
   });
 
   it('refundACH amount=0 throws with field name', async () => {
@@ -565,29 +595,43 @@ describe('assertPositiveAmount error messages', () => {
   it('processPurchase amount=0 throws with field name', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processPurchase({ amount: 0, currency: 'CAD', ipAddress: '1.1.1.1', cardData: { cardToken: 't' } }))
-      .rejects.toThrow(/processPurchase amount/);
+    await expect(
+      c.processPurchase({
+        amount: 0,
+        currency: 'CAD',
+        ipAddress: '1.1.1.1',
+        cardData: { cardToken: 't' },
+      })
+    ).rejects.toThrow(/processPurchase amount/);
   });
 
   it('processPreauth amount=0 throws with field name', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processPreauth({ amount: 0, currency: 'CAD', ipAddress: '1.1.1.1', cardData: { cardToken: 't' } }))
-      .rejects.toThrow(/processPreauth amount/);
+    await expect(
+      c.processPreauth({
+        amount: 0,
+        currency: 'CAD',
+        ipAddress: '1.1.1.1',
+        cardData: { cardToken: 't' },
+      })
+    ).rejects.toThrow(/processPreauth amount/);
   });
 
   it('capturePreauth amount=0 throws with field name', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.capturePreauth({ cardTransactionId: 1, amount: 0, currency: 'CAD', ipAddress: '1.1.1.1' }))
-      .rejects.toThrow(/capturePreauth amount/);
+    await expect(
+      c.capturePreauth({ cardTransactionId: 1, amount: 0, currency: 'CAD', ipAddress: '1.1.1.1' })
+    ).rejects.toThrow(/capturePreauth amount/);
   });
 
   it('refundPurchase amount=0 throws with field name', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.refundPurchase({ cardTransactionId: 1, amount: 0, ipAddress: '1.1.1.1' }))
-      .rejects.toThrow(/refundPurchase amount/);
+    await expect(
+      c.refundPurchase({ cardTransactionId: 1, amount: 0, ipAddress: '1.1.1.1' })
+    ).rejects.toThrow(/refundPurchase amount/);
   });
 });
 

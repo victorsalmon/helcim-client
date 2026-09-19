@@ -35,7 +35,9 @@ describe('connectionTest contract', () => {
   });
 
   it('returns false on network error', async () => {
-    const fetchImpl = vi.fn(async () => { throw new Error('network'); }) as unknown as typeof fetch;
+    const fetchImpl = vi.fn(async () => {
+      throw new Error('network');
+    }) as unknown as typeof fetch;
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     expect(await c.connectionTest()).toBe(false);
   });
@@ -413,7 +415,10 @@ fcTest.prop([fc.integer({ min: 1, max: 999999 }), fc.integer({ min: 1, max: 9999
     const { fetchImpl, calls } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.setCustomerCardDefault(cid, cardId);
-    return calls[0].method === 'PATCH' && calls[0].url === `${BASE}/customers/${cid}/cards/${cardId}/default`;
+    return (
+      calls[0].method === 'PATCH' &&
+      calls[0].url === `${BASE}/customers/${cid}/cards/${cardId}/default`
+    );
   }
 );
 
@@ -424,14 +429,15 @@ fcTest.prop([
     businessName: fc.string({ minLength: 1, maxLength: 50 }),
     cellPhone: fc.string({ minLength: 1, maxLength: 20 }),
   }),
-])(
-  'createCustomer includes all provided optional fields in the body',
-  async (input) => {
-    const { fetchImpl, calls } = mockFetch({ body: { id: 1 } });
-    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.createCustomer(input);
-    const b = bodyOf(calls[0]);
-    return b.customerCode === input.customerCode && b.contactName === input.contactName &&
-           b.businessName === input.businessName && b.cellPhone === input.cellPhone;
-  }
-);
+])('createCustomer includes all provided optional fields in the body', async (input) => {
+  const { fetchImpl, calls } = mockFetch({ body: { id: 1 } });
+  const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+  await c.createCustomer(input);
+  const b = bodyOf(calls[0]);
+  return (
+    b.customerCode === input.customerCode &&
+    b.contactName === input.contactName &&
+    b.businessName === input.businessName &&
+    b.cellPhone === input.cellPhone
+  );
+});

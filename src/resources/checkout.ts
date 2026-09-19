@@ -32,12 +32,21 @@ export function createCheckoutApi({ request }: CheckoutContext) {
     }
     if (input.customerRequest) {
       assertNonEmptyString(input.customerRequest.contactName, 'customerRequest contactName');
-      const customerRequestBody: Record<string, unknown> = { contactName: input.customerRequest.contactName };
-      if (input.customerRequest.businessName) customerRequestBody.businessName = input.customerRequest.businessName;
-      if (input.customerRequest.customerCode) customerRequestBody.customerCode = input.customerRequest.customerCode;
-      if (input.customerRequest.cellPhone) customerRequestBody.cellPhone = input.customerRequest.cellPhone;
-      if (input.customerRequest.billingAddress) customerRequestBody.billingAddress = addressToPayload(input.customerRequest.billingAddress);
-      if (input.customerRequest.shippingAddress) customerRequestBody.shippingAddress = addressToPayload(input.customerRequest.shippingAddress);
+      const customerRequestBody: Record<string, unknown> = {
+        contactName: input.customerRequest.contactName,
+      };
+      if (input.customerRequest.businessName)
+        customerRequestBody.businessName = input.customerRequest.businessName;
+      if (input.customerRequest.customerCode)
+        customerRequestBody.customerCode = input.customerRequest.customerCode;
+      if (input.customerRequest.cellPhone)
+        customerRequestBody.cellPhone = input.customerRequest.cellPhone;
+      if (input.customerRequest.billingAddress)
+        customerRequestBody.billingAddress = addressToPayload(input.customerRequest.billingAddress);
+      if (input.customerRequest.shippingAddress)
+        customerRequestBody.shippingAddress = addressToPayload(
+          input.customerRequest.shippingAddress
+        );
       body.customerRequest = customerRequestBody;
     }
     if (input.invoiceRequest) {
@@ -64,4 +73,3 @@ export function createCheckoutApi({ request }: CheckoutContext) {
     initializeHelcimPay,
   };
 }
-

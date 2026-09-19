@@ -14,7 +14,8 @@ describe('Helcim compliance contracts', () => {
   });
 
   it('does not accept a forged webhook signature', () => {
-    expect(verifyHelcimWebhook('id', 'ts', '{}', 'v1,not-a-real-signature', 'dGVzdA==')).toBe(false);
+    expect(verifyHelcimWebhook('id', 'ts', '{}', 'v1,not-a-real-signature', 'dGVzdA==')).toBe(
+      false
+    );
   });
 });
-

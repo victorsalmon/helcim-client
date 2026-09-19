@@ -29,7 +29,9 @@ describe('decodeAddress — alternate key spellings', () => {
   const base = { name: 'N', street1: 'S1', postalCode: 'P' };
 
   it('decodes name from "Name"', () => {
-    expect(decodeAddress({ Name: 'Example', street1: 'S1', postalCode: 'P' })?.name).toBe('Example');
+    expect(decodeAddress({ Name: 'Example', street1: 'S1', postalCode: 'P' })?.name).toBe(
+      'Example'
+    );
   });
   it('decodes street1 from "Street1" and "street_1"', () => {
     expect(decodeAddress({ name: 'N', Street1: 'X', postalCode: 'P' })?.street1).toBe('X');
@@ -283,7 +285,9 @@ describe('decodeSubscriptionPayment — alternate key spellings', () => {
     expect(decodeSubscriptionPayment({ date_due: '2026-02-01' }).dateDue).toBe('2026-02-01');
   });
   it('decodes dateProcessed from "date_processed"', () => {
-    expect(decodeSubscriptionPayment({ date_processed: '2026-01-15' }).dateProcessed).toBe('2026-01-15');
+    expect(decodeSubscriptionPayment({ date_processed: '2026-01-15' }).dateProcessed).toBe(
+      '2026-01-15'
+    );
   });
   it('decodes paymentNumber from "payment_number"', () => {
     expect(decodeSubscriptionPayment({ payment_number: 3 }).paymentNumber).toBe(3);
@@ -396,7 +400,9 @@ describe('decodeBankAccount — alternate key spellings', () => {
     expect(decodeBankAccount({ bank_account_number_l4: '5678' }).bankAccountNumberL4).toBe('5678');
   });
   it('decodes address from "Address"', () => {
-    expect(decodeBankAccount({ Address: { name: 'N', street1: 'S', postalCode: 'P' } }).address?.name).toBe('N');
+    expect(
+      decodeBankAccount({ Address: { name: 'N', street1: 'S', postalCode: 'P' } }).address?.name
+    ).toBe('N');
   });
 });
 
@@ -421,7 +427,9 @@ describe('decodePADAgreement — alternate key spellings', () => {
     expect(decodePADAgreement({ date_created: '2026-01-02' }).dateCreated).toBe('2026-01-02');
   });
   it('decodes dateEarliestDebit from "date_earliest_debit"', () => {
-    expect(decodePADAgreement({ date_earliest_debit: '2026-01-05' }).dateEarliestDebit).toBe('2026-01-05');
+    expect(decodePADAgreement({ date_earliest_debit: '2026-01-05' }).dateEarliestDebit).toBe(
+      '2026-01-05'
+    );
   });
   it('decodes dateRevoked from "date_revoked"', () => {
     expect(decodePADAgreement({ date_revoked: '2026-01-10' }).dateRevoked).toBe('2026-01-10');
@@ -487,7 +495,9 @@ describe('decodeACHTransaction — alternate key spellings', () => {
     expect(decodeACHTransaction({ Test: 0 }).test).toBe(false);
   });
   it('decodes acquirerTransactionId from "acquirer_transaction_id"', () => {
-    expect(decodeACHTransaction({ acquirer_transaction_id: 'acq1' }).acquirerTransactionId).toBe('acq1');
+    expect(decodeACHTransaction({ acquirer_transaction_id: 'acq1' }).acquirerTransactionId).toBe(
+      'acq1'
+    );
   });
   it('decodes responseMessage from "response_message"', () => {
     expect(decodeACHTransaction({ response_message: 'OK' }).responseMessage).toBe('OK');
@@ -547,10 +557,19 @@ describe('decodeInvoice — alternate key spellings', () => {
     expect(decodeInvoice({ items: [{ sku: 'B' }] }).lineItems).toHaveLength(1);
   });
   it('decodes line-item fields from alternate keys', () => {
-    const inv = decodeInvoice({ lineItems: [{
-      SKU: 'sku1', Description: 'desc', Quantity: 2, Price: 5, Total: 10,
-      tax_amount: 1, discount_amount: 0.5,
-    }] });
+    const inv = decodeInvoice({
+      lineItems: [
+        {
+          SKU: 'sku1',
+          Description: 'desc',
+          Quantity: 2,
+          Price: 5,
+          Total: 10,
+          tax_amount: 1,
+          discount_amount: 0.5,
+        },
+      ],
+    });
     const li = inv.lineItems[0];
     expect(li.sku).toBe('sku1');
     expect(li.description).toBe('desc');

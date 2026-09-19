@@ -72,4 +72,3 @@ export function createHelcimClient(config: HelcimConfig, fetchImpl: typeof fetch
 }
 
 export type HelcimClient = ReturnType<typeof createHelcimClient>;
-

@@ -60,73 +60,97 @@ describe('processACHWithdraw contract', () => {
   it('rejects bankAccountId=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, bankAccountId: 0 })).rejects.toThrow(/bankAccountId/);
+    await expect(c.processACHWithdraw({ ...baseInput, bankAccountId: 0 })).rejects.toThrow(
+      /bankAccountId/
+    );
   });
 
   it('rejects negative bankAccountId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, bankAccountId: -1 })).rejects.toThrow(/bankAccountId/);
+    await expect(c.processACHWithdraw({ ...baseInput, bankAccountId: -1 })).rejects.toThrow(
+      /bankAccountId/
+    );
   });
 
   it('rejects non-integer bankAccountId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, bankAccountId: 1.5 })).rejects.toThrow(/bankAccountId/);
+    await expect(c.processACHWithdraw({ ...baseInput, bankAccountId: 1.5 })).rejects.toThrow(
+      /bankAccountId/
+    );
   });
 
   it('rejects customerId=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, customerId: 0 })).rejects.toThrow(/customerId/);
+    await expect(c.processACHWithdraw({ ...baseInput, customerId: 0 })).rejects.toThrow(
+      /customerId/
+    );
   });
 
   it('rejects negative customerId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, customerId: -1 })).rejects.toThrow(/customerId/);
+    await expect(c.processACHWithdraw({ ...baseInput, customerId: -1 })).rejects.toThrow(
+      /customerId/
+    );
   });
 
   it('rejects non-integer customerId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, customerId: 1.5 })).rejects.toThrow(/customerId/);
+    await expect(c.processACHWithdraw({ ...baseInput, customerId: 1.5 })).rejects.toThrow(
+      /customerId/
+    );
   });
 
   it('rejects amount=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, amount: 0 })).rejects.toThrow(/positive finite/);
+    await expect(c.processACHWithdraw({ ...baseInput, amount: 0 })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('rejects negative amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, amount: -5 })).rejects.toThrow(/positive finite/);
+    await expect(c.processACHWithdraw({ ...baseInput, amount: -5 })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('rejects NaN amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, amount: NaN })).rejects.toThrow(/positive finite/);
+    await expect(c.processACHWithdraw({ ...baseInput, amount: NaN })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('rejects Infinity amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, amount: Infinity })).rejects.toThrow(/positive finite/);
+    await expect(c.processACHWithdraw({ ...baseInput, amount: Infinity })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('rejects currencyId=3', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, currencyId: 3 as any })).rejects.toThrow(/currencyId/);
+    await expect(c.processACHWithdraw({ ...baseInput, currencyId: 3 as any })).rejects.toThrow(
+      /currencyId/
+    );
   });
 
   it('rejects currencyId=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processACHWithdraw({ ...baseInput, currencyId: 0 as any })).rejects.toThrow(/currencyId/);
+    await expect(c.processACHWithdraw({ ...baseInput, currencyId: 0 as any })).rejects.toThrow(
+      /currencyId/
+    );
   });
 
   it('accepts currencyId=2 (USD)', async () => {
@@ -494,13 +518,17 @@ describe('processPurchase contract', () => {
   it('rejects negative amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processPurchase({ ...baseInput, amount: -5 })).rejects.toThrow(/positive finite/);
+    await expect(c.processPurchase({ ...baseInput, amount: -5 })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('rejects NaN amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processPurchase({ ...baseInput, amount: NaN })).rejects.toThrow(/positive finite/);
+    await expect(c.processPurchase({ ...baseInput, amount: NaN })).rejects.toThrow(
+      /positive finite/
+    );
   });
 
   it('rejects empty currency', async () => {
@@ -524,17 +552,23 @@ describe('processPurchase contract', () => {
   it('rejects missing cardData', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processPurchase({ ...baseInput, cardData: null as any })).rejects.toThrow(/cardData/);
+    await expect(c.processPurchase({ ...baseInput, cardData: null as any })).rejects.toThrow(
+      /cardData/
+    );
   });
 
   it('rejects non-object cardData', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processPurchase({ ...baseInput, cardData: 'string' as any })).rejects.toThrow(/cardData/);
+    await expect(c.processPurchase({ ...baseInput, cardData: 'string' as any })).rejects.toThrow(
+      /cardData/
+    );
   });
 
   it('unwraps transaction object', async () => {
-    const { fetchImpl } = mockFetch({ body: { transaction: { transactionId: 1, status: 'APPROVED' } } });
+    const { fetchImpl } = mockFetch({
+      body: { transaction: { transactionId: 1, status: 'APPROVED' } },
+    });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     const r = await c.processPurchase(baseInput);
     expect(r.transactionId).toBe(1);
@@ -625,11 +659,15 @@ describe('processPreauth contract', () => {
   it('rejects missing cardData', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.processPreauth({ ...baseInput, cardData: null as any })).rejects.toThrow(/cardData/);
+    await expect(c.processPreauth({ ...baseInput, cardData: null as any })).rejects.toThrow(
+      /cardData/
+    );
   });
 
   it('unwraps transaction object', async () => {
-    const { fetchImpl } = mockFetch({ body: { transaction: { transactionId: 1, status: 'APPROVED' } } });
+    const { fetchImpl } = mockFetch({
+      body: { transaction: { transactionId: 1, status: 'APPROVED' } },
+    });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     const r = await c.processPreauth(baseInput);
     expect(r.transactionId).toBe(1);
@@ -696,19 +734,25 @@ describe('capturePreauth contract', () => {
   it('rejects cardTransactionId=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.capturePreauth({ ...baseInput, cardTransactionId: 0 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.capturePreauth({ ...baseInput, cardTransactionId: 0 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects negative cardTransactionId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.capturePreauth({ ...baseInput, cardTransactionId: -1 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.capturePreauth({ ...baseInput, cardTransactionId: -1 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects non-integer cardTransactionId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.capturePreauth({ ...baseInput, cardTransactionId: 1.5 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.capturePreauth({ ...baseInput, cardTransactionId: 1.5 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects amount=0', async () => {
@@ -809,19 +853,25 @@ describe('refundPurchase contract', () => {
   it('rejects cardTransactionId=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.refundPurchase({ ...baseInput, cardTransactionId: 0 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.refundPurchase({ ...baseInput, cardTransactionId: 0 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects negative cardTransactionId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.refundPurchase({ ...baseInput, cardTransactionId: -1 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.refundPurchase({ ...baseInput, cardTransactionId: -1 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects non-integer cardTransactionId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.refundPurchase({ ...baseInput, cardTransactionId: 1.5 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.refundPurchase({ ...baseInput, cardTransactionId: 1.5 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects amount=0', async () => {
@@ -886,19 +936,25 @@ describe('reversePurchase contract', () => {
   it('rejects cardTransactionId=0', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.reversePurchase({ ...baseInput, cardTransactionId: 0 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.reversePurchase({ ...baseInput, cardTransactionId: 0 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects negative cardTransactionId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.reversePurchase({ ...baseInput, cardTransactionId: -1 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.reversePurchase({ ...baseInput, cardTransactionId: -1 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects non-integer cardTransactionId', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.reversePurchase({ ...baseInput, cardTransactionId: 1.5 })).rejects.toThrow(/cardTransactionId/);
+    await expect(c.reversePurchase({ ...baseInput, cardTransactionId: 1.5 })).rejects.toThrow(
+      /cardTransactionId/
+    );
   });
 
   it('rejects empty ipAddress', async () => {
@@ -989,13 +1045,17 @@ describe('createInvoice contract', () => {
   it('rejects empty customerCode', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createInvoice({ ...baseInput, customerCode: '' })).rejects.toThrow(/customerCode/);
+    await expect(c.createInvoice({ ...baseInput, customerCode: '' })).rejects.toThrow(
+      /customerCode/
+    );
   });
 
   it('rejects whitespace-only customerCode', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.createInvoice({ ...baseInput, customerCode: '  ' })).rejects.toThrow(/customerCode/);
+    await expect(c.createInvoice({ ...baseInput, customerCode: '  ' })).rejects.toThrow(
+      /customerCode/
+    );
   });
 
   it('rejects empty lineItems array', async () => {

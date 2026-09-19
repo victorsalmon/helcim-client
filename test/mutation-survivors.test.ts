@@ -145,7 +145,9 @@ describe('webhook edge cases for surviving mutants', () => {
   });
 
   it('returns null subscriptionId when nested subscriptionId is a boolean', () => {
-    const r = parseHelcimWebhookBody('{"type":"subscriptionPayment","data":{"subscriptionId":true}}');
+    const r = parseHelcimWebhookBody(
+      '{"type":"subscriptionPayment","data":{"subscriptionId":true}}'
+    );
     expect(r.subscriptionId).toBeNull();
   });
 
@@ -219,13 +221,17 @@ describe('helcimPay parsing edge cases', () => {
   });
 
   it('returns null data when outer.data is an array of objects', () => {
-    const r = parseHelcimPayEventMessage(JSON.stringify({ status: 1, data: [{ data: {}, hash: 'h' }] }));
+    const r = parseHelcimPayEventMessage(
+      JSON.stringify({ status: 1, data: [{ data: {}, hash: 'h' }] })
+    );
     expect(r.data).toBeNull();
     expect(r.hash).toBeNull();
   });
 
   it('returns null innerData when dataWrapper.data is null', () => {
-    const r = parseHelcimPayEventMessage(JSON.stringify({ status: 1, data: { data: null, hash: 'h' } }));
+    const r = parseHelcimPayEventMessage(
+      JSON.stringify({ status: 1, data: { data: null, hash: 'h' } })
+    );
     expect(r.data).toBeNull();
     expect(r.hash).toBe('h');
   });
@@ -341,12 +347,14 @@ describe('payment API mutation survivors', () => {
   it('processPreauth throws when cardData is a non-object truthy value', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(client.processPreauth({
-      amount: 100,
-      currency: 'CAD',
-      ipAddress: '1.1.1.1',
-      cardData: 'not-an-object' as any,
-    })).rejects.toThrow(/cardData/);
+    await expect(
+      client.processPreauth({
+        amount: 100,
+        currency: 'CAD',
+        ipAddress: '1.1.1.1',
+        cardData: 'not-an-object' as any,
+      })
+    ).rejects.toThrow(/cardData/);
   });
 });
 

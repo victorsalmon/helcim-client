@@ -15,11 +15,10 @@ export type FetchCall = {
   body: string | undefined;
 };
 
-export function mockFetch(response: {
-  status?: number;
-  body?: unknown;
-  text?: string;
-}): { fetchImpl: typeof fetch; calls: FetchCall[] } {
+export function mockFetch(response: { status?: number; body?: unknown; text?: string }): {
+  fetchImpl: typeof fetch;
+  calls: FetchCall[];
+} {
   const calls: FetchCall[] = [];
   const fetchImpl = vi.fn(async (url: string, init: any) => {
     calls.push({
@@ -30,8 +29,7 @@ export function mockFetch(response: {
     });
     const status = response.status ?? 200;
     const text =
-      response.text ??
-      (response.body !== undefined ? JSON.stringify(response.body) : '');
+      response.text ?? (response.body !== undefined ? JSON.stringify(response.body) : '');
     return {
       ok: status >= 200 && status < 300,
       status,

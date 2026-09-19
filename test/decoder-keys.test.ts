@@ -19,7 +19,9 @@ import {
 
 describe('decodeAddress alternate keys', () => {
   it('reads name from Name (PascalCase)', () => {
-    expect(decodeAddress({ Name: 'Example', street1: '1 St', postalCode: 'H0H' })?.name).toBe('Example');
+    expect(decodeAddress({ Name: 'Example', street1: '1 St', postalCode: 'H0H' })?.name).toBe(
+      'Example'
+    );
   });
 
   it('reads street1 from Street1 and street_1', () => {
@@ -28,8 +30,12 @@ describe('decodeAddress alternate keys', () => {
   });
 
   it('reads postalCode from PostalCode and postal_code', () => {
-    expect(decodeAddress({ name: 'J', street1: '1 St', PostalCode: 'H0H' })?.postalCode).toBe('H0H');
-    expect(decodeAddress({ name: 'J', street1: '1 St', postal_code: 'H1H' })?.postalCode).toBe('H1H');
+    expect(decodeAddress({ name: 'J', street1: '1 St', PostalCode: 'H0H' })?.postalCode).toBe(
+      'H0H'
+    );
+    expect(decodeAddress({ name: 'J', street1: '1 St', postal_code: 'H1H' })?.postalCode).toBe(
+      'H1H'
+    );
   });
 
   it('reads street2 from Street2 and street_2', () => {
@@ -40,23 +46,33 @@ describe('decodeAddress alternate keys', () => {
   });
 
   it('reads city from City', () => {
-    expect(decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', City: 'Example City' })?.city).toBe('Example City');
+    expect(
+      decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', City: 'Example City' })?.city
+    ).toBe('Example City');
   });
 
   it('reads province from Province', () => {
-    expect(decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Province: 'AB' })?.province).toBe('AB');
+    expect(
+      decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Province: 'AB' })?.province
+    ).toBe('AB');
   });
 
   it('reads country from Country', () => {
-    expect(decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Country: 'CA' })?.country).toBe('CA');
+    expect(
+      decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Country: 'CA' })?.country
+    ).toBe('CA');
   });
 
   it('reads phone from Phone', () => {
-    expect(decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Phone: '555' })?.phone).toBe('555');
+    expect(
+      decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Phone: '555' })?.phone
+    ).toBe('555');
   });
 
   it('reads email from Email', () => {
-    expect(decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Email: 'a@b.com' })?.email).toBe('a@b.com');
+    expect(
+      decodeAddress({ name: 'J', street1: '1 St', postalCode: 'H0H', Email: 'a@b.com' })?.email
+    ).toBe('a@b.com');
   });
 });
 
@@ -120,11 +136,17 @@ describe('decodeCustomer alternate keys', () => {
   });
 
   it('reads billingAddress from billing_address', () => {
-    expect(decodeCustomer({ billing_address: { name: 'J', street1: '1 St', postalCode: 'H0H' } }).billingAddress?.name).toBe('J');
+    expect(
+      decodeCustomer({ billing_address: { name: 'J', street1: '1 St', postalCode: 'H0H' } })
+        .billingAddress?.name
+    ).toBe('J');
   });
 
   it('reads shippingAddress from shipping_address', () => {
-    expect(decodeCustomer({ shipping_address: { name: 'J', street1: '2 St', postalCode: 'H0H' } }).shippingAddress?.name).toBe('J');
+    expect(
+      decodeCustomer({ shipping_address: { name: 'J', street1: '2 St', postalCode: 'H0H' } })
+        .shippingAddress?.name
+    ).toBe('J');
   });
 });
 
@@ -244,7 +266,9 @@ describe('decodePaymentPlan alternate keys', () => {
   });
 
   it('reads billSetupImmediately from bill_setup_immediately', () => {
-    expect(decodePaymentPlan({ bill_setup_immediately: 'immediate' }).billSetupImmediately).toBe('immediate');
+    expect(decodePaymentPlan({ bill_setup_immediately: 'immediate' }).billSetupImmediately).toBe(
+      'immediate'
+    );
   });
 
   it('reads billingPeriod from billing_period', () => {
@@ -272,7 +296,9 @@ describe('decodePaymentPlan alternate keys', () => {
   });
 
   it('reads taxCalculation from tax_calculation', () => {
-    expect(decodePaymentPlan({ tax_calculation: 'country_only' }).taxCalculation).toBe('country_only');
+    expect(decodePaymentPlan({ tax_calculation: 'country_only' }).taxCalculation).toBe(
+      'country_only'
+    );
   });
 
   it('reads termLength from term_length', () => {
@@ -284,7 +310,9 @@ describe('decodePaymentPlan alternate keys', () => {
   });
 
   it('reads businessEmail from business_email', () => {
-    expect(decodePaymentPlan({ business_email: 'biz@test.com' }).businessEmail).toBe('biz@test.com');
+    expect(decodePaymentPlan({ business_email: 'biz@test.com' }).businessEmail).toBe(
+      'biz@test.com'
+    );
   });
 
   it('reads addOnIds from add_on_ids', () => {
@@ -330,7 +358,9 @@ describe('decodeSubscriptionPayment alternate keys', () => {
   });
 
   it('reads dateProcessed from date_processed', () => {
-    expect(decodeSubscriptionPayment({ date_processed: '2024-01-02' }).dateProcessed).toBe('2024-01-02');
+    expect(decodeSubscriptionPayment({ date_processed: '2024-01-02' }).dateProcessed).toBe(
+      '2024-01-02'
+    );
   });
 
   it('reads paymentNumber from payment_number', () => {
@@ -474,7 +504,10 @@ describe('decodeBankAccount alternate keys', () => {
   });
 
   it('reads address from Address', () => {
-    expect(decodeBankAccount({ Address: { name: 'J', street1: '1 St', postalCode: 'H0H' } }).address?.name).toBe('J');
+    expect(
+      decodeBankAccount({ Address: { name: 'J', street1: '1 St', postalCode: 'H0H' } }).address
+        ?.name
+    ).toBe('J');
   });
 });
 
@@ -505,7 +538,9 @@ describe('decodePADAgreement alternate keys', () => {
   });
 
   it('reads dateEarliestDebit from date_earliest_debit', () => {
-    expect(decodePADAgreement({ date_earliest_debit: '2024-01-02' }).dateEarliestDebit).toBe('2024-01-02');
+    expect(decodePADAgreement({ date_earliest_debit: '2024-01-02' }).dateEarliestDebit).toBe(
+      '2024-01-02'
+    );
   });
 
   it('reads dateRevoked from date_revoked', () => {
@@ -597,7 +632,9 @@ describe('decodeACHTransaction alternate keys', () => {
   });
 
   it('reads acquirerTransactionId from acquirer_transaction_id', () => {
-    expect(decodeACHTransaction({ acquirer_transaction_id: 'abc' }).acquirerTransactionId).toBe('abc');
+    expect(decodeACHTransaction({ acquirer_transaction_id: 'abc' }).acquirerTransactionId).toBe(
+      'abc'
+    );
   });
 
   it('reads responseMessage from response_message', () => {
@@ -674,10 +711,19 @@ describe('decodeInvoice alternate keys', () => {
   });
 
   it('reads line item alternate keys', () => {
-    const inv = decodeInvoice({ lineItems: [{
-      SKU: 'abc', Description: 'desc', Quantity: 2, Price: 5, Total: 10,
-      tax_amount: 1, discount_amount: 2,
-    }] });
+    const inv = decodeInvoice({
+      lineItems: [
+        {
+          SKU: 'abc',
+          Description: 'desc',
+          Quantity: 2,
+          Price: 5,
+          Total: 10,
+          tax_amount: 1,
+          discount_amount: 2,
+        },
+      ],
+    });
     expect(inv.lineItems[0].sku).toBe('abc');
     expect(inv.lineItems[0].description).toBe('desc');
     expect(inv.lineItems[0].quantity).toBe(2);

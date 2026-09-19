@@ -34,11 +34,13 @@ export function createCustomersApi({ request }: CustomersContext) {
   }
 
   /** List customers, optionally filtered by customer code or paginated. */
-  async function getCustomers(params: {
-    customerCode?: string;
-    page?: number;
-    limit?: number;
-  } = {}): Promise<HelcimCustomer[]> {
+  async function getCustomers(
+    params: {
+      customerCode?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<HelcimCustomer[]> {
     const raw = await request('GET', '/customers', {
       query: {
         customerCode: params.customerCode,
@@ -53,7 +55,10 @@ export function createCustomersApi({ request }: CustomersContext) {
   // ─── Customer cards ────────────────────────────────────────────────────
   /** List the cards stored for a customer, optionally filtered by token. */
   async function getCustomerCards(customerId: number, cardToken?: string): Promise<HelcimCard[]> {
-    assertPositiveInteger(customerId, 'Helcim getCustomerCards requires a positive integer customerId');
+    assertPositiveInteger(
+      customerId,
+      'Helcim getCustomerCards requires a positive integer customerId'
+    );
     const raw = await request('GET', `/customers/${customerId}/cards`, {
       query: { cardToken },
     });
@@ -62,9 +67,18 @@ export function createCustomersApi({ request }: CustomersContext) {
   }
 
   /** Set the default card for a customer. */
-  async function setCustomerCardDefault(customerId: number, cardId: number): Promise<HelcimCustomer[]> {
-    assertPositiveInteger(customerId, 'Helcim setCustomerCardDefault requires a positive integer customerId');
-    assertPositiveInteger(cardId, 'Helcim setCustomerCardDefault requires a positive integer cardId');
+  async function setCustomerCardDefault(
+    customerId: number,
+    cardId: number
+  ): Promise<HelcimCustomer[]> {
+    assertPositiveInteger(
+      customerId,
+      'Helcim setCustomerCardDefault requires a positive integer customerId'
+    );
+    assertPositiveInteger(
+      cardId,
+      'Helcim setCustomerCardDefault requires a positive integer cardId'
+    );
     const raw = await request('PATCH', `/customers/${customerId}/cards/${cardId}/default`);
     const arr = Array.isArray(raw) ? raw : (firstArray(raw, ['data']) ?? [raw]);
     return arr.map(decodeCustomer);
@@ -78,4 +92,3 @@ export function createCustomersApi({ request }: CustomersContext) {
     setCustomerCardDefault,
   };
 }
-

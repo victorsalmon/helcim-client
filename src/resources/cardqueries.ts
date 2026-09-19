@@ -12,19 +12,24 @@ export function createCardTransactionQueriesApi({ request }: cardTransactionQuer
   // ─── Card transactions ─────────────────────────────────────────────────
   /** Retrieve a single card transaction by id. */
   async function getCardTransaction(transactionId: number): Promise<HelcimCardTransaction> {
-    assertPositiveInteger(transactionId, 'Helcim getCardTransaction requires a positive integer transactionId');
+    assertPositiveInteger(
+      transactionId,
+      'Helcim getCardTransaction requires a positive integer transactionId'
+    );
     const raw = await request('GET', `/card-transactions/${transactionId}`);
     return decodeCardTransaction(raw);
   }
 
   /** List card transactions, optionally filtered by customer or date range. */
-  async function getCardTransactions(params: {
-    customerCode?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    page?: number;
-    limit?: number;
-  } = {}): Promise<HelcimCardTransaction[]> {
+  async function getCardTransactions(
+    params: {
+      customerCode?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<HelcimCardTransaction[]> {
     const raw = await request('GET', '/card-transactions', {
       query: {
         customerCode: params.customerCode,
@@ -43,4 +48,3 @@ export function createCardTransactionQueriesApi({ request }: cardTransactionQuer
     getCardTransactions,
   };
 }
-

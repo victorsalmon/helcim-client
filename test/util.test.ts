@@ -40,7 +40,9 @@ describe('util — sha256', () => {
 
   it('produces correct hash for ASCII input', () => {
     // SHA-256("hello") = 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
-    expect(sha256('hello')).toBe('2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824');
+    expect(sha256('hello')).toBe(
+      '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824'
+    );
   });
 });
 
@@ -287,12 +289,9 @@ fcTest.prop([fc.string({ minLength: 1 })])(
   }
 );
 
-fcTest.prop([fc.string({ minLength: 1 })])(
-  'sha256 always returns a 64-char hex string',
-  (s) => {
-    return /^[0-9a-f]{64}$/.test(sha256(s));
-  }
-);
+fcTest.prop([fc.string({ minLength: 1 })])('sha256 always returns a 64-char hex string', (s) => {
+  return /^[0-9a-f]{64}$/.test(sha256(s));
+});
 
 fcTest.prop([fc.string({ minLength: 1 }), fc.string({ minLength: 1 })])(
   'sha256 differs for different inputs (high probability)',
@@ -302,12 +301,13 @@ fcTest.prop([fc.string({ minLength: 1 }), fc.string({ minLength: 1 })])(
   }
 );
 
-fcTest.prop(
-  [fc.array(fc.string({ minLength: 1 }), { minLength: 1 })]
-)('generateIdempotencyKey always returns 25 alphanumeric chars', () => {
-  const key = generateIdempotencyKey();
-  return key.length === 25 && /^[a-f0-9]+$/.test(key);
-});
+fcTest.prop([fc.array(fc.string({ minLength: 1 }), { minLength: 1 })])(
+  'generateIdempotencyKey always returns 25 alphanumeric chars',
+  () => {
+    const key = generateIdempotencyKey();
+    return key.length === 25 && /^[a-f0-9]+$/.test(key);
+  }
+);
 
 fcTest.prop([fc.record({ a: fc.string() })])(
   'firstString never throws for any string record',

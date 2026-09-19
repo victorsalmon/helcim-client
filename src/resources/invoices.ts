@@ -1,7 +1,12 @@
 import type { TransportRequest } from '../transport.js';
 import type { CreateInvoiceInput, HelcimInvoice } from '../types.js';
 import { generateIdempotencyKey, firstArray } from '../util.js';
-import { decodeInvoice, assertNonEmptyString, assertPositiveInteger, decodeFirstInData } from '../decode.js';
+import {
+  decodeInvoice,
+  assertNonEmptyString,
+  assertPositiveInteger,
+  decodeFirstInData,
+} from '../decode.js';
 
 export interface InvoicesContext {
   request: TransportRequest;
@@ -34,12 +39,14 @@ export function createInvoicesApi({ request }: InvoicesContext) {
   }
 
   /** List invoices, optionally filtered by customer or status. */
-  async function getInvoices(params: {
-    customerCode?: string;
-    page?: number;
-    limit?: number;
-    status?: string;
-  } = {}): Promise<HelcimInvoice[]> {
+  async function getInvoices(
+    params: {
+      customerCode?: string;
+      page?: number;
+      limit?: number;
+      status?: string;
+    } = {}
+  ): Promise<HelcimInvoice[]> {
     const raw = await request('GET', '/invoices', {
       query: {
         customerCode: params.customerCode,
@@ -65,4 +72,3 @@ export function createInvoicesApi({ request }: InvoicesContext) {
     getInvoice,
   };
 }
-

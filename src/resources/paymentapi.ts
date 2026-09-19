@@ -1,7 +1,21 @@
 import type { TransportRequest } from '../transport.js';
-import type { HelcimCardTransaction, ProcessPurchaseInput, ProcessPreauthInput, CapturePreauthInput, RefundPurchaseInput, ReversePurchaseInput } from '../types.js';
+import type {
+  HelcimCardTransaction,
+  ProcessPurchaseInput,
+  ProcessPreauthInput,
+  CapturePreauthInput,
+  RefundPurchaseInput,
+  ReversePurchaseInput,
+} from '../types.js';
 import { generateIdempotencyKey } from '../util.js';
-import { decodeCardTransaction, assertPositiveAmount, assertNonEmptyString, assertPositiveInteger, unwrapRecord, addressToPayload } from '../decode.js';
+import {
+  decodeCardTransaction,
+  assertPositiveAmount,
+  assertNonEmptyString,
+  assertPositiveInteger,
+  unwrapRecord,
+  addressToPayload,
+} from '../decode.js';
 
 export interface paymentApiContext {
   request: TransportRequest;
@@ -69,7 +83,10 @@ export function createPaymentApi({ request }: paymentApiContext) {
     input: CapturePreauthInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimCardTransaction> {
-    assertPositiveInteger(input.cardTransactionId, 'Helcim capturePreauth requires a positive integer cardTransactionId');
+    assertPositiveInteger(
+      input.cardTransactionId,
+      'Helcim capturePreauth requires a positive integer cardTransactionId'
+    );
     assertPositiveAmount(input.amount, 'capturePreauth amount');
     assertNonEmptyString(input.currency, 'capturePreauth currency');
     assertNonEmptyString(input.ipAddress, 'capturePreauth ipAddress');
@@ -89,7 +106,10 @@ export function createPaymentApi({ request }: paymentApiContext) {
     input: RefundPurchaseInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimCardTransaction> {
-    assertPositiveInteger(input.cardTransactionId, 'Helcim refundPurchase requires a positive integer cardTransactionId');
+    assertPositiveInteger(
+      input.cardTransactionId,
+      'Helcim refundPurchase requires a positive integer cardTransactionId'
+    );
     assertPositiveAmount(input.amount, 'refundPurchase amount');
     assertNonEmptyString(input.ipAddress, 'refundPurchase ipAddress');
     const body: Record<string, unknown> = {
@@ -108,7 +128,10 @@ export function createPaymentApi({ request }: paymentApiContext) {
     input: ReversePurchaseInput,
     idempotencyKey: string = generateIdempotencyKey()
   ): Promise<HelcimCardTransaction> {
-    assertPositiveInteger(input.cardTransactionId, 'Helcim reversePurchase requires a positive integer cardTransactionId');
+    assertPositiveInteger(
+      input.cardTransactionId,
+      'Helcim reversePurchase requires a positive integer cardTransactionId'
+    );
     assertNonEmptyString(input.ipAddress, 'reversePurchase ipAddress');
     const body: Record<string, unknown> = {
       cardTransactionId: input.cardTransactionId,
@@ -126,4 +149,3 @@ export function createPaymentApi({ request }: paymentApiContext) {
     reversePurchase,
   };
 }
-
