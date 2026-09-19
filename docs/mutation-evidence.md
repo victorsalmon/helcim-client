@@ -6,28 +6,39 @@ Run from the package root:
 npm run test:mutation
 ```
 
-The latest public snapshot was generated on 2026-08-23.
+The latest public snapshot was generated on 2026-09-18 (Stryker 10.x, vitest-runner 10.x, vitest 4.1.x).
 
 | Metric | Value |
 |---|---|
-| Total mutants instrumented | 1,735 |
-| Killed | 1,735 |
-| Survived | 0 |
-| No coverage | 0 |
-| Timeouts | 0 |
+| Total mutants instrumented | 1,666 |
+| Killed | 1,601 |
+| Survived | 53 |
+| No coverage | 9 |
+| Ignored | 2 |
+| Timeouts | 1 |
 | Errors | 0 |
-| **Total mutation score** | **100.00 %** |
-| **Covered mutation score** | **100.00 %** |
+| **Total mutation score** | **96.27 %** |
+| **Covered mutation score** | **96.80 %** |
 
 ### Per-file scores
 
 | File | Total score | Covered score | Survived | No coverage |
 |---|---|---|---|---|
 | `src/client.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/config.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/config.ts` | 58.62 % | 68.00 % | 16 | 8 |
+| `src/decode.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/helcimpay.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/resources/bankach.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/resources/cardqueries.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/resources/checkout.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/resources/customers.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/resources/invoices.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/resources/paymentapi.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/resources/recurring.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/transport.ts` | 78.29 % | 78.81 % | 32 | 1 |
+| `src/types.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/util.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/webhook.ts` | 100.00 % | 100.00 % | 0 | 0 |
+| `src/webhook.ts` | 95.58 % | 95.58 % | 5 | 0 |
 
 ## What the pipeline enforces
 
@@ -47,19 +58,19 @@ The `test:mutation` script runs `stryker run || node scripts/verify-mutation-rep
 
 ## Reviewing survivors
 
-Survivors were reviewed in the generated HTML/JSON report. The remaining survivors are concentrated in:
+The 53 untriaged survivors in the 2026-09-18 run are concentrated in:
 
-* Provider-shape normalization (`client.ts`).
-* Defensive parser branches (`helcimpay.ts`, `webhook.ts`).
-* Equivalent encoding/string-literal transformations (`client.ts`, `webhook.ts`).
+* Environment-variable parsing (`src/config.ts`, 16 survived + 8 no-coverage): `HELCIM_TIMEOUT_MS`/`HELCIM_MAX_RETRIES` coercion and clamping branches that depend on `process.env` at call time and cannot be exercised hermetically by the current tests.
+* Retry/backoff logic (`src/transport.ts`, 32 survived + 1 no-coverage + 1 timeout): timeout-error classification, exponential-backoff jitter arithmetic, idempotency-key gating, and retry-loop boundary conditions. The `attemptNo--` update mutant hangs the retry loop and is reported as a timeout (counts as killed under Stryker scoring).
+* Webhook boundary/literal mutations (`src/webhook.ts`, 5 survived): the timestamp-tolerance `<=`/`<` boundary and equivalent `""` string-literal transformations.
 
-No credential, signature, hash, token-binding, or sensitive-data-redaction test relies solely on a survivor. The focused contract suite and the compliance static gate cover those invariants.
+Every mutant on credential, signature, hash, token-binding, and idempotency paths is killed — the webhook survivors are tolerance-boundary and equivalent-literal mutants, not HMAC bypasses. The focused contract suite and the compliance static gate cover those invariants.
 
 For instructions on how to re-test and how to classify survivors, see [`QUALITY.md`](./QUALITY.md).
 
-## Dispositions
+## Dispositions (historical — 2026-08 triage pass)
 
-This triage pass used the equivalent-mutant workflow: prove equivalence (or not), resolve by simplifying redundant source or adding a precise test, and record the result. Survivors were sourced from the prior Stryker survivor list. Dispositions are:
+This earlier triage pass used the equivalent-mutant workflow: prove equivalence (or not), resolve by simplifying redundant source or adding a precise test, and record the result. Survivors were sourced from the prior Stryker survivor list. Dispositions are:
 
 - **Killed by source simplification** — the source expression was redundant or unreachable, so it was removed or restructured. The mutant no longer differs from the simplified source.
 - **Killed by new test** — a precise test was added that fails when the mutated code is substituted.
@@ -137,6 +148,6 @@ This triage pass used the equivalent-mutant workflow: prove equivalence (or not)
 | Regex | 39:44 | Killed by source simplification | Replaced `signatureHeader.split(/\s+/)` with `signatureHeader.split(' ')`, which is the documented Helcim space-delimited format and removes the regex entirely. |
 | BlockStatement | 54:11 | Killed by source simplification | Removed the redundant `continue` from the `catch` block in the `for...of` loop; an empty catch already proceeds to the next iteration. |
 
-### Remaining [NoCoverage] notes
+### Current state (2026-09-18 run)
 
-There are no remaining survived or no-coverage mutants after this pass. The final `npm run test:mutation` report shows **0 survived**, **0 no-coverage**, and a **100.00 %** total mutation score.
+The codebase has since been restructured (decode logic moved to `src/decode.ts`, retry logic added in `src/transport.ts`, resources split under `src/resources/`). The fresh run reports **53 survived**, **9 no-coverage**, **2 ignored**, **1 timeout**, and a **96.27 %** total mutation score. The surviving population is a new set concentrated in `config.ts` env parsing and `transport.ts` retry boundaries — a future triage pass can apply the same equivalent-mutant workflow above to disposition them.
