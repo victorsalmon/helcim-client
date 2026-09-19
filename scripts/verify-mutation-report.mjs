@@ -1,6 +1,14 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 
 const reportPath = new URL('../stryker-report/mutation/report.json', import.meta.url);
+const { mtimeMs } = await stat(reportPath);
+const ageMinutes = (Date.now() - mtimeMs) / 60000;
+if (ageMinutes > 30) {
+  console.error(
+    `Mutation report is ${Math.round(ageMinutes)} minutes old — refusing to verify stale evidence. Run a fresh 'stryker run'.`
+  );
+  process.exit(1);
+}
 const report = JSON.parse(await readFile(reportPath, 'utf8'));
 const mutants = Object.values(report.files ?? {}).flatMap((file) => file.mutants ?? []);
 const counts = mutants.reduce((acc, mutant) => {
