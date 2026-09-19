@@ -6,26 +6,28 @@ Run from the package root:
 npm run test:mutation
 ```
 
-The latest public snapshot was generated on 2026-09-18 (Stryker 10.x, vitest-runner 10.x, vitest 4.1.x).
+The latest public snapshot was generated on 2026-09-19 (Stryker 10.x, vitest-runner 10.x, vitest 4.1.x).
 
 | Metric | Value |
 |---|---|
-| Total mutants instrumented | 1,666 |
-| Killed | 1,601 |
-| Survived | 53 |
+| Total mutants instrumented | 1,688 |
+| Killed | 1,629 |
+| Survived | 43 |
 | No coverage | 9 |
-| Ignored | 2 |
+| Ignored | 6 |
 | Timeouts | 1 |
 | Errors | 0 |
-| **Total mutation score** | **96.27 %** |
-| **Covered mutation score** | **96.80 %** |
+| **Total mutation score** | **96.91 %** |
+| **Covered mutation score** | **97.43 %** |
+
+Stryker counts a timeout as a detection, so the 1 timeout in `src/transport.ts` contributes to the scores above.
 
 ### Per-file scores
 
 | File | Total score | Covered score | Survived | No coverage |
 |---|---|---|---|---|
 | `src/client.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/config.ts` | 58.62 % | 68.00 % | 16 | 8 |
+| `src/config.ts` | 68.00 % | 76.12 % | 16 | 8 |
 | `src/decode.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/helcimpay.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/resources/bankach.ts` | 100.00 % | 100.00 % | 0 | 0 |
@@ -35,7 +37,7 @@ The latest public snapshot was generated on 2026-09-18 (Stryker 10.x, vitest-run
 | `src/resources/invoices.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/resources/paymentapi.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/resources/recurring.ts` | 100.00 % | 100.00 % | 0 | 0 |
-| `src/transport.ts` | 78.29 % | 78.81 % | 32 | 1 |
+| `src/transport.ts` | 84.87 % | 85.43 % | 22 | 1 |
 | `src/types.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/util.ts` | 100.00 % | 100.00 % | 0 | 0 |
 | `src/webhook.ts` | 95.58 % | 95.58 % | 5 | 0 |
@@ -58,11 +60,11 @@ The `test:mutation` script runs `stryker run || node scripts/verify-mutation-rep
 
 ## Reviewing survivors
 
-The 53 untriaged survivors in the 2026-09-18 run are concentrated in:
+The 43 untriaged survivors in the 2026-09-19 run are concentrated in:
 
-* Environment-variable parsing (`src/config.ts`, 16 survived + 8 no-coverage): `HELCIM_TIMEOUT_MS`/`HELCIM_MAX_RETRIES` coercion and clamping branches that depend on `process.env` at call time and cannot be exercised hermetically by the current tests.
-* Retry/backoff logic (`src/transport.ts`, 32 survived + 1 no-coverage + 1 timeout): timeout-error classification, exponential-backoff jitter arithmetic, idempotency-key gating, and retry-loop boundary conditions. The `attemptNo--` update mutant hangs the retry loop and is reported as a timeout (counts as killed under Stryker scoring).
-* Webhook boundary/literal mutations (`src/webhook.ts`, 5 survived): the timestamp-tolerance `<=`/`<` boundary and equivalent `""` string-literal transformations.
+* Environment-variable parsing (`src/config.ts`, 16 survived + 8 no-coverage): `HELCIM_TIMEOUT_MS`/`HELCIM_MAX_RETRIES` coercion and clamping branches that depend on `process.env` at call time and cannot be exercised hermetically by the current tests. Six further static mutants in `src/config.ts` (the base-URL string literals and loopback-hostname set at lines 34, 37, and 40) are ignored because Stryker's `ignoreStatic` option is enabled; they are excluded from both scores, so the base-URL constants are not mutation-protected.
+* Retry/backoff logic (`src/transport.ts`, 22 survived + 1 no-coverage + 1 timeout): timeout-error classification, exponential-backoff jitter arithmetic, and retry-loop boundary conditions. The `attemptNo--` update mutant hangs the retry loop and is reported as a timeout (counts as killed under Stryker scoring). This count fell from 32 to 22 after the per-attempt-timeout fix and the added retry-safety tests.
+* Webhook boundary/literal mutations (`src/webhook.ts`, 5 survived): the timestamp-tolerance `<=`/`<` boundary and equivalent `Buffer.from(..., 'utf8')` literal transformations (the default encoding makes those mutants equivalent).
 
 Every mutant on credential, signature, hash, token-binding, and idempotency paths is killed — the webhook survivors are tolerance-boundary and equivalent-literal mutants, not HMAC bypasses. The focused contract suite and the compliance static gate cover those invariants.
 
@@ -148,6 +150,6 @@ This earlier triage pass used the equivalent-mutant workflow: prove equivalence 
 | Regex | 39:44 | Killed by source simplification | Replaced `signatureHeader.split(/\s+/)` with `signatureHeader.split(' ')`, which is the documented Helcim space-delimited format and removes the regex entirely. |
 | BlockStatement | 54:11 | Killed by source simplification | Removed the redundant `continue` from the `catch` block in the `for...of` loop; an empty catch already proceeds to the next iteration. |
 
-### Current state (2026-09-18 run)
+### Current state (2026-09-19 run)
 
-The codebase has since been restructured (decode logic moved to `src/decode.ts`, retry logic added in `src/transport.ts`, resources split under `src/resources/`). The fresh run reports **53 survived**, **9 no-coverage**, **2 ignored**, **1 timeout**, and a **96.27 %** total mutation score. The surviving population is a new set concentrated in `config.ts` env parsing and `transport.ts` retry boundaries — a future triage pass can apply the same equivalent-mutant workflow above to disposition them.
+The codebase has since been restructured (decode logic moved to `src/decode.ts`, retry logic added in `src/transport.ts`, resources split under `src/resources/`), and the 2026-09-19 audit pass added per-attempt timeout signals (`src/transport.ts`), a non-idempotent-write network-error test, constant-time HelcimPay hash comparison (`src/helcimpay.ts`), and HTTPS base-URL enforcement (`src/config.ts`). The fresh run reports **43 survived**, **9 no-coverage**, **6 ignored**, **1 timeout**, and a **96.91 %** total mutation score (97.43 % covered). The surviving population is concentrated in `config.ts` env parsing and `transport.ts` retry boundaries — a future triage pass can apply the same equivalent-mutant workflow above to disposition them.

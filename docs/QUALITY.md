@@ -46,23 +46,23 @@ Each contract tests the **HTTP method, URL, headers, body shape, idempotency beh
 
 ## Latest mutation report
 
-Run with Stryker 10.x and the Vitest runner on 2026-09-18. The package is configured to mutate all `src/**/*.ts` files except `src/index.ts` and `src/sandbox.ts`.
+Run with Stryker 10.x and the Vitest runner on 2026-09-19. The package is configured to mutate all `src/**/*.ts` files except `src/index.ts` and `src/sandbox.ts`.
 
 | Metric | Value |
 |---|---|
-| Total mutants | 1,666 |
-| Killed | 1,601 |
-| Survived | 53 |
+| Total mutants | 1,688 |
+| Killed | 1,629 |
+| Survived | 43 |
 | No coverage | 9 |
-| Ignored | 2 |
+| Ignored | 6 |
 | Timeouts | 1 |
 | Errors | 0 |
-| **Total mutation score** | **96.27 %** |
-| **Covered mutation score** | **96.80 %** |
+| **Total mutation score** | **96.91 %** |
+| **Covered mutation score** | **97.43 %** |
 
 Mutation results and per-file detail: see [`docs/mutation-evidence.md`](./mutation-evidence.md).
 
-The two ignored mutants in `src/config.ts` are excluded by Stryker because they depend on environment variables at instrument time and cannot be executed hermetically. All security-critical paths (webhook HMAC, HelcimPay hash, idempotency, and token handling) are fully covered — every mutant there is killed. The 53 untriaged survivors sit in `src/config.ts` environment-variable parsing (16), `src/transport.ts` retry/backoff boundaries (32), and `src/webhook.ts` timestamp-tolerance/equivalent literal mutations (5).
+Six static mutants in `src/config.ts` (the base-URL constants and the loopback-hostname set) are excluded by Stryker's `ignoreStatic` option; they are neither survivors nor no-coverage, but they are also not mutation-protected. All security-critical paths (webhook HMAC, HelcimPay hash, idempotency, and token handling) are fully covered — every mutant there is killed. The 43 untriaged survivors sit in `src/config.ts` environment-variable parsing (16), `src/transport.ts` retry/backoff boundaries (22), and `src/webhook.ts` timestamp-tolerance/equivalent-literal mutations (5).
 
 ---
 

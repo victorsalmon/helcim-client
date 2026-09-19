@@ -122,11 +122,11 @@ This package is built with a **property-based + mutation-validated** QA pipeline
 |---|---|---|
 | Unit & contract tests | `npm test` | Vitest + `@fast-check/vitest` property tests |
 | Compliance contracts | `npm run test:compliance` | Idempotency, field presence, and endpoint-shape invariants |
-| Mutation testing | `npm run test:mutation` | Stryker + Vitest; current **mutation score 96.27 %** (covered 96.80 %) |
+| Mutation testing | `npm run test:mutation` | Stryker + Vitest; current **mutation score 96.91 %** (covered 97.43 %) |
 
 Mutation results and per-file detail: see [docs/mutation-evidence.md](docs/mutation-evidence.md).
 
-The two ignored mutants in `src/config.ts` depend on environment variables at instrument time and cannot be executed hermetically; they are neither survivors nor no-coverage. Every mutant on security-critical paths (credential handling, webhook HMAC, HelcimPay hash, and idempotency) is killed. The 53 untriaged survivors are concentrated in `src/config.ts` environment-variable parsing and `src/transport.ts` retry/backoff boundary conditions; see `docs/mutation-evidence.md` for the breakdown.
+Six static mutants in `src/config.ts` (the base-URL constants and the loopback-hostname set) are excluded by Stryker's `ignoreStatic` option; they are neither survivors nor no-coverage. Every mutant on security-critical paths (credential handling, webhook HMAC, HelcimPay hash, and idempotency) is killed. The 43 untriaged survivors are concentrated in `src/config.ts` environment-variable parsing and `src/transport.ts` retry/backoff boundary conditions; see `docs/mutation-evidence.md` for the breakdown.
 
 See [`docs/QUALITY.md`](./docs/QUALITY.md) for the full QA runbook and [`docs/PRICING.md`](./docs/PRICING.md) for the cost comparison.
 
