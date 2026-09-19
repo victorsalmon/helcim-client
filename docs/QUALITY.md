@@ -106,6 +106,10 @@ The report verifier additionally rejects:
 
 After a run, open `reports/mutation/mutation.html` in a browser, or inspect `stryker-report/mutation/report.json` programmatically.
 
+### Automation
+
+The mutation gate runs in automation as a scheduled workflow rather than a per-PR job. `.github/workflows/mutation.yml` runs weekly on `schedule` plus `workflow_dispatch`, executes `npm run test:mutation`, and uploads the mutation reports as artifacts.
+
 ---
 
 ## How to re-test after a change
