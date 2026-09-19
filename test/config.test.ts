@@ -122,4 +122,36 @@ describe('Helcim configuration', () => {
     });
     expect(cfg!.webhookVerifierToken).toBeUndefined();
   });
+
+  it('rejects a plaintext remote base URL so the api token is never sent in the clear', () => {
+    expect(() =>
+      createHelcimConfigFromEnv({
+        HELCIM_API_TOKEN: 'tok-1',
+        HELCIM_BASE_URL: 'http://api.helcim.com/v2',
+      })
+    ).toThrow(/https/);
+  });
+
+  it('allows a loopback http base URL for local test servers', () => {
+    const cfg = createHelcimConfigFromEnv({
+      HELCIM_API_TOKEN: 'tok-1',
+      HELCIM_BASE_URL: 'http://localhost:8080/v2',
+    });
+    expect(cfg!.baseUrl).toBe('http://localhost:8080/v2');
+  });
+
+  it('rejects a base URL that is not an absolute URL', () => {
+    expect(() =>
+      createHelcimConfigFromEnv({ HELCIM_API_TOKEN: 'tok-1', HELCIM_BASE_URL: 'not-a-url' })
+    ).toThrow(/valid absolute URL/);
+  });
+
+  it('rejects a non-HTTP(S) scheme even for a loopback host', () => {
+    expect(() =>
+      createHelcimConfigFromEnv({
+        HELCIM_API_TOKEN: 'tok-1',
+        HELCIM_BASE_URL: 'ftp://localhost/v2',
+      })
+    ).toThrow(/ftp:\/\/localhost/);
+  });
 });

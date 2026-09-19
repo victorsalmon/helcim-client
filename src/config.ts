@@ -36,6 +36,32 @@ export const HELCIM_PRODUCTION_BASE_URL = 'https://api.helcim.com/v2';
 /** Developer test Helcim API base URL (test cards, no real charges). */
 export const HELCIM_TEST_BASE_URL = 'https://api.helcim.test/v2';
 
+/** Hosts for which plain HTTP is tolerated (local test servers only). */
+const LOOPBACK_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]']);
+
+/**
+ * Assert that a base URL cannot leak the `api-token` in plaintext.
+ *
+ * Every request carries the API token in a header, so the transport must only
+ * ever talk to an HTTPS endpoint. Plain HTTP is tolerated solely for loopback
+ * hosts so local test doubles can be exercised; any other scheme or host
+ * fails closed.
+ */
+export function assertSecureBaseUrl(baseUrl: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    throw new Error(`Helcim baseUrl must be a valid absolute URL (got '${baseUrl}')`);
+  }
+  if (parsed.protocol === 'https:') return;
+  if (parsed.protocol === 'http:' && LOOPBACK_HOSTNAMES.has(parsed.hostname)) return;
+  throw new Error(
+    `Helcim baseUrl must use https so the api-token is never sent in plaintext ` +
+      `(got '${parsed.protocol}//${parsed.hostname}')`
+  );
+}
+
 /**
  * Resolve the Helcim base URL from environment variables.
  *
@@ -56,8 +82,8 @@ function resolveBaseUrl(env: NodeJS.ProcessEnv): string {
 /**
  * Build a Helcim config from the environment. Returns `null` when
  * `HELCIM_API_TOKEN` is absent (the integration is disabled). Throws if the
- * token is present but the base URL cannot be resolved, so a misconfiguration
- * is fail-fast.
+ * token is present but the base URL cannot be resolved or is insecure
+ * (non-HTTPS and not loopback), so a misconfiguration is fail-fast.
  */
 export function createHelcimConfigFromEnv(
   env: NodeJS.ProcessEnv = process.env
@@ -66,6 +92,7 @@ export function createHelcimConfigFromEnv(
   if (!apiToken) return null;
 
   const baseUrl = resolveBaseUrl(env);
+  assertSecureBaseUrl(baseUrl);
   const webhookVerifierToken = env.HELCIM_WEBHOOK_VERIFIER_TOKEN?.trim() || undefined;
 
   const timeoutRaw = env.HELCIM_TIMEOUT_MS?.trim();

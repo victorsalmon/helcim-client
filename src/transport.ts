@@ -1,4 +1,4 @@
-import type { HelcimConfig } from './config.js';
+import { assertSecureBaseUrl, type HelcimConfig } from './config.js';
 
 /** The single HTTP entry point every resource factory is given. */
 export type TransportRequest = (
@@ -34,6 +34,9 @@ function sleep(ms: number): Promise<void> {
  *    network failures, HTTP 429, and 5xx responses.
  */
 export function createTransport(config: HelcimConfig, fetchImpl: typeof fetch = fetch): Transport {
+  // Fail closed at construction: a plaintext (or invalid) base URL must never
+  // receive the api-token header below.
+  assertSecureBaseUrl(config.baseUrl);
   const baseHeaders: Record<string, string> = {
     accept: 'application/json',
     'content-type': 'application/json',
@@ -73,12 +76,7 @@ export function createTransport(config: HelcimConfig, fetchImpl: typeof fetch = 
     if (opts.idempotencyKey) {
       headers['idempotency-key'] = opts.idempotencyKey;
     }
-    const init: RequestInit = {
-      method,
-      headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-      signal: AbortSignal.timeout(timeoutMs),
-    };
+    const body = opts.body !== undefined ? JSON.stringify(opts.body) : undefined;
 
     let lastError: unknown;
     for (let attemptNo = 0; attemptNo <= maxRetries; attemptNo++) {
@@ -86,9 +84,19 @@ export function createTransport(config: HelcimConfig, fetchImpl: typeof fetch = 
         // Exponential backoff with jitter; only reachable when retryable.
         await sleep(250 * 2 ** (attemptNo - 1) + Math.floor(Math.random() * 100));
       }
+      // A fresh timeout signal per attempt: `AbortSignal.timeout` starts its
+      // timer when it is created, so a signal built once before the loop would
+      // share one budget across attempts and leave every retry after the first
+      // timeout already aborted (an instant, useless retry).
+      const init: RequestInit = {
+        method,
+        headers,
+        body,
+        signal: AbortSignal.timeout(timeoutMs),
+      };
       let result: { ok: boolean; status: number; text: string };
       try {
-        result = await attempt(method, url.toString(), { ...init });
+        result = await attempt(method, url.toString(), init);
       } catch (err) {
         // Network-level failure. Retry only when the call is safe to repeat.
         lastError = err;
@@ -134,7 +142,6 @@ export function createTransport(config: HelcimConfig, fetchImpl: typeof fetch = 
       }
       // Recurring API wraps responses in { data: [...] } or { data: {...} }.
       // Payment API returns the object directly. Unwrap for callers.
-      void lastError;
       return parsedBody;
     }
     // Unreachable: the loop always returns or throws.
