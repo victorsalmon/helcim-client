@@ -13,7 +13,7 @@ import {
   decodeInvoice,
   createHelcimClient,
 } from '../src/index.js';
-import { TEST_CONFIG, mockFetch, bodyOf } from './helpers.js';
+import { TEST_CONFIG, mockFetch } from './helpers.js';
 
 beforeEach(() => vi.restoreAllMocks());
 

@@ -121,7 +121,6 @@ describe('verifyHelcimWebhook', () => {
     const id = 'evt_123';
     const ts = '1700000000';
     const body = '{"type":"cardTransaction","id":42}';
-    const sig = sign(VERIFIER, id, ts, body);
     expect(verifyHelcimWebhook(id, ts, body, '', VERIFIER)).toBe(false);
   });
 

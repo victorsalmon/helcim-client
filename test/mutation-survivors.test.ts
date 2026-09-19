@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { createHmac } from 'node:crypto';
 import {
   createHelcimClient,
   decodeCustomer,
@@ -12,9 +13,8 @@ import {
   parseHelcimPayEventMessage,
   firstNumber,
   firstString,
-  type HelcimConfig,
 } from '../src/index.js';
-import { mockFetch, assertHeaderAbsent, assertBodyField, assertBodyFieldAbsent, TEST_CONFIG } from './helpers.js';
+import { mockFetch, assertHeaderAbsent, TEST_CONFIG } from './helpers.js';
 
 // ─── Surviving-mutant hunters ────────────────────────────────────────────────
 //
@@ -23,7 +23,6 @@ import { mockFetch, assertHeaderAbsent, assertBodyField, assertBodyFieldAbsent, 
 // edge cases, and webhook/HelcimPay parsing branches.
 
 function sign(verifierBase64: string, id: string, ts: string, body: string): string {
-  const { createHmac } = require('node:crypto');
   const key = Buffer.from(verifierBase64, 'base64');
   const signedContent = `${id}.${ts}.${body}`;
   return createHmac('sha256', key).update(signedContent).digest().toString('base64');
@@ -136,7 +135,6 @@ describe('webhook edge cases for surviving mutants', () => {
     const id = 'evt_123';
     const ts = '1700000000';
     const body = '{"type":"cardTransaction","id":42}';
-    const sig = sign(VERIFIER, id, ts, body);
     // Only the empty v1, entry is present; it must not be treated as a match
     expect(verifyHelcimWebhook(id, ts, body, 'v1,', VERIFIER)).toBe(false);
   });
@@ -276,7 +274,7 @@ describe('client request query and header guards', () => {
 
 describe('bank account response second-key coverage', () => {
   it('createBankAccount reads id from "Id" and message from "Message" when camelCase keys are absent', async () => {
-    const { fetchImpl, calls } = mockFetch({
+    const { fetchImpl } = mockFetch({
       body: { data: { Id: 45367, Message: 'Successfully created new bank account' } },
     });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
@@ -295,7 +293,7 @@ describe('bank account response second-key coverage', () => {
   });
 
   it('createBankAccount defaults message to "" when the response has no message field', async () => {
-    const { fetchImpl, calls } = mockFetch({ body: { data: { Id: 45367 } } });
+    const { fetchImpl } = mockFetch({ body: { data: { Id: 45367 } } });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     const result = await client.createBankAccount(123, {
       accountCorporate: 1,

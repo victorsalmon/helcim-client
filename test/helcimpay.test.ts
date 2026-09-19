@@ -80,7 +80,6 @@ describe('validateHelcimPayHash', () => {
   it('rejects when only hash is empty', () => {
     const data = { a: 1 };
     const secret = 's';
-    const hash = computeHash(data, secret);
     expect(validateHelcimPayHash(data, '', secret)).toBe(false);
   });
 
@@ -114,7 +113,6 @@ describe('validateHelcimPayHash', () => {
   it('rejects when hash is undefined', () => {
     const data = { a: 1 };
     const secret = 's';
-    const hash = computeHash(data, secret);
     expect(validateHelcimPayHash(data, undefined as any, secret)).toBe(false);
   });
 
@@ -327,6 +325,7 @@ fcTest.prop([
 fcTest.prop([
   fc.array(fc.constantFrom('é', '—', '中', '😀', 'a', 'Z', ' '), { minLength: 1, maxLength: 40 })
     .map((chars) => chars.join(''))
+    // eslint-disable-next-line no-control-regex -- \x00 is intentional: filters for non-ASCII strings
     .filter((value) => /[^\x00-\x7f]/.test(value)),
   fc.string({ minLength: 1, maxLength: 40 }),
 ])('validates every Helcim escaped-Unicode string payload', (name, secret) => {

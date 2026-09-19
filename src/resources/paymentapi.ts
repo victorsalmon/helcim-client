@@ -1,8 +1,7 @@
 import type { TransportRequest } from '../transport.js';
-import { numericBoolean } from '../types.js';
-import type { HelcimCard, HelcimCardTransaction, ProcessPurchaseInput, ProcessPreauthInput, CapturePreauthInput, RefundPurchaseInput, ReversePurchaseInput } from '../types.js';
+import type { HelcimCardTransaction, ProcessPurchaseInput, ProcessPreauthInput, CapturePreauthInput, RefundPurchaseInput, ReversePurchaseInput } from '../types.js';
 import { generateIdempotencyKey } from '../util.js';
-import { decodeCard, decodeCardTransaction, assertPositiveAmount, assertNonEmptyString, assertPositiveInteger, unwrapRecord, addressToPayload } from '../decode.js';
+import { decodeCardTransaction, assertPositiveAmount, assertNonEmptyString, assertPositiveInteger, unwrapRecord, addressToPayload } from '../decode.js';
 
 export interface paymentApiContext {
   request: TransportRequest;

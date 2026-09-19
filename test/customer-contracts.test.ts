@@ -8,11 +8,9 @@ import {
   assertPath,
   assertQuery,
   assertQueryAbsent,
-  assertHeader,
   assertBodyField,
   assertBodyFieldAbsent,
   assertBodyPath,
-  assertBodyPathAbsent,
   bodyOf,
   BASE,
 } from './helpers.js';

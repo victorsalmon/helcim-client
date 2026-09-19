@@ -1,5 +1,4 @@
 import type { TransportRequest } from '../transport.js';
-import { numericBoolean } from '../types.js';
 import type { HelcimCustomer, HelcimCard, CreateCustomerInput } from '../types.js';
 import { firstArray } from '../util.js';
 import { decodeCard, decodeCustomer, assertPositiveInteger, addressToPayload } from '../decode.js';

@@ -52,7 +52,9 @@ export function createTransport(config: HelcimConfig, fetchImpl: typeof fetch = 
       return { ok: response.ok, status: response.status, text: await response.text() };
     } catch (err) {
       if (err instanceof Error && err.name === 'TimeoutError') {
-        throw new Error(`Helcim ${method} ${url} timed out after ${timeoutMs}ms`);
+        throw new Error(`Helcim ${method} ${url} timed out after ${timeoutMs}ms`, {
+          cause: err,
+        });
       }
       throw err;
     }

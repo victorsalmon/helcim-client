@@ -1,8 +1,7 @@
 import type { TransportRequest } from '../transport.js';
-import { numericBoolean } from '../types.js';
-import type { HelcimCard, HelcimCardTransaction } from '../types.js';
+import type { HelcimCardTransaction } from '../types.js';
 import { firstArray } from '../util.js';
-import { decodeCard, decodeCardTransaction, assertPositiveInteger } from '../decode.js';
+import { decodeCardTransaction, assertPositiveInteger } from '../decode.js';
 
 export interface cardTransactionQueriesContext {
   request: TransportRequest;

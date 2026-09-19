@@ -59,6 +59,7 @@ export function verifyHelcimWebhook(
     try {
       if (timingSafeEqual(actualBytes, expectedBytes)) return true;
     } catch {
+      // Mismatched lengths make timingSafeEqual throw; fall through to false.
     }
   }
   return false;

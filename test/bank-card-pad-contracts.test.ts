@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { fc, test as fcTest } from '@fast-check/vitest';
 import { createHelcimClient } from '../src/index.js';
 import {
   TEST_CONFIG,
@@ -10,10 +9,6 @@ import {
   assertQueryAbsent,
   assertBodyField,
   assertBodyFieldAbsent,
-  assertBodyPath,
-  assertBodyPathAbsent,
-  bodyOf,
-  BASE,
 } from './helpers.js';
 
 beforeEach(() => vi.restoreAllMocks());

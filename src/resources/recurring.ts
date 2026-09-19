@@ -1,5 +1,4 @@
 import type { TransportRequest } from '../transport.js';
-import { numericBoolean } from '../types.js';
 import type { HelcimPaymentPlan, HelcimSubscription, CreatePaymentPlanInput, CreateSubscriptionInput } from '../types.js';
 import { generateIdempotencyKey, firstArray } from '../util.js';
 import { decodePaymentPlan, decodeSubscription, assertPositiveAmount, assertNonEmptyString, assertPositiveInteger, decodeFirstInData } from '../decode.js';
