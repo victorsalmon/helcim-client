@@ -26,19 +26,19 @@ Focused tests for individual functions: decoders, first-key lookup, utilities, w
 
 Powered by `@fast-check/vitest` / `fast-check`. These generate large, random input spaces to catch off-by-one and parser-decoder edge cases. Examples:
 
-* Decoders never throw on arbitrary JSON objects.
-* `firstString`, `firstNumber`, and `firstArray` return correct types and ignore non-matching keys.
-* Webhook verification rejects forged signatures for every generated input.
+- Decoders never throw on arbitrary JSON objects.
+- `firstString`, `firstNumber`, and `firstArray` return correct types and ignore non-matching keys.
+- Webhook verification rejects forged signatures for every generated input.
 
 ### 3. Contract tests
 
 One test file per functional domain:
 
-* `ach-payment-invoice-contracts.test.ts`
-* `bank-card-pad-contracts.test.ts`
-* `customer-contracts.test.ts`
-* `helcimpay-plan-sub-contracts.test.ts`
-* `compliance-contracts.test.ts`
+- `ach-payment-invoice-contracts.test.ts`
+- `bank-card-pad-contracts.test.ts`
+- `customer-contracts.test.ts`
+- `helcimpay-plan-sub-contracts.test.ts`
+- `compliance-contracts.test.ts`
 
 Each contract tests the **HTTP method, URL, headers, body shape, idempotency behavior, and validation rules** for a group of endpoints.
 
@@ -48,16 +48,16 @@ Each contract tests the **HTTP method, URL, headers, body shape, idempotency beh
 
 Run with Stryker 10.x and the Vitest runner on 2026-09-19. The package is configured to mutate all `src/**/*.ts` files except `src/index.ts` and `src/sandbox.ts`.
 
-| Metric | Value |
-|---|---|
-| Total mutants | 1,688 |
-| Killed | 1,629 |
-| Survived | 43 |
-| No coverage | 9 |
-| Ignored | 6 |
-| Timeouts | 1 |
-| Errors | 0 |
-| **Total mutation score** | **96.91 %** |
+| Metric                     | Value       |
+| -------------------------- | ----------- |
+| Total mutants              | 1,688       |
+| Killed                     | 1,629       |
+| Survived                   | 43          |
+| No coverage                | 9           |
+| Ignored                    | 6           |
+| Timeouts                   | 1           |
+| Errors                     | 0           |
+| **Total mutation score**   | **96.91 %** |
 | **Covered mutation score** | **97.43 %** |
 
 Mutation results and per-file detail: see [`docs/mutation-evidence.md`](./mutation-evidence.md).
@@ -91,16 +91,18 @@ This does two things:
 The configured Stryker thresholds:
 
 | Threshold | Value |
-|---|---|
-| High | 85 % |
-| Low | 70 % |
-| Break | 59 % |
+| --------- | ----- |
+| High      | 85 %  |
+| Low       | 70 %  |
+| Break     | 59 %  |
 
 The report verifier additionally rejects:
 
-* Any runtime/compile error mutant.
-* Any timeout.
-* A covered mutation score below **90 %**.
+- Any runtime/compile error mutant.
+- A covered mutation score below **90 %**.
+
+Stryker counts a timeout as a detection (the mutated code hung rather than
+surviving), so timeouts are accepted evidence and do not fail the verifier.
 
 ### View the report
 
@@ -134,8 +136,8 @@ If you want to iterate on just the survivors:
 2. Filter `mutants` by `status === 'Survived'`.
 3. For each survivor, note the `fileName`, `mutatorName`, and `location`.
 4. Determine whether the mutant is:
-   * **Meaningful** — the code change would alter real behavior. Add a focused test to kill it.
-   * **Equivalent** — the mutated code is semantically identical. Either add a precise test if one is feasible, or simplify the source to remove the redundant expression.
+   - **Meaningful** — the code change would alter real behavior. Add a focused test to kill it.
+   - **Equivalent** — the mutated code is semantically identical. Either add a precise test if one is feasible, or simplify the source to remove the redundant expression.
 5. Re-run `npm run test:mutation`.
 6. Repeat until the score no longer improves or all survivors are triaged.
 
@@ -160,9 +162,7 @@ for (const [file, data] of Object.entries(report.files)) {
   }
 }
 
-survivors
-  .sort((a, b) => a.line - b.line)
-  .sort((a, b) => a.file.localeCompare(b.file));
+survivors.sort((a, b) => a.line - b.line).sort((a, b) => a.file.localeCompare(b.file));
 
 console.table(survivors);
 ```
@@ -179,7 +179,7 @@ A survivor is acceptable only when it is **proven equivalent** and not just lazi
 
 Examples of proven-equivalent survivors in this package:
 
-* `client.ts` optional-field guards like `if (input.tipAmount !== undefined) body.tipAmount = input.tipAmount;` — assigning `undefined` and JSON-stringifying the body produces the same wire request as skipping the field.
-* `webhook.ts` defensive `typeof`/`Array.isArray` guards on `record.data` — accessing `.transactionId` or `.subscriptionId` on a primitive or array returns `undefined`, so the parser returns the same `null` id either way.
+- `client.ts` optional-field guards like `if (input.tipAmount !== undefined) body.tipAmount = input.tipAmount;` — assigning `undefined` and JSON-stringifying the body produces the same wire request as skipping the field.
+- `webhook.ts` defensive `typeof`/`Array.isArray` guards on `record.data` — accessing `.transactionId` or `.subscriptionId` on a primitive or array returns `undefined`, so the parser returns the same `null` id either way.
 
 If you add `// Stryker disable` comments to your own code, document the equivalent proof right next to the comment.

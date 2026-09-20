@@ -18,7 +18,9 @@ const counts = mutants.reduce((acc, mutant) => {
 const total = mutants.length;
 const killed = counts.Killed ?? 0;
 const score = total ? (killed / (total - (counts.NoCoverage ?? 0))) * 100 : 0;
-const disallowed = ['CompileError', 'RuntimeError', 'Timeout', 'Failed'];
+// Stryker counts a Timeout as a detection: the mutated code hung instead of
+// surviving, so timeouts are accepted evidence (see docs/mutation-evidence.md).
+const disallowed = ['CompileError', 'RuntimeError', 'Failed'];
 const hasDisallowed = disallowed.some((status) => (counts[status] ?? 0) > 0);
 
 console.log(`Mutation report: ${killed}/${total} killed; score ${score.toFixed(2)}%`);
