@@ -19,6 +19,7 @@
   "timeoutMS": 60000,
   "timeoutFactor": 2,
   "ignoreStatic": true,
+  "ignoreStatic_comment": "Accepted: the only static mutants are the src/config.ts base-URL string literals and the loopback-hostname set. config.test.ts asserts their exact values, but static initializers have no per-test coverage attribution, so Stryker would re-run the whole suite per mutant for no extra signal. Revisit if a new static constant ships.",
   "thresholds": {
     "high": 85,
     "low": 70,
