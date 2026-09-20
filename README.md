@@ -33,15 +33,15 @@ flowchart LR
     G --> I
 ```
 
-* **Customer vault** — create, list, and update customers and their card/bank-account tokens.
-* **Cards & bank accounts** — store, verify, and set default payment methods, with built-in support for Canadian transit/institution and U.S. routing/account number fields.
-* **Payment plans & subscriptions** — schedule recurring charges and manage subscription lifecycle.
-* **Transactions & refunds** — card transactions and refunds with idempotency-key support.
-* **ACH / PAD** — withdraw funds and manage pre-authorized debit agreements.
-* **Invoices** — create, list, retrieve, and pay invoices.
-* **HelcimPay.js** — initialize a checkout session and validate the response hash so you can trust the returned `cardTransactionId`.
-* **Webhook verification** — constant-time HMAC-SHA256 validation of `webhook-signature` headers, including multi-signature parsing.
-* **Defensive decoders** — normalize Helcim's inconsistent casing/aliasing (`camelCase`, `PascalCase`, `snake_case`, and provider-specific variants) into a single predictable TypeScript model.
+- **Customer vault** — create, list, and update customers and their card/bank-account tokens.
+- **Cards & bank accounts** — store, verify, and set default payment methods, with built-in support for Canadian transit/institution and U.S. routing/account number fields.
+- **Payment plans & subscriptions** — schedule recurring charges and manage subscription lifecycle.
+- **Transactions & refunds** — card transactions and refunds with idempotency-key support.
+- **ACH / PAD** — withdraw funds and manage pre-authorized debit agreements.
+- **Invoices** — create, list, retrieve, and pay invoices.
+- **HelcimPay.js** — initialize a checkout session and validate the response hash so you can trust the returned `cardTransactionId`.
+- **Webhook verification** — constant-time HMAC-SHA256 validation of `webhook-signature` headers, including multi-signature parsing.
+- **Defensive decoders** — normalize Helcim's inconsistent casing/aliasing (`camelCase`, `PascalCase`, `snake_case`, and provider-specific variants) into a single predictable TypeScript model.
 
 ---
 
@@ -88,11 +88,11 @@ const customer = await helcim.createCustomer({
 import { verifyHelcimWebhook } from '@clocklobster/helcim-client';
 
 const ok = verifyHelcimWebhook(
-  webhookId,         // from `webhook-id` header
-  webhookTimestamp,  // from `webhook-timestamp` header
-  rawBody,           // the raw request body, before JSON.parse
-  signatureHeader,   // from `webhook-signature` header
-  verifierToken,     // base64 secret from Helcim dashboard
+  webhookId, // from `webhook-id` header
+  webhookTimestamp, // from `webhook-timestamp` header
+  rawBody, // the raw request body, before JSON.parse
+  signatureHeader, // from `webhook-signature` header
+  verifierToken // base64 secret from Helcim dashboard
 );
 
 if (!ok) return new Response('unauthorized', { status: 401 });
@@ -104,9 +104,9 @@ if (!ok) return new Response('unauthorized', { status: 401 });
 import { validateHelcimPayHash } from '@clocklobster/helcim-client';
 
 const valid = validateHelcimPayHash(
-  responseData,  // the parsed JSON object HelcimPay posted back
-  responseHash,  // the `hash` field from the response
-  secretToken,   // the secret token from HelcimPay configuration
+  responseData, // the parsed JSON object HelcimPay posted back
+  responseHash, // the `hash` field from the response
+  secretToken // the secret token from HelcimPay configuration
 );
 ```
 
@@ -118,11 +118,11 @@ Runnable example: [`examples/verify-webhook.mjs`](./examples/verify-webhook.mjs)
 
 This package is built with a **property-based + mutation-validated** QA pipeline.
 
-| Suite | Command | Notes |
-|---|---|---|
-| Unit & contract tests | `npm test` | Vitest + `@fast-check/vitest` property tests |
-| Compliance contracts | `npm run test:compliance` | Idempotency, field presence, and endpoint-shape invariants |
-| Mutation testing | `npm run test:mutation` | Stryker + Vitest; current **mutation score 96.91 %** (covered 97.43 %) |
+| Suite                 | Command                   | Notes                                                                  |
+| --------------------- | ------------------------- | ---------------------------------------------------------------------- |
+| Unit & contract tests | `npm test`                | Vitest + `@fast-check/vitest` property tests                           |
+| Compliance contracts  | `npm run test:compliance` | Idempotency, field presence, and endpoint-shape invariants             |
+| Mutation testing      | `npm run test:mutation`   | Stryker + Vitest; current **mutation score 96.91 %** (covered 97.43 %) |
 
 Mutation results and per-file detail: see [docs/mutation-evidence.md](docs/mutation-evidence.md).
 
@@ -134,11 +134,11 @@ See [`docs/QUALITY.md`](./docs/QUALITY.md) for the full QA runbook and [`docs/PR
 
 ## Documentation
 
-* [`docs/PRICING.md`](./docs/PRICING.md) — Helcim vs Stripe cost comparison with scenario tables.
-* [`docs/QUALITY.md`](./docs/QUALITY.md) — QA pipeline, mutation testing, and how to re-run mutation proofs.
-* [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — module map, request/response flow, and mermaid diagrams.
-* [`docs/COMPLIANCE.md`](./docs/COMPLIANCE.md) — PCI, PIPEDA, GDPR, and SOC 2 readiness boundaries.
-* [`docs/mutation-evidence.md`](./docs/mutation-evidence.md) — latest mutation report snapshot.
+- [`docs/PRICING.md`](./docs/PRICING.md) — Helcim vs Stripe cost comparison with scenario tables.
+- [`docs/QUALITY.md`](./docs/QUALITY.md) — QA pipeline, mutation testing, and how to re-run mutation proofs.
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — module map, request/response flow, and mermaid diagrams.
+- [`docs/COMPLIANCE.md`](./docs/COMPLIANCE.md) — PCI, PIPEDA, GDPR, and SOC 2 readiness boundaries.
+- [`docs/mutation-evidence.md`](./docs/mutation-evidence.md) — latest mutation report snapshot.
 
 ---
 

@@ -44,19 +44,19 @@ flowchart TD
     D --> V
 ```
 
-| File | Responsibility |
-|---|---|
-| `src/index.ts` | Public exports for the main package. |
-| `src/sandbox.ts` | Convenience factory for test-mode clients. |
-| `src/config.ts` | Parse environment / explicit config; resolve base URL and API token. |
-| `src/client.ts` | Composition root: wires the transport and resource factories into the public client and re-exports shared types/decoders. |
-| `src/transport.ts` | Single HTTP entry point: headers, a fresh per-attempt timeout signal, bounded retry policy, and the `Idempotency-Key` header. Rejects a non-HTTPS base URL at construction. |
-| `src/resources/*.ts` | Endpoint groups (customers, cards, bank/ACH, plans, subscriptions, invoices, transactions, refunds, HelcimPay), each a factory over `{ request }`. |
-| `src/decode.ts` | Response decoders plus validation/unwrapping helpers. |
-| `src/types.ts` | Shared entity and input types. |
-| `src/util.ts` | Provider-shape helpers (`firstString`, `firstNumber`, `firstArray`), `sha256`, `isProviderErrorStatus`, and idempotency-key generation. |
-| `src/webhook.ts` | `verifyHelcimWebhook` — HMAC-SHA256 signature verification with constant-time comparison. |
-| `src/helcimpay.ts` | `validateHelcimPayHash` and `parseHelcimPayEventMessage` for HelcimPay.js checkout responses. |
+| File                 | Responsibility                                                                                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/index.ts`       | Public exports for the main package.                                                                                                                                        |
+| `src/sandbox.ts`     | Convenience factory for test-mode clients.                                                                                                                                  |
+| `src/config.ts`      | Parse environment / explicit config; resolve base URL and API token.                                                                                                        |
+| `src/client.ts`      | Composition root: wires the transport and resource factories into the public client and re-exports shared types/decoders.                                                   |
+| `src/transport.ts`   | Single HTTP entry point: headers, a fresh per-attempt timeout signal, bounded retry policy, and the `Idempotency-Key` header. Rejects a non-HTTPS base URL at construction. |
+| `src/resources/*.ts` | Endpoint groups (customers, cards, bank/ACH, plans, subscriptions, invoices, transactions, refunds, HelcimPay), each a factory over `{ request }`.                          |
+| `src/decode.ts`      | Response decoders plus validation/unwrapping helpers.                                                                                                                       |
+| `src/types.ts`       | Shared entity and input types.                                                                                                                                              |
+| `src/util.ts`        | Provider-shape helpers (`firstString`, `firstNumber`, `firstArray`), `sha256`, `isProviderErrorStatus`, and idempotency-key generation.                                     |
+| `src/webhook.ts`     | `verifyHelcimWebhook` — HMAC-SHA256 signature verification with constant-time comparison.                                                                                   |
+| `src/helcimpay.ts`   | `validateHelcimPayHash` and `parseHelcimPayEventMessage` for HelcimPay.js checkout responses.                                                                               |
 
 ---
 
