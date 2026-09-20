@@ -1,5 +1,8 @@
 {
   "name": "@clocklobster/helcim-client",
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "0.5.0",
   "description": "A product-neutral, type-safe Helcim API client for Node.js. Covers the Payment API, Recurring API (payment plans + subscriptions), customer/card vault, HelcimPay.js checkout sessions, webhook verification, and HelcimPay response-hash verification.",
   "license": "MIT",
@@ -47,7 +50,7 @@
   "author": "Victor Salmon",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/victorsalmon/helcim-client.git"
+    "url": "https://github.com/victorsalmon/helcim-client.git"
   },
   "bugs": {
     "url": "https://github.com/victorsalmon/helcim-client/issues"
