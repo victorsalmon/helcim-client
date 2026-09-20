@@ -8,6 +8,7 @@ Thumbs.db
 stryker-tmp/
 stryker-report/
 reports/mutation/
+reports/salmon-run/
 .env
 .env.local
 .vscode/
