@@ -1,9 +1,16 @@
 /**
  * Helcim client configuration.
  *
- * The Helcim API has two base URLs:
+ * The Helcim API has one reachable host:
  *   - Production: https://api.helcim.com/v2  (real cards, real charges)
- *   - Developer test: https://api.helcim.test/v2  (test cards only, no charges)
+ *
+ * Helcim's documented developer-test host `https://api.helcim.test/v2` does NOT
+ * resolve (NXDOMAIN, re-verified 2026-09-20 against public resolvers). A Helcim
+ * developer test account is separated by its TOKENS, not by a different host, so
+ * a test deployment must set `HELCIM_BASE_URL` explicitly. `HELCIM_TEST_BASE_URL`
+ * below is retained as an intentional fail-closed default: a missing `HELCIM_ENV`
+ * can never reach production, and unresolved test traffic fails at DNS rather
+ * than silently billing real cards.
  *
  * The webhook verifier token is a separate secret from the api-token — it is
  * base64-encoded and used to HMAC-verify webhook signatures. Find it in the
@@ -33,7 +40,14 @@ export interface HelcimConfig {
 /** Production Helcim Payment / Recurring API base URL. */
 export const HELCIM_PRODUCTION_BASE_URL = 'https://api.helcim.com/v2';
 
-/** Developer test Helcim API base URL (test cards, no real charges). */
+/**
+ * Default base URL when neither `HELCIM_BASE_URL` nor `HELCIM_ENV=production` is
+ * set. The host is Helcim's documented developer-test host, which no longer
+ * resolves (NXDOMAIN, re-verified 2026-09-20) — Helcim separates a test account
+ * by its tokens, not by hostname. Retained deliberately so a misconfiguration
+ * fails closed at DNS instead of reaching production. Set `HELCIM_BASE_URL`
+ * explicitly in any environment that must exercise the test account.
+ */
 export const HELCIM_TEST_BASE_URL = 'https://api.helcim.test/v2';
 
 /** Hosts for which plain HTTP is tolerated (local test servers only). */
@@ -66,7 +80,9 @@ export function assertSecureBaseUrl(baseUrl: string): void {
  * Resolve the Helcim base URL from environment variables.
  *
  * `HELCIM_BASE_URL` takes precedence, then `HELCIM_ENV` (`production`/`prod`
- * or `test`/unset), defaulting to the test URL so production is opt-in.
+ * or `test`/unset), defaulting to the test URL so production is opt-in. The
+ * test URL's host is dead (see `HELCIM_TEST_BASE_URL`), so an unset `HELCIM_ENV`
+ * fails closed at DNS — set `HELCIM_BASE_URL` for test traffic.
  */
 function resolveBaseUrl(env: NodeJS.ProcessEnv): string {
   const explicit = env.HELCIM_BASE_URL?.trim();

@@ -178,13 +178,13 @@ flowchart TD
     B -->|Yes| C[Trim and strip trailing slashes]
     B -->|No| D{HELCIM_ENV?}
     D -->|production / prod| E[api.helcim.com/v2]
-    D -->|anything else| F[api.helcim.test/v2]
+    D -->|"anything else"| F["api.helcim.test/v2 (NXDOMAIN - fail-closed)"]
     A --> G{HELCIM_API_TOKEN?}
     G -->|non-empty| H[trim token]
     G -->|empty| I[null config]
 ```
 
-The default is the **test endpoint**, so a missing `HELCIM_ENV` cannot accidentally send requests to production. `HELCIM_BASE_URL` must resolve to an HTTPS URL (loopback `http://localhost`/`http://127.0.0.1`/`http://[::1]` is tolerated for local test servers); any other scheme fails closed at config resolution and again in `createTransport`, because every request carries the `api-token` header.
+The default is the **test endpoint**, so a missing `HELCIM_ENV` cannot accidentally send requests to production. That host no longer resolves (NXDOMAIN, re-verified 2026-09-20), which makes the default a **fail-closed trap**: test traffic fails at DNS rather than silently billing real cards. Helcim separates a developer test account by its tokens, not by hostname, so any environment that must exercise the test account has to set `HELCIM_BASE_URL` explicitly. `HELCIM_BASE_URL` must resolve to an HTTPS URL (loopback `http://localhost`/`http://127.0.0.1`/`http://[::1]` is tolerated for local test servers); any other scheme fails closed at config resolution and again in `createTransport`, because every request carries the `api-token` header.
 
 ---
 

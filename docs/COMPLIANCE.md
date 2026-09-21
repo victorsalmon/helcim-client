@@ -8,16 +8,16 @@ What the library _does_ provide is a secure baseline that makes downstream compl
 
 ## Library-level controls
 
-| Control                | Implementation                                                                                                                                                                                |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No bundled credentials | API tokens and webhook verifier tokens are supplied at runtime through `createHelcimConfigFromEnv`. Nothing in this package contains real credentials.                                        |
-| Safe endpoint defaults | Test endpoint is the default. Production is selected explicitly via `env: 'production'` or `HELCIM_ENV=production`.                                                                           |
-| HTTPS-only transport   | `createHelcimConfigFromEnv` and `createTransport` reject a base URL that is not HTTPS (loopback hosts excepted for local test servers), so the `api-token` header is never sent in plaintext. |
-| Webhook integrity      | HMAC-SHA256 with constant-time `crypto.timingSafeEqual` comparison; supports multi-signature headers.                                                                                         |
-| HelcimPay integrity    | SHA-256 hash verification of the response object with constant-time digest comparison, using Unicode-escape matching to Helcim's PHP behavior.                                                |
-| Input validation       | Rejects non-positive ids, non-finite amounts, unsupported currencies, and malformed provider payloads.                                                                                        |
-| Idempotency            | `Idempotency-Key` header is generated for every mutating call and can be overridden by the caller.                                                                                            |
-| Payload redaction      | Decoders normalize casing and aliases **without logging**. Callers are expected to redact raw payloads before writing audit logs.                                                             |
+| Control                | Implementation                                                                                                                                                                                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No bundled credentials | API tokens and webhook verifier tokens are supplied at runtime through `createHelcimConfigFromEnv`. Nothing in this package contains real credentials.                                                                                                            |
+| Safe endpoint defaults | Test endpoint is the default. Production is selected explicitly via `env: 'production'` or `HELCIM_ENV=production`. The test host is dead (NXDOMAIN), so the default fails closed at DNS instead of reaching production; test traffic must set `HELCIM_BASE_URL`. |
+| HTTPS-only transport   | `createHelcimConfigFromEnv` and `createTransport` reject a base URL that is not HTTPS (loopback hosts excepted for local test servers), so the `api-token` header is never sent in plaintext.                                                                     |
+| Webhook integrity      | HMAC-SHA256 with constant-time `crypto.timingSafeEqual` comparison; supports multi-signature headers.                                                                                                                                                             |
+| HelcimPay integrity    | SHA-256 hash verification of the response object with constant-time digest comparison, using Unicode-escape matching to Helcim's PHP behavior.                                                                                                                    |
+| Input validation       | Rejects non-positive ids, non-finite amounts, unsupported currencies, and malformed provider payloads.                                                                                                                                                            |
+| Idempotency            | `Idempotency-Key` header is generated for every mutating call and can be overridden by the caller.                                                                                                                                                                |
+| Payload redaction      | Decoders normalize casing and aliases **without logging**. Callers are expected to redact raw payloads before writing audit logs.                                                                                                                                 |
 
 ---
 
