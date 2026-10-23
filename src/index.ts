@@ -87,3 +87,13 @@ export {
   firstArray,
   optionalString,
 } from './util.js';
+
+export type {
+  HelcimBillingPeriod,
+  HelcimSubscribePlan,
+  HelcimSubscriptionPlanRegistry,
+} from './subscription-plans.js';
+export {
+  createHelcimSubscriptionPlanRegistry,
+  isHelcimSubscribeUrl,
+} from './subscription-plans.js';
