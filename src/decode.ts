@@ -344,6 +344,17 @@ export function assertPositiveAmount(value: number, name: string): void {
   }
 }
 
+/**
+ * Throw if a monetary amount is not exactly zero. HelcimPay's `verify` payment
+ * type is a card-vault check, so the provider rejects any non-zero amount
+ * ("amount must be a valid Zero Number") and requires the field to be present.
+ */
+export function assertZeroAmount(value: number, name: string): void {
+  if (!Number.isFinite(value) || value !== 0) {
+    throw new Error(`Helcim ${name} must be 0 for verify`);
+  }
+}
+
 /** Throw if a required string field is missing or whitespace-only. */
 export function assertNonEmptyString(value: unknown, name: string): void {
   if (typeof value !== 'string' || value.trim() === '') {

@@ -56,66 +56,107 @@ describe('optional field guards reject empty-string and null values', () => {
 
   // ─── initializeHelcimPay ───────────────────────────────────────────────────
 
-  it('initializeHelcimPay omits empty-string currency', async () => {
-    const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
+  it('initializeHelcimPay throws on empty-string currency (currency is required)', async () => {
+    const { fetchImpl } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', currency: '' });
-    assertBodyFieldAbsent(calls[0], 'currency');
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: '' })
+    ).rejects.toThrow(/currency/);
   });
 
   it('initializeHelcimPay omits empty-string customerCode', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', customerCode: '' });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      customerCode: '',
+    });
     assertBodyFieldAbsent(calls[0], 'customerCode');
   });
 
   it('initializeHelcimPay omits empty-string invoiceNumber', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', invoiceNumber: '' });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      invoiceNumber: '',
+    });
     assertBodyFieldAbsent(calls[0], 'invoiceNumber');
   });
 
   it('initializeHelcimPay omits empty-string language', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', language: '' as any });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      language: '' as any,
+    });
     assertBodyFieldAbsent(calls[0], 'language');
   });
 
   it('initializeHelcimPay omits empty-string paymentMethod', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', paymentMethod: '' as any });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      paymentMethod: '' as any,
+    });
     assertBodyFieldAbsent(calls[0], 'paymentMethod');
   });
 
   it('initializeHelcimPay omits null customerRequest', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', customerRequest: null as any });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      customerRequest: null as any,
+    });
     assertBodyFieldAbsent(calls[0], 'customerRequest');
   });
 
   it('initializeHelcimPay omits null invoiceRequest', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', invoiceRequest: null as any });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      invoiceRequest: null as any,
+    });
     assertBodyFieldAbsent(calls[0], 'invoiceRequest');
   });
 
   it('initializeHelcimPay omits null customStyling', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', customStyling: null as any });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      customStyling: null as any,
+    });
     assertBodyFieldAbsent(calls[0], 'customStyling');
   });
 
   it('initializeHelcimPay omits null digitalWallet', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', digitalWallet: null as any });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      digitalWallet: null as any,
+    });
     assertBodyFieldAbsent(calls[0], 'digitalWallet');
   });
 
@@ -124,6 +165,8 @@ describe('optional field guards reject empty-string and null values', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: { contactName: 'J', businessName: '' },
     });
     const b = bodyOf(calls[0]);
@@ -135,6 +178,8 @@ describe('optional field guards reject empty-string and null values', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: { contactName: 'J', customerCode: '' },
     });
     const b = bodyOf(calls[0]);
@@ -146,6 +191,8 @@ describe('optional field guards reject empty-string and null values', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: { contactName: 'J', cellPhone: '' },
     });
     const b = bodyOf(calls[0]);
@@ -157,6 +204,8 @@ describe('optional field guards reject empty-string and null values', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: { contactName: 'J', billingAddress: null as any },
     });
     const b = bodyOf(calls[0]);
@@ -168,6 +217,8 @@ describe('optional field guards reject empty-string and null values', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: { contactName: 'J', shippingAddress: null as any },
     });
     const b = bodyOf(calls[0]);

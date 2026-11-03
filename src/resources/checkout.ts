@@ -2,7 +2,12 @@ import type { TransportRequest } from '../transport.js';
 import { numericBoolean } from '../types.js';
 import type { HelcimCheckoutSession, InitializeHelcimPayInput } from '../types.js';
 import { firstString } from '../util.js';
-import { assertPositiveAmount, assertNonEmptyString, addressToPayload } from '../decode.js';
+import {
+  assertPositiveAmount,
+  assertZeroAmount,
+  assertNonEmptyString,
+  addressToPayload,
+} from '../decode.js';
 
 export interface CheckoutContext {
   request: TransportRequest;
@@ -16,14 +21,20 @@ export function createCheckoutApi({ request }: CheckoutContext) {
     input: InitializeHelcimPayInput
   ): Promise<HelcimCheckoutSession> {
     assertNonEmptyString(input.paymentType, 'initializeHelcimPay paymentType');
+    assertNonEmptyString(input.currency, 'initializeHelcimPay currency');
+    // HelcimPay's runtime contract: `amount` and `currency` are always required,
+    // and `verify` (a zero-dollar card vault check) must carry exactly 0 while
+    // `purchase` / `preauth` must carry a positive amount.
+    if (input.paymentType === 'verify') {
+      assertZeroAmount(input.amount, 'initializeHelcimPay amount');
+    } else {
+      assertPositiveAmount(input.amount, 'initializeHelcimPay amount');
+    }
     const body: Record<string, unknown> = {
       paymentType: input.paymentType,
+      amount: input.amount,
+      currency: input.currency,
     };
-    if (input.amount !== undefined) {
-      assertPositiveAmount(input.amount, 'initializeHelcimPay amount');
-      body.amount = input.amount;
-    }
-    if (input.currency) body.currency = input.currency;
     if (input.customerCode) body.customerCode = input.customerCode;
     if (input.invoiceNumber) body.invoiceNumber = input.invoiceNumber;
     if (input.language) body.language = input.language;

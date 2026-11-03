@@ -23,7 +23,7 @@ describe('initializeHelcimPay contract', () => {
   it('POSTs to /helcim-pay/initialize with paymentType', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertMethod(calls[0], 'POST');
     assertPath(calls[0], '/helcim-pay/initialize');
     assertBodyField(calls[0], 'paymentType', 'verify');
@@ -32,91 +32,134 @@ describe('initializeHelcimPay contract', () => {
   it('includes amount when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'purchase', amount: 50 });
+    await c.initializeHelcimPay({ paymentType: 'purchase', amount: 50, currency: 'CAD' });
     assertBodyField(calls[0], 'amount', 50);
   });
 
-  it('omits amount when not provided', async () => {
+  it('accepts amount 0 for verify and sends amount + currency', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
-    assertBodyFieldAbsent(calls[0], 'amount');
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
+    assertBodyField(calls[0], 'amount', 0);
+    assertBodyField(calls[0], 'currency', 'CAD');
+  });
+
+  it('refuses a non-zero amount for verify (Helcim requires exactly 0)', async () => {
+    const { fetchImpl } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', amount: 1, currency: 'CAD' })
+    ).rejects.toThrow(/must be 0 for verify/);
+  });
+
+  it('throws when amount is missing (amount is required by /helcim-pay/initialize)', async () => {
+    const { fetchImpl } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
+    const c = createHelcimClient(TEST_CONFIG, fetchImpl);
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', currency: 'CAD' } as any)
+    ).rejects.toThrow(/amount/);
   });
 
   it('includes currency when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', currency: 'CAD' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyField(calls[0], 'currency', 'CAD');
   });
 
-  it('omits currency when not provided', async () => {
-    const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
+  it('throws when currency is missing (currency is required by /helcim-pay/initialize)', async () => {
+    const { fetchImpl } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
-    assertBodyFieldAbsent(calls[0], 'currency');
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', amount: 0 } as any)
+    ).rejects.toThrow(/currency/);
   });
 
   it('includes customerCode when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', customerCode: 'CST1' });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      customerCode: 'CST1',
+    });
     assertBodyField(calls[0], 'customerCode', 'CST1');
   });
 
   it('omits customerCode when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'customerCode');
   });
 
   it('includes invoiceNumber when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', invoiceNumber: 'INV1' });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      invoiceNumber: 'INV1',
+    });
     assertBodyField(calls[0], 'invoiceNumber', 'INV1');
   });
 
   it('omits invoiceNumber when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'invoiceNumber');
   });
 
   it('includes language when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', language: 'fr' });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      language: 'fr',
+    });
     assertBodyField(calls[0], 'language', 'fr');
   });
 
   it('omits language when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'language');
   });
 
   it('serializes setAsDefaultPaymentMethod=true to 1', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', setAsDefaultPaymentMethod: true });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      setAsDefaultPaymentMethod: true,
+    });
     assertBodyField(calls[0], 'setAsDefaultPaymentMethod', 1);
   });
 
   it('serializes setAsDefaultPaymentMethod=false to 0', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', setAsDefaultPaymentMethod: false });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      setAsDefaultPaymentMethod: false,
+    });
     assertBodyField(calls[0], 'setAsDefaultPaymentMethod', 0);
   });
 
   it('omits setAsDefaultPaymentMethod when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'setAsDefaultPaymentMethod');
   });
 
@@ -125,6 +168,8 @@ describe('initializeHelcimPay contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: {
         contactName: 'Example Customer',
         businessName: 'Example Inc.',
@@ -147,6 +192,8 @@ describe('initializeHelcimPay contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: { contactName: 'Example Customer' },
     });
     assertBodyPathAbsent(calls[0], 'customerRequest.businessName');
@@ -161,6 +208,8 @@ describe('initializeHelcimPay contract', () => {
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await c.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       invoiceRequest: {
         contactName: 'Example Customer',
         lineItems: [{ description: 'x', quantity: 1, price: 5, total: 5 }],
@@ -172,152 +221,181 @@ describe('initializeHelcimPay contract', () => {
   it('omits invoiceRequest when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'invoiceRequest');
   });
 
   it('includes customStyling when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', customStyling: { appearance: 'dark' } });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      customStyling: { appearance: 'dark' },
+    });
     assertBodyPath(calls[0], 'customStyling.appearance', 'dark');
   });
 
   it('omits customStyling when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'customStyling');
   });
 
   it('includes paymentMethod when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', paymentMethod: 'cc-ach' });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      paymentMethod: 'cc-ach',
+    });
     assertBodyField(calls[0], 'paymentMethod', 'cc-ach');
   });
 
   it('omits paymentMethod when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'paymentMethod');
   });
 
   it('includes digitalWallet when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', digitalWallet: { 'google-pay': 1 } });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      digitalWallet: { 'google-pay': 1 },
+    });
     assertBodyPath(calls[0], 'digitalWallet.google-pay', 1);
   });
 
   it('omits digitalWallet when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'digitalWallet');
   });
 
   it('includes confirmationScreen when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', confirmationScreen: true });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      confirmationScreen: true,
+    });
     assertBodyField(calls[0], 'confirmationScreen', true);
   });
 
   it('omits confirmationScreen when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'confirmationScreen');
   });
 
   it('includes allowExit when provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify', allowExit: false });
+    await c.initializeHelcimPay({
+      paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
+      allowExit: false,
+    });
     assertBodyField(calls[0], 'allowExit', false);
   });
 
   it('omits allowExit when not provided', async () => {
     const { fetchImpl, calls } = mockFetch({ body: { checkoutToken: 'c', secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await c.initializeHelcimPay({ paymentType: 'verify' });
+    await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     assertBodyFieldAbsent(calls[0], 'allowExit');
   });
 
   it('throws on empty paymentType', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: '' as any })).rejects.toThrow(/paymentType/);
+    await expect(
+      c.initializeHelcimPay({ paymentType: '' as any, amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/paymentType/);
   });
 
   it('throws on whitespace-only paymentType', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: '  ' as any })).rejects.toThrow(
-      /paymentType/
-    );
+    await expect(
+      c.initializeHelcimPay({ paymentType: '  ' as any, amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/paymentType/);
   });
 
   it('throws on non-string paymentType', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 123 as any })).rejects.toThrow(/paymentType/);
+    await expect(
+      c.initializeHelcimPay({ paymentType: 123 as any, amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/paymentType/);
   });
 
-  it('throws on amount=0', async () => {
+  it('still throws on amount=0 for purchase (zero is verify-only)', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: 0 })).rejects.toThrow(
-      /positive finite/
-    );
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'purchase', amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/positive finite/);
   });
 
   it('throws on negative amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: -5 })).rejects.toThrow(
-      /positive finite/
-    );
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'purchase', amount: -5, currency: 'CAD' })
+    ).rejects.toThrow(/positive finite/);
   });
 
   it('throws on NaN amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: NaN })).rejects.toThrow(
-      /positive finite/
-    );
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'purchase', amount: NaN, currency: 'CAD' })
+    ).rejects.toThrow(/positive finite/);
   });
 
   it('throws on Infinity amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await expect(
-      c.initializeHelcimPay({ paymentType: 'purchase', amount: Infinity })
+      c.initializeHelcimPay({ paymentType: 'purchase', amount: Infinity, currency: 'CAD' })
     ).rejects.toThrow(/positive finite/);
   });
 
   it('throws on missing checkoutToken in response', async () => {
     const { fetchImpl } = mockFetch({ body: { secretToken: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(
-      /checkoutToken and secretToken/
-    );
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/checkoutToken and secretToken/);
   });
 
   it('throws on missing secretToken in response', async () => {
     const { fetchImpl } = mockFetch({ body: { checkoutToken: 'c' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(
-      /checkoutToken and secretToken/
-    );
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/checkoutToken and secretToken/);
   });
 
   it('reads checkout_token (snake_case) from response', async () => {
     const { fetchImpl } = mockFetch({ body: { checkout_token: 'c', secret_token: 's' } });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    const r = await c.initializeHelcimPay({ paymentType: 'verify' });
+    const r = await c.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' });
     expect(r.checkoutToken).toBe('c');
     expect(r.secretToken).toBe('s');
   });
@@ -326,7 +404,12 @@ describe('initializeHelcimPay contract', () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await expect(
-      c.initializeHelcimPay({ paymentType: 'verify', customerRequest: {} as any })
+      c.initializeHelcimPay({
+        paymentType: 'verify',
+        amount: 0,
+        currency: 'CAD',
+        customerRequest: {} as any,
+      })
     ).rejects.toThrow(/contactName/);
   });
 
@@ -334,7 +417,12 @@ describe('initializeHelcimPay contract', () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
     await expect(
-      c.initializeHelcimPay({ paymentType: 'verify', customerRequest: { contactName: '  ' } })
+      c.initializeHelcimPay({
+        paymentType: 'verify',
+        amount: 0,
+        currency: 'CAD',
+        customerRequest: { contactName: '  ' },
+      })
     ).rejects.toThrow(/contactName/);
   });
 });

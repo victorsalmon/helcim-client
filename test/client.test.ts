@@ -182,6 +182,7 @@ describe('client — initializeHelcimPay', () => {
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     const result = await client.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
       currency: 'CAD',
       customerCode: 'CST100',
     });
@@ -197,27 +198,27 @@ describe('client — initializeHelcimPay', () => {
   it('throws if paymentType is missing', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(client.initializeHelcimPay({ paymentType: '' as any })).rejects.toThrow(
-      /paymentType/
-    );
+    await expect(
+      client.initializeHelcimPay({ paymentType: '' as any, amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/paymentType/);
   });
 
   it('throws if the response is missing tokens', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(client.initializeHelcimPay({ paymentType: 'verify' })).rejects.toThrow(
-      /checkoutToken and secretToken/
-    );
+    await expect(
+      client.initializeHelcimPay({ paymentType: 'verify', amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/checkoutToken and secretToken/);
   });
 
   it('rejects a non-positive amount', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     await expect(
-      client.initializeHelcimPay({ paymentType: 'purchase', amount: 0 })
+      client.initializeHelcimPay({ paymentType: 'purchase', amount: 0, currency: 'CAD' })
     ).rejects.toThrow(/positive finite amount/);
     await expect(
-      client.initializeHelcimPay({ paymentType: 'purchase', amount: -5 })
+      client.initializeHelcimPay({ paymentType: 'purchase', amount: -5, currency: 'CAD' })
     ).rejects.toThrow(/positive finite amount/);
   });
 
@@ -228,6 +229,8 @@ describe('client — initializeHelcimPay', () => {
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     await client.initializeHelcimPay({
       paymentType: 'verify',
+      amount: 0,
+      currency: 'CAD',
       customerRequest: { contactName: 'Example Customer', businessName: 'Example Inc.' },
     });
     const body = JSON.parse(calls[0].body!);
@@ -241,6 +244,8 @@ describe('client — initializeHelcimPay', () => {
     await expect(
       client.initializeHelcimPay({
         paymentType: 'verify',
+        amount: 0,
+        currency: 'CAD',
         customerRequest: {} as any,
       })
     ).rejects.toThrow(/contactName/);
@@ -937,8 +942,9 @@ describe('client — initializeHelcimPay paymentMethod', () => {
     const client = createHelcimClient(TEST_CONFIG, fetchImpl);
     await client.initializeHelcimPay({
       paymentType: 'verify',
-      paymentMethod: 'cc-ach',
+      amount: 0,
       currency: 'CAD',
+      paymentMethod: 'cc-ach',
     });
     const body = JSON.parse(calls[0].body!);
     expect(body.paymentMethod).toBe('cc-ach');
@@ -952,6 +958,7 @@ describe('client — initializeHelcimPay paymentMethod', () => {
     await client.initializeHelcimPay({
       paymentType: 'purchase',
       amount: 10,
+      currency: 'CAD',
       digitalWallet: { 'google-pay': 1 },
     });
     const body = JSON.parse(calls[0].body!);

@@ -278,8 +278,13 @@ export interface CreateCustomerInput {
 
 export interface InitializeHelcimPayInput {
   paymentType: 'purchase' | 'preauth' | 'verify';
-  amount?: number;
-  currency?: string;
+  /**
+   * Required by `/helcim-pay/initialize`. `verify` is a card-vault check and
+   * must be exactly `0`; `purchase` and `preauth` must be a positive amount.
+   */
+  amount: number;
+  /** Required by `/helcim-pay/initialize` (for example `CAD`). */
+  currency: string;
   customerCode?: string;
   invoiceNumber?: string;
   language?: 'en' | 'fr';

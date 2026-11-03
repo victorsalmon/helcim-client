@@ -573,9 +573,9 @@ describe('assertPositiveAmount error messages', () => {
   it('initializeHelcimPay amount=0 throws with field name', async () => {
     const { fetchImpl } = mockFetch({ body: {} });
     const c = createHelcimClient(TEST_CONFIG, fetchImpl);
-    await expect(c.initializeHelcimPay({ paymentType: 'purchase', amount: 0 })).rejects.toThrow(
-      /initializeHelcimPay amount/
-    );
+    await expect(
+      c.initializeHelcimPay({ paymentType: 'purchase', amount: 0, currency: 'CAD' })
+    ).rejects.toThrow(/initializeHelcimPay amount/);
   });
 
   it('processACHWithdraw amount=0 throws with field name', async () => {

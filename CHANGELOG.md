@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `initializeHelcimPay` now requires `amount` and `currency`,
+  because `POST /helcim-pay/initialize` requires both. A `verify` call is a
+  zero-dollar card-vault check and must send `amount: 0`; `purchase` and
+  `preauth` must send a positive amount. The previous shape let a caller omit
+  the fields (the provider answers `400 Missing required data amount/currency`)
+  or send `amount: 0` for `verify` (the client threw before the request was
+  made). Verified against the sandbox provider: the corrected verify body
+  returns `200` with a `checkoutToken`.
+
 ### Fixed
 
 - Transport retries now allocate a fresh `AbortSignal.timeout` per attempt. The
